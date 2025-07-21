@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuraciones OLT y ACS</title>
+    <style>
+        :root {
+            --azul-antel: #0056b3;
+            --amarillo-antel: #f0ad4e;
+            --gris-claro: #f4f4f4;
+            --sombra: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--azul-antel);
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px var(--sombra);
+            margin: 20px 0;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin: 20px 0;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px var(--sombra);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px 20px;
+            background: var(--gris-claro);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--azul-antel);
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            background: #e2e6ea;
+            transform: translateY(-2px);
+        }
+
+        .tab.active {
+            background: var(--azul-antel);
+            color: white;
+            box-shadow: 0 2px 6px var(--sombra);
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 4px 12px var(--sombra);
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .config-section {
+            margin-bottom: 25px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            background: #fff;
+        }
+
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 2px 6px; /* aún menos espacio entre filas y columnas */
+            margin-bottom: 8px;
+        }
+
+        .input-group label,
+        .input-group input {
+            min-width: 120px;
+            margin-bottom: 5px;
+        }
+
+        .input-group label {
+            font-size: 14px;
+            min-width: unset;
+            margin-bottom: 0;
+            font-weight: 500;
+            color: var(--azul-antel);
+            margin-right: 2px;
+        }
+
+        .input-group input, 
+        .input-group select {
+            min-width: 40px;
+            max-width: 70px;
+            font-size: 14px;
+            padding: 3px 6px;
+            margin-bottom: 0;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+
+        .input-group input:focus, 
+        .input-group select:focus {
+            border-color: var(--azul-antel);
+            box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
+            outline: none;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--azul-antel);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--amarillo-antel);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 6px var(--sombra);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-size: 18px;
+            color: var(--azul-antel);
+            margin: 15px 0 10px;
+        }
+
+        .comment {
+            font-size: 14px;
+            color: #666;
+            margin: 0 0 10px;
+        }
+
+        .command {
+            font-family: 'Courier New', Courier, monospace;
+            background: #eef;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            display: block;
+            width: 100%;         /* Hace que ocupe todo el ancho disponible */
+            min-width: 300px;    /* Un mínimo cómodo para comandos largos */
+            max-width: 100%;     /* No se pasa del contenedor */
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+
+        .result {
+            font-family: 'Courier New', Courier, monospace;
+            background: #eef;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            display: block;
+            white-space: pre-wrap;
+        }
+
+        /* Mejora visual para el summary de los detalles */
+        details > summary {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--azul-antel);
+            background: #eaf1fb;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 4px var(--sombra);
+            outline: none;
+            transition: background 0.2s;
+        }
+
+        details[open] > summary {
+            background: #d0e6ff;
+        }
+
+        /* Estilos específicos para las OLTs */
+        .olt-block {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+            background: #f9f9f9;
+        }
+
+        .olt-block h3 {
+            margin: 0;
+            font-size: 18px;
+            color: var(--azul-antel);
+        }
+
+        .olt-block .input-group {
+            margin-bottom: 10px;
+        }
+
+        .olt-block .input-group label {
+            font-weight: 500;
+            color: var(--azul-antel);
+        }
+
+        .olt-block .input-group input {
+            width: 60px;
+        }
+
+        .olt-block .config-section {
+            margin-top: 15px;
+        }
+
+        .olt-block .section-title {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        .olt-block button {
+            margin-top: 10px;
+        }
+
+        /* Modal de confirmación */
+        #modal-confirm {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.25);
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #modal-confirm > div {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+            padding: 32px 28px;
+            min-width: 320px;
+            max-width: 90vw;
+            text-align: center;
+            position: relative;
+        }
+
+        #modal-confirm-text {
+            font-size: 18px;
+            color: #0056b3;
+            margin-bottom: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Unidad Desarrollo Residenciales</h1>
+        <h2 style="text-align:center; color:var(--azul-antel); margin-bottom:10px; margin-top:0;">
+            Links y Comandos útiles
+        </h2>
+        <div class="tabs">
+            <div class="tab active" data-tab="inicio">Inicio</div>
+            <div class="tab" data-tab="olt">OLT</div>
+            <div class="tab" data-tab="acs">ACS</div>
+            <div class="tab" data-tab="ims">IMS</div>
+        </div>
+
+        <!-- Contenido Inicio -->
+        <div class="tab-content active" id="inicio">
+            <div class="config-section">
+                <h2 class="section-title">Bienvenido a la Unidad Desarrollo Servicios Residenciales</h2>
+                <p style="font-size: 16px; line-height: 1.6; color: #555;">
+                    Esta plataforma fue creada para facilitar la gestión y configuración de equipos y servicios residenciales de Antel. 
+                    Aquí podrás administrar OLTs y acceder a comandos y enlaces útiles para el trabajo diario en la unidad.
+                </p>
+                <p style="font-size: 16px; line-height: 1.6; color: #555;">
+                    La Unidad Desarrollo Servicios Residenciales se encarga de diseñar, implementar y mantener soluciones tecnológicas 
+                    para los servicios de telecomunicaciones en el ámbito residencial, asegurando la calidad y eficiencia en la provisión 
+                    de servicios como Internet, telefonía y TV para los hogares.
+                </p>
+                <p style="font-size: 16px; line-height: 1.6; color: #555;">
+                    Utiliza las pestañas superiores para navegar entre las distintas herramientas y recursos disponibles.
+                </p>
+            </div>
+        </div>
+
+        <!-- Contenido OLT -->
+        <div class="tab-content" id="olt">
+            <div class="config-section" style="margin-bottom: 30px;">
+    <h2 class="section-title" style="margin-top:0;">Configuración OLT</h2>
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <label for="nombre-olt" style="font-weight:600;">Nombre:</label>
+        <input type="text" id="nombre-olt" style="min-width:120px; padding:6px 10px; border-radius:5px; border:1px solid #ced4da;" placeholder="Ej: OLT Central">
+        <button class="btn btn-secondary" onclick="agregarOlt()">➕ Agregar OLT</button>
+    </div>
+</div>
+
+    <!-- Tips para el usuario -->
+    <div class="config-section" style="background: #f9f9f9; border: 1px solid #ccc; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+        <h3 class="section-title" style="margin-top: 0;">Tips para usar el sistema dinámico</h3>
+        <ul style="font-size: 14px; color: #555; line-height: 1.6; margin: 0; padding-left: 20px;">
+            <li><strong>Agregar OLT:</strong> Ingresa un nombre en el campo "Nombre" y haz clic en el botón <strong>➕ Agregar OLT</strong>.</li>
+            <li><strong>Editar configuraciones:</strong> Modifica los valores de <em>Shelf</em>, <em>Slot</em>, <em>Port</em>, y <em>ONU Id</em> directamente en los campos correspondientes.</li>
+            <li><strong>Guardar configuraciones:</strong> Haz clic en el botón <strong>💾 Guardar Configuración</strong> para guardar los cambios.</li>
+            <li><strong>Aplicar configuraciones:</strong> Haz clic en el botón <strong>🔄 Aplicar Configuración</strong> para aplicar los cambios.</li>
+            <li><strong>Eliminar OLT:</strong> Haz clic en el botón <strong>🗑️ Eliminar OLT</strong> para eliminar una OLT específica.</li>
+            <li><strong>Agregar comandos:</strong> 
+                Al agregar un comando, utiliza las siguientes variables para que se reemplacen automáticamente:
+                <ul>
+                    <li><code>{shelf}</code>: Se reemplaza por el valor del campo <em>Shelf</em>.</li>
+                    <li><code>{slot}</code>: Se reemplaza por el valor del campo <em>Slot</em>.</li>
+                    <li><code>{port}</code>: Se reemplaza por el valor del campo <em>Port</em>.</li>
+                    <li><code>{onuId}</code>: Se reemplaza por el valor del campo <em>ONU Id</em>.</li>
+                </ul>
+                Ejemplo de comando:
+                <pre style="background: #eef; padding: 10px; border-radius: 5px; font-family: 'Courier New', Courier, monospace;">
+pon-onu-mng gpon_onu-{shelf}/{slot}/{port}:{onuId}
+                </pre>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Comandos dinámicos desplegables -->
+    <div id="olts-tabs" class="tabs" style="margin-bottom:0;"></div>
+    <div id="olts-list"></div>
+</div>
+
+        <!-- Contenido ACS -->
+        <div class="tab-content" id="acs">
+    <div class="config-section">
+        <h2 class="section-title">Gestión de ONTs</h2>
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px;">
+            <label for="nombre-ont" style="font-weight:600;">Nombre de la ONT:</label>
+            <input type="text" id="nombre-ont" style="min-width:120px; padding:6px 10px; border-radius:5px; border:1px solid #ced4da;" placeholder="Ej: ONT Principal">
+            <button class="btn btn-secondary" onclick="agregarOnt()">➕ Agregar ONT</button>
+        </div>
+    </div>
+
+    <!-- Contenedor para las ONTs -->
+    <div id="onts-tabs" class="tabs" style="margin-bottom:0;"></div>
+    <div id="onts-list"></div>
+</div>
+
+        <!-- Contenido IMS -->
+        <div class="tab-content" id="ims">
+    <div class="config-section">
+        <h2 class="section-title">Configuración IMS</h2>
+        <!-- Aquí puedes agregar contenido relacionado con IMS -->
+    </div>
+</div>
+
+    <script>
+        // Reemplaza tu script de pestañas por este:
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        // Remover activos de todas las pestañas y contenidos
+        document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+
+        // Activar la pestaña y el contenido correspondiente
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab).classList.add('active');
+
+        // Mostrar u ocultar sub-pestañas OLT según la pestaña activa
+        const mostrarOlts = tab.dataset.tab === 'olt';
+        document.getElementById('olts-tabs').style.display = mostrarOlts ? '' : 'none';
+        document.getElementById('olts-list').style.display = mostrarOlts ? '' : 'none';
+
+        // Mostrar u ocultar sub-pestañas ONU solo en ACS
+        const mostrarOnus = tab.dataset.tab === 'acs';
+        document.getElementById('onus-tabs').style.display = mostrarOnus ? '' : 'none';
+        document.getElementById('onus-list').style.display = mostrarOnus ? '' : 'none';
+
+        // Renderiza las sub-pestañas y contenido de ONU solo si está activa la pestaña ACS
+        if (mostrarOnus) {
+            renderOnus();
+        }
+    });
+});
+
+// Al cargar la página, asegúrate de mostrar solo si ACS está activa
+window.addEventListener('load', () => {
+    const tabAcs = document.querySelector('.tab[data-tab="acs"]');
+    const mostrarOnus = tabAcs.classList.contains('active');
+    document.getElementById('onus-tabs').style.display = mostrarOnus ? '' : 'none';
+    document.getElementById('onus-list').style.display = mostrarOnus ? '' : 'none';
+    if (mostrarOnus) renderOnus();
+});
+
+        // Sistema de guardado
+        function guardarConfig(seccion) {
+            const elementos = document.querySelectorAll(`#${seccion} .dynamic-field`);
+            const config = {};
+
+            elementos.forEach(elemento => {
+                config[elemento.id] = elemento.value;
+            });
+
+            localStorage.setItem(`config-${seccion}`, JSON.stringify(config));
+            alert('Configuración guardada correctamente!');
+        }
+
+        function aplicarConfig(seccion) {
+            const guardado = localStorage.getItem(`config-${seccion}`);
+            if (!guardado) {
+                alert('No hay configuraciones guardadas para aplicar.');
+                return;
+            }
+
+            const config = JSON.parse(guardado);
+            Object.keys(config).forEach(id => {
+                const elemento = document.getElementById(id);
+                if (elemento) elemento.value = config[id];
+            });
+
+            // Mostrar mensaje de confirmación
+            alert('Configuración aplicada correctamente!');
+        }
+
+        // Cargar configuraciones al iniciar
+        window.addEventListener('load', () => {
+            ['olt', 'acs', 'ims', 'onu'].forEach(seccion => {
+                const guardado = localStorage.getItem(`config-${seccion}`);
+                if (guardado) {
+                    const config = JSON.parse(guardado);
+                    Object.keys(config).forEach(id => {
+                        const elemento = document.getElementById(id);
+                        if (elemento) elemento.value = config[id];
+                    });
+                }
+            });
+        });
+
+        // Estructura para múltiples OLTs
+let olts = [];
+let oltsIndex = JSON.parse(localStorage.getItem('olts-index')) || [];
+olts = oltsIndex.map(id => JSON.parse(localStorage.getItem(id))).filter(Boolean);
+
+// Si no hay ninguna OLT, crea la inicial
+if (olts.length === 0) {
+    const id = 'olt-' + Date.now();
+    const oltInicial = {
+        id: id,
+        nombre: 'OLT Inicial',
+        shelf: 1,
+        slot: 8,
+        port: 2,
+        onuId: 1,
+        comandos: [
+            {
+                summary: "1. Factory Reset",
+                lines: [
+                    "# Comando para restaurar la configuración de fábrica de una ONU",
+                    "pon-onu-mng gpon_onu-{shelf}/{slot}/{port}:{onuId}",
+                    "restore factory",
+                    "pon-onu-mng gpon_onu-{shelf}/{slot}/{port}:{onuId}"
+                ]
+            },
+            {
+                summary: "2. Ver configuración de la ONU en la ONT",
+                lines: [
+                    "# Comando para mostrar la configuración de una ONU",
+                    "show collection pon-onu gpon_onu-{shelf}/{slot}/{port}:{onuId} config"
+                ]
+            }
+        ]
+    };
+    olts = [oltInicial];
+    localStorage.setItem(id, JSON.stringify(oltInicial));
+    localStorage.setItem('olts-index', JSON.stringify([id]));
+}
+
+// Variable para llevar el control de la OLT seleccionada
+let oltSeleccionada = 0;
+
+// Renderiza todas las OLTs
+function renderOlts() {
+    const tabsContainer = document.getElementById('olts-tabs');
+    const oltsList = document.getElementById('olts-list');
+    tabsContainer.innerHTML = '';
+    oltsList.innerHTML = '';
+
+    // Renderiza las sub-pestañas
+    olts.forEach((olt, idx) => {
+        const tab = document.createElement('div');
+        tab.className = 'tab' + (idx === oltSeleccionada ? ' active' : '');
+        tab.textContent = olt.nombre ? olt.nombre : '(Sin nombre)';
+        tab.style.flex = 'unset';
+        tab.style.padding = '8px 18px';
+        tab.onclick = () => {
+            oltSeleccionada = idx;
+            renderOlts();
+        };
+        tabsContainer.appendChild(tab);
+    });
+
+    // Si hay OLTs, renderiza solo la seleccionada
+    if (olts.length > 0) {
+        const idx = oltSeleccionada;
+        const olt = olts[idx];
+        const oltDiv = document.createElement('div');
+        oltDiv.className = 'olt-block';
+        oltDiv.style.border = '1px solid #ccc';
+        oltDiv.style.borderRadius = '8px';
+        oltDiv.style.padding = '15px';
+        oltDiv.style.marginBottom = '25px';
+        oltDiv.style.background = '#f9f9f9';
+
+        // Título y botón eliminar
+        const header = document.createElement('div');
+        header.style.display = 'flex';
+        header.style.justifyContent = 'space-between';
+        header.style.alignItems = 'center';
+
+        // Nombre editable
+        const nombreDiv = document.createElement('div');
+        nombreDiv.style.display = 'flex';
+        nombreDiv.style.alignItems = 'center';
+
+        const nombreSpan = document.createElement('span');
+        nombreSpan.textContent = olt.nombre ? olt.nombre : '(Sin nombre)';
+        nombreSpan.style.fontSize = '18px';
+        nombreSpan.style.fontWeight = 'bold';
+        nombreSpan.style.color = 'var(--azul-antel)';
+        nombreSpan.style.marginRight = '10px';
+
+        const btnEdit = document.createElement('button');
+        btnEdit.textContent = '✏️';
+        btnEdit.className = 'btn btn-secondary';
+        btnEdit.style.padding = '4px 10px';
+        btnEdit.style.fontSize = '14px';
+        btnEdit.onclick = function() {
+            const nuevoNombre = prompt('Nuevo nombre para la OLT:', olt.nombre || '');
+            if (nuevoNombre !== null && nuevoNombre.trim() !== '') {
+                olt.nombre = nuevoNombre.trim();
+                guardarOltIndividual(olt);
+                renderOlts();
+            }
+        };
+
+        nombreDiv.appendChild(nombreSpan);
+        nombreDiv.appendChild(btnEdit);
+
+        header.appendChild(nombreDiv);
+
+        // Campos de configuración
+        const configDiv = document.createElement('div');
+        configDiv.className = 'input-group';
+        configDiv.innerHTML = `
+            <label>Shelf:</label>
+            <input type="number" min="1" value="${olt.shelf}" style="width:60px" onchange="actualizarOltCampo(${idx}, 'shelf', this.value)">
+            <label>Slot:</label>
+            <input type="number" min="1" value="${olt.slot}" style="width:60px" onchange="actualizarOltCampo(${idx}, 'slot', this.value)">
+            <label>Port:</label>
+            <input type="number" min="1" value="${olt.port}" style="width:60px" onchange="actualizarOltCampo(${idx}, 'port', this.value)">
+            <label>ONU Id:</label>
+            <input type="number" min="1" value="${olt.onuId}" style="width:60px" onchange="actualizarOltCampo(${idx}, 'onuId', this.value)">
+        `;
+        oltDiv.appendChild(configDiv);
+
+        // Botones de aplicar y guardar configuración
+        const buttonGroup = document.createElement('div');
+        buttonGroup.className = 'button-group';
+
+        const btnAplicar = document.createElement('button');
+        btnAplicar.className = 'btn btn-primary';
+        btnAplicar.textContent = '🔄 Aplicar Configuración';
+        btnAplicar.onclick = function() {
+            guardarOlts();
+            renderOlts();
+        };
+
+        buttonGroup.appendChild(btnAplicar);
+        oltDiv.appendChild(buttonGroup);
+
+        // Comandos de la OLT
+        const comandosDiv = document.createElement('div');
+        comandosDiv.className = 'config-section';
+        comandosDiv.innerHTML = `
+            <h4 class="section-title">Comandos Dinámicos</h4>
+            <button class="btn btn-secondary" onclick="agregarComandoOlt(${idx})">➕ Agregar Comando</button>
+        `;
+        // Renderiza los comandos de esta OLT
+        const comandosList = document.createElement('div');
+        renderComandosOlt(olt, idx, comandosList);
+        comandosDiv.appendChild(comandosList);
+
+        oltDiv.appendChild(comandosDiv);
+        oltsList.appendChild(oltDiv);
+
+        // Mueve este bloque al final, después de agregar todos los elementos a oltDiv:
+        const btnDelOlt = document.createElement('button');
+        btnDelOlt.textContent = '🗑️ Eliminar OLT';
+        btnDelOlt.className = 'btn btn-secondary';
+        btnDelOlt.style.marginTop = '20px';
+        btnDelOlt.onclick = function() {
+            mostrarConfirmacion('¿Seguro que deseas eliminar esta OLT?', (ok) => {
+        if (ok) {
+            localStorage.removeItem(olt.id);
+            olts.splice(idx, 1);
+            if (oltSeleccionada >= olts.length) oltSeleccionada = Math.max(0, olts.length - 1);
+            localStorage.setItem('olts-index', JSON.stringify(olts.map(o => o.id)));
+            renderOlts();
+        }
+    });
+        };
+        oltDiv.appendChild(btnDelOlt); // <-- Ahora está al final
+    }
+}
+
+// Actualiza un campo de la OLT
+function actualizarOltCampo(idx, campo, valor) {
+    olts[idx][campo] = Number(valor);
+    guardarOltIndividual(olts[idx]);
+}
+
+// Agrega una nueva OLT
+function agregarOlt() {
+    const nombre = document.getElementById('nombre-olt').value.trim() || '(Sin nombre)';
+    const id = 'olt-' + Date.now();
+    const nuevaOlt = {
+        id: id,
+        nombre: nombre,
+        shelf: 1,
+        slot: 8,
+        port: 2,
+        onuId: 1,
+        comandos: [
+            {
+                summary: "Nuevo Comando",
+                lines: [
+                    "# Descripción del comando",
+                    "pon-onu-mng gpon_onu-{shelf}/{slot}/{port}:{onuId}"
+                ]
+            }
+        ]
+    };
+    olts.push(nuevaOlt);
+    oltSeleccionada = olts.length - 1;
+    guardarOltIndividual(nuevaOlt);
+    localStorage.setItem('olts-index', JSON.stringify(olts.map(o => o.id))); // <-- actualiza índice
+    renderOlts();
+    document.getElementById('nombre-olt').value = "";
+}
+
+// Guarda una OLT individual en localStorage
+function guardarOltIndividual(olt) {
+    localStorage.setItem(olt.id, JSON.stringify(olt));
+    mostrarMensaje('OLT guardada correctamente!');
+}
+
+// Agrega esta función en tu script:
+function mostrarMensaje(texto) {
+    let msg = document.getElementById('mensaje-guardado');
+    if (!msg) {
+        msg = document.createElement('div');
+        msg.id = 'mensaje-guardado';
+        msg.style.position = 'fixed';
+        msg.style.bottom = '30px';
+        msg.style.left = '50%';
+        msg.style.transform = 'translateX(-50%)';
+        msg.style.background = '#0056b3';
+        msg.style.color = 'white';
+        msg.style.padding = '12px 30px';
+        msg.style.borderRadius = '8px';
+        msg.style.fontSize = '16px';
+        msg.style.zIndex = '9999';
+        document.body.appendChild(msg);
+    }
+    msg.textContent = texto;
+    msg.style.display = 'block';
+    setTimeout(() => { msg.style.display = 'none'; }, 1500);
+}
+
+// Guarda todas las OLTs en localStorage
+function guardarOlts() {
+    olts.forEach(olt => guardarOltIndividual(olt));
+    // alert('OLTs guardadas correctamente!'); // Opcional: sin alert
+}
+
+// Agrega un comando a una OLT
+function agregarComandoOlt(idx) {
+    olts[idx].comandos.push({
+        summary: `Nuevo Comando`,
+        lines: [
+            "# Descripción del comando",
+            "pon-onu-mng gpon_onu-{shelf}/{slot}/{port}:{onuId}"
+        ]
+    });
+    guardarOlts();
+    renderOlts();
+}
+
+// Renderiza los comandos de una OLT específica
+function renderComandosOlt(olt, idxOlt, container) {
+    container.innerHTML = '';
+
+    // Variable para rastrear el índice del comando arrastrado
+    let draggedIndex = null;
+
+    olt.comandos.forEach((cmd, idx) => {
+        const details = document.createElement('details');
+        details.open = false;
+        details.draggable = true; // Hacer que el comando sea arrastrable
+        details.style.cursor = 'grab';
+
+        // Evento al iniciar el arrastre
+        details.addEventListener('dragstart', () => {
+            draggedIndex = idx;
+            details.style.opacity = '0.5'; // Cambiar la opacidad mientras se arrastra
+        });
+
+        // Evento al terminar el arrastre
+        details.addEventListener('dragend', () => {
+            details.style.opacity = '1'; // Restaurar la opacidad
+        });
+
+        // Evento al pasar sobre otro comando
+        details.addEventListener('dragover', (e) => {
+            e.preventDefault(); // Permitir el "drop"
+            details.style.border = '2px dashed #0056b3'; // Resaltar el área de destino
+        });
+
+        // Evento al salir del área de otro comando
+        details.addEventListener('dragleave', () => {
+            details.style.border = 'none'; // Quitar el resaltado
+        });
+
+        // Evento al soltar el comando
+        details.addEventListener('drop', () => {
+            details.style.border = 'none'; // Quitar el resaltado
+
+            // Intercambiar los comandos en la lista
+            const temp = olt.comandos[draggedIndex];
+            olt.comandos.splice(draggedIndex, 1); // Eliminar el comando arrastrado
+            olt.comandos.splice(idx, 0, temp); // Insertar en la nueva posición
+
+            guardarOlts(); // Guardar los cambios
+            renderOlts(); // Volver a renderizar
+        });
+
+        // Reemplazar variables dinámicas en los comandos
+        const reemplazarVariables = (line) => {
+            return line
+                .replace(/{shelf}/g, olt.shelf)
+                .replace(/{slot}/g, olt.slot)
+                .replace(/{port}/g, olt.port)
+                .replace(/{onuId}/g, olt.onuId);
+        };
+
+        // Título editable con número dinámico
+        const summary = document.createElement('summary');
+        const numeroComando = document.createElement('span');
+        numeroComando.textContent = `${idx + 1}. `; // Número dinámico del comando
+        numeroComando.style.fontWeight = 'bold';
+        numeroComando.style.marginRight = '8px';
+        summary.appendChild(numeroComando);
+
+        const inputTitulo = document.createElement('input');
+        inputTitulo.type = 'text';
+        inputTitulo.value = cmd.summary || `Comando ${idx + 1}`;
+        inputTitulo.className = 'command-title';
+        inputTitulo.style.fontWeight = 'bold';
+        inputTitulo.style.fontSize = '16px';
+        inputTitulo.style.border = 'none';
+        inputTitulo.style.background = 'transparent';
+        inputTitulo.style.width = '70%';
+        inputTitulo.oninput = function () {
+            cmd.summary = inputTitulo.value;
+        };
+        summary.appendChild(inputTitulo);
+        details.appendChild(summary);
+
+        // Comentario editable
+        let comentarioIdx = cmd.lines.findIndex(line => line.trim().startsWith('#'));
+        let comentario = comentarioIdx !== -1 ? cmd.lines[comentarioIdx] : "# Descripción del comando";
+        const inputComentario = document.createElement('input');
+        inputComentario.type = 'text';
+        inputComentario.value = comentario.replace(/^#\s?/, '');
+        inputComentario.className = 'comment';
+        inputComentario.style.width = '100%';
+        inputComentario.style.margin = '8px 0';
+        inputComentario.oninput = function () {
+            const nuevoComentario = "# " + inputComentario.value;
+            if (comentarioIdx !== -1) {
+                cmd.lines[comentarioIdx] = nuevoComentario;
+            } else {
+                cmd.lines.unshift(nuevoComentario);
+                comentarioIdx = 0;
+            }
+        };
+        details.appendChild(inputComentario);
+
+        // Comandos (sin comentarios)
+        const comandosSolo = cmd.lines
+            .filter(line => !line.trim().startsWith('#'))
+            .map(reemplazarVariables); // Reemplazar variables dinámicas
+        const textarea = document.createElement('textarea');
+        textarea.className = 'command';
+        textarea.rows = Math.max(3, comandosSolo.length);
+        textarea.style.resize = 'vertical';
+        textarea.style.width = '100%';
+        textarea.value = comandosSolo.join('\n');
+        textarea.oninput = function () {
+            const nuevasLineas = textarea.value.split('\n');
+            if (comentarioIdx !== -1) {
+                cmd.lines = [cmd.lines[comentarioIdx], ...nuevasLineas];
+            } else {
+                cmd.lines = nuevasLineas;
+            }
+        };
+        details.appendChild(textarea);
+
+        // Botón copiar
+        const btnCopy = document.createElement('button');
+        btnCopy.textContent = '📋 Copiar comandos';
+        btnCopy.className = 'btn btn-primary';
+        btnCopy.style.marginTop = '10px';
+        btnCopy.onclick = function () {
+            navigator.clipboard.writeText(textarea.value);
+            btnCopy.textContent = '✅ Copiado!';
+            setTimeout(() => btnCopy.textContent = '📋 Copiar comandos', 1200);
+        };
+        details.appendChild(btnCopy);
+
+        // Botón eliminar comando
+        const btnDel = document.createElement('button');
+        btnDel.textContent = '🗑️ Eliminar comando';
+        btnDel.className = 'btn btn-secondary';
+        btnDel.style.marginTop = '10px';
+        btnDel.style.marginLeft = '10px';
+        btnDel.onclick = function () {
+            mostrarConfirmacion('¿Seguro que deseas eliminar este comando?', (ok) => {
+                if (ok) {
+                    olt.comandos.splice(idx, 1);
+                    guardarOlts();
+                    renderOlts();
+                }
+            });
+        };
+        details.appendChild(btnDel);
+
+        container.appendChild(details);
+    });
+}
+
+// Inicializa la vista de OLTs al cargar la página
+renderOlts();
+
+function mostrarAcsProduccion() {
+    const panel = document.getElementById('acs-produccion-panel');
+    const iframe = document.getElementById('acs-produccion-iframe');
+    panel.style.display = 'block';
+    iframe.src = 'http://acs.in.iantel.com.uy/live/manage';
+}
+
+function cerrarAcsProduccion() {
+    const panel = document.getElementById('acs-produccion-panel');
+    const iframe = document.getElementById('acs-produccion-iframe');
+    panel.style.display = 'none';
+    iframe.src = '';
+}
+
+// --- Estructura y renderizado de ONUs ---
+let onus = JSON.parse(localStorage.getItem('onus-list')) || [
+    { id: 'onu-1', nombre: 'ZTE F670v1', modelo: 'ZTE-F670v1', vlan: 10 }
+];
+let onuSeleccionada = 0;
+
+function renderOnus() {
+    const tabsContainer = document.getElementById('onus-tabs');
+    const onusList = document.getElementById('onus-list');
+    tabsContainer.innerHTML = '';
+    onusList.innerHTML = '';
+
+    // Renderiza las sub-pestañas
+    onus.forEach((onu, idx) => {
+        const tab = document.createElement('div');
+        tab.className = 'tab' + (idx === onuSeleccionada ? ' active' : '');
+        tab.textContent = onu.nombre || 'Sin nombre';
+        tab.style.flex = 'unset';
+        tab.style.padding = '8px 18px';
+        tab.onclick = () => {
+            onuSeleccionada = idx;
+            renderOnus();
+        };
+        tabsContainer.appendChild(tab);
+    });
+
+    // Renderiza solo la ONU seleccionada
+    if (onus.length > 0) {
+        const idx = onuSeleccionada;
+        const onu = onus[idx];
+        const onuDiv = document.createElement('div');
+        onuDiv.className = 'olt-block';
+        onuDiv.style.border = '1px solid #ccc';
+        onuDiv.style.borderRadius = '8px';
+        onuDiv.style.padding = '15px';
+        onuDiv.style.marginBottom = '25px';
+        onuDiv.style.background = '#f9f9f9';
+
+        // Título y botón eliminar
+        const header = document.createElement('div');
+        header.style.display = 'flex';
+        header.style.justifyContent = 'space-between';
+        header.style.alignItems = 'center';
+
+        // Nombre editable
+        const nombreDiv = document.createElement('div');
+        nombreDiv.style.display = 'flex';
+        nombreDiv.style.alignItems = 'center';
+
+        const nombreSpan = document.createElement('span');
+        nombreSpan.textContent = onu.nombre || 'Sin nombre';
+        nombreSpan.style.fontSize = '18px';
+        nombreSpan.style.fontWeight = 'bold';
+        nombreSpan.style.color = 'var(--azul-antel)';
+        nombreSpan.style.marginRight = '10px';
+
+        const btnEdit = document.createElement('button');
+        btnEdit.textContent = '✏️';
+        btnEdit.className = 'btn btn-secondary';
+        btnEdit.style.padding = '4px 10px';
+        btnEdit.style.fontSize = '14px';
+        btnEdit.onclick = function() {
+            const nuevoNombre = prompt('Nuevo nombre para la ONU:', onu.nombre || '');
+            if (nuevoNombre !== null && nuevoNombre.trim() !== '') {
+                onu.nombre = nuevoNombre.trim();
+                guardarOnus();
+                renderOnus();
+            }
+        };
+
+        nombreDiv.appendChild(nombreSpan);
+        nombreDiv.appendChild(btnEdit);
+
+        header.appendChild(nombreDiv);
+
+        // Comandos de la ONU
+        const comandosDiv = document.createElement('div');
+        comandosDiv.className = 'config-section';
+        comandosDiv.innerHTML = `
+            <h4 class="section-title">Comandos ACS</h4>
+            <button class="btn btn-secondary" onclick="agregarComandoOnu(${idx})">➕ Agregar Comando</button>
+        `;
+
+        const comandosList = document.createElement('div');
+        renderComandosOnu(onu, idx, comandosList);
+        comandosDiv.appendChild(comandosList);
+
+        // Botones Guardar y Aplicar para los comandos de esta ONU
+        const buttonGroup = document.createElement('div');
+        buttonGroup.className = 'button-group';
+
+        const btnGuardar = document.createElement('button');
+        btnGuardar.className = 'btn btn-primary';
+        btnGuardar.textContent = '💾 Guardar';
+        btnGuardar.onclick = function() {
+            guardarOnus();
+            mostrarMensaje('Comandos de la ONU guardados correctamente!');
+        };
+
+        const btnAplicar = document.createElement('button');
+        btnAplicar.className = 'btn btn-secondary';
+        btnAplicar.textContent = '🔄 Aplicar';
+        btnAplicar.onclick = function() {
+            renderOnus();
+            mostrarMensaje('Comandos de la ONU aplicados correctamente!');
+        };
+
+        buttonGroup.appendChild(btnGuardar);
+        buttonGroup.appendChild(btnAplicar);
+        comandosDiv.appendChild(buttonGroup);
+
+        onuDiv.appendChild(comandosDiv);
+
+        onusList.appendChild(onuDiv);
+
+        // Mueve este bloque al final, después de agregar todos los elementos a onuDiv:
+        const btnDelOnu = document.createElement('button');
+        btnDelOnu.textContent = '🗑️ Eliminar ONU';
+        btnDelOnu.className = 'btn btn-secondary';
+        btnDelOnu.style.marginTop = '20px';
+        btnDelOnu.onclick = function() {
+            mostrarConfirmacion('¿Seguro que deseas eliminar esta ONU?', (ok) => {
+                if (ok) {
+                    onus.splice(idx, 1);
+                    if (onuSeleccionada >= onus.length) onuSeleccionada = Math.max(0, onus.length - 1);
+                    guardarOnus();
+                    renderOnus();
+                }
+            });
+        };
+        onuDiv.appendChild(btnDelOnu); // <-- Ahora está al final
+    }
+}
+
+function actualizarOnuCampo(idx, campo, valor) {
+    onus[idx][campo] = campo === 'vlan' ? Number(valor) : valor;
+    guardarOnus();
+}
+
+function agregarOnu() {
+    const nombre = prompt('Nombre de la ONU:') || 'Sin nombre';
+    const modelo = prompt('Modelo de la ONU:') || '';
+    const vlan = 10;
+    onus.push({
+        id: 'onu-' + Date.now(),
+        nombre: nombre,
+        modelo: modelo,
+        vlan: vlan
+    });
+    onuSeleccionada = onus.length - 1;
+    guardarOnus();
+    renderOnus();
+}
+
+function guardarOnus() {
+    localStorage.setItem('onus-list', JSON.stringify(onus));
+}
+
+// Llama a renderOnus() al cargar la página
+window.addEventListener('load', () => {
+    renderOnus();
+});
+
+// Agrega estas funciones después de las funciones de ONU existentes:
+
+function agregarComandoOnu(idx) {
+    onus[idx].comandos = onus[idx].comandos || [];
+    onus[idx].comandos.push({
+        summary: `Nuevo Comando`,
+        lines: [
+            "# Descripción del comando",
+            "comando-ejemplo"
+        ]
+    });
+    guardarOnus();
+    renderOnus();
+}
+
+function renderComandosOnu(onu, idxOnu, container) {
+    container.innerHTML = '';
+    (onu.comandos || []).forEach((cmd, idx) => {
+        const details = document.createElement('details');
+        details.open = false;
+
+        // Título editable
+        const summary = document.createElement('summary');
+        const inputTitulo = document.createElement('input');
+        inputTitulo.type = 'text';
+        inputTitulo.value = cmd.summary || `Comando ${idx + 1}`;
+        inputTitulo.className = 'command-title';
+        inputTitulo.style.fontWeight = 'bold';
+        inputTitulo.style.fontSize = '16px';
+        inputTitulo.style.border = 'none';
+        inputTitulo.style.background = 'transparent';
+        inputTitulo.style.width = '90%';
+        inputTitulo.oninput = function() {
+            cmd.summary = inputTitulo.value;
+        };
+        summary.appendChild(inputTitulo);
+        details.appendChild(summary);
+
+        // Comentario editable
+        let comentarioIdx = cmd.lines.findIndex(line => line.trim().startsWith('#'));
+        let comentario = comentarioIdx !== -1 ? cmd.lines[comentarioIdx] : "# Descripción del comando";
+        const inputComentario = document.createElement('input');
+        inputComentario.type = 'text';
+        inputComentario.value = comentario.replace(/^#\s?/, '');
+        inputComentario.className = 'comment';
+        inputComentario.style.width = '100%';
+        inputComentario.style.margin = '8px 0';
+        inputComentario.oninput = function() {
+            const nuevoComentario = "# " + inputComentario.value;
+            if (comentarioIdx !== -1) {
+                cmd.lines[comentarioIdx] = nuevoComentario;
+            } else {
+                cmd.lines.unshift(nuevoComentario);
+                comentarioIdx = 0;
+            }
+        };
+        details.appendChild(inputComentario);
+
+        // Comandos (sin comentarios)
+        const comandosSolo = cmd.lines.filter(line => !line.trim().startsWith('#'));
+        const textarea = document.createElement('textarea');
+        textarea.className = 'command';
+        textarea.rows = Math.max(3, comandosSolo.length);
+        textarea.style.resize = 'vertical';
+        textarea.style.width = '100%';
+        textarea.value = comandosSolo.join('\n');
+        textarea.oninput = function() {
+            const nuevasLineas = textarea.value.split('\n');
+            if (comentarioIdx !== -1) {
+                cmd.lines = [cmd.lines[comentarioIdx], ...nuevasLineas];
+            } else {
+                cmd.lines = nuevasLineas;
+            }
+        };
+        details.appendChild(textarea);
+
+        // Botón copiar
+        const btnCopy = document.createElement('button');
+        btnCopy.textContent = '📋 Copiar comandos';
+        btnCopy.className = 'btn btn-primary';
+        btnCopy.style.marginTop = '10px';
+        btnCopy.onclick = function() {
+            navigator.clipboard.writeText(textarea.value);
+            btnCopy.textContent = '✅ Copiado!';
+            setTimeout(() => btnCopy.textContent = '📋 Copiar comandos', 1200);
+        };
+        details.appendChild(btnCopy);
+
+        // Botón eliminar comando
+        const btnDel = document.createElement('button');
+        btnDel.textContent = '🗑️ Eliminar comando';
+        btnDel.className = 'btn btn-secondary';
+        btnDel.style.marginTop = '10px';
+        btnDel.style.marginLeft = '10px';
+        btnDel.onclick = function() {
+            mostrarConfirmacion('¿Seguro que deseas eliminar este comando?', (ok) => {
+                if (ok) {
+                    onu.comandos.splice(idx, 1);
+                    guardarOnus();
+                    renderOnus();
+                }
+            });
+        };
+        details.appendChild(btnDel);
+
+        container.appendChild(details);
+    });
+}
+
+// Función para mostrar el modal de confirmación
+function mostrarModalConfirmacion(mensaje, onConfirm) {
+    const modal = document.getElementById('modal-confirm');
+    const texto = document.getElementById('modal-confirm-text');
+    const btnYes = document.getElementById('modal-confirm-yes');
+    const btnNo = document.getElementById('modal-confirm-no');
+
+    texto.textContent = mensaje;
+    modal.style.display = 'flex';
+
+    btnYes.onclick = () => {
+        modal.style.display = 'none';
+        if (onConfirm) onConfirm();
+    };
+
+    btnNo.onclick = () => {
+        modal.style.display = 'none';
+    };
+}
+
+// Modal de confirmación reutilizable
+function mostrarConfirmacion(texto, callback) {
+    const modal = document.getElementById('modal-confirm');
+    const txt = document.getElementById('modal-confirm-text');
+    txt.textContent = texto || '¿Estás seguro?';
+    modal.style.display = 'flex';
+
+    // Limpiar listeners previos
+    const btnYes = document.getElementById('modal-confirm-yes');
+    const btnNo = document.getElementById('modal-confirm-no');
+    btnYes.onclick = () => {
+        modal.style.display = 'none';
+        callback(true);
+    };
+    btnNo.onclick = () => {
+        modal.style.display = 'none';
+        callback(false);
+    };
+    // Cerrar con Escape
+    modal.onkeydown = (e) => {
+        if (e.key === 'Escape') {
+            modal.style.display = 'none';
+            callback(false);
+        }
+    };
+    // Enfocar botón sí
+    setTimeout(() => btnYes.focus(), 100);
+}
+
+// Oculta contenedores vacíos al renderizar
+function ocultarContenedoresVacios() {
+    const contenedores = ['#olts-tabs', '#olts-list', '#onus-tabs', '#onus-list'];
+    contenedores.forEach(selector => {
+        const elemento = document.querySelector(selector);
+        if (elemento) {
+            elemento.style.display = elemento.innerHTML.trim() === '' ? 'none' : '';
+        }
+    });
+}
+
+// Llama a esta función después de renderizar las pestañas o listas
+window.addEventListener('load', ocultarContenedoresVacios);
+document.addEventListener('DOMContentLoaded', ocultarContenedoresVacios);
+
+// Renderiza los comandos de una ACS específica
+function renderComandosAcs(acs, idxAcs, container) {
+    container.innerHTML = '';
+
+    // Variable para rastrear el índice del comando arrastrado
+    let draggedIndex = null;
+
+    acs.comandos.forEach((cmd, idx) => {
+        const details = document.createElement('details');
+        details.open = false;
+        details.draggable = true; // Hacer que el comando sea arrastrable
+        details.style.cursor = 'grab';
+
+        // Evento al iniciar el arrastre
+        details.addEventListener('dragstart', () => {
+            draggedIndex = idx;
+            details.style.opacity = '0.5'; // Cambiar la opacidad mientras se arrastra
+        });
+
+        // Evento al terminar el arrastre
+        details.addEventListener('dragend', () => {
+            details.style.opacity = '1'; // Restaurar la opacidad
+        });
+
+        // Evento al pasar sobre otro comando
+        details.addEventListener('dragover', (e) => {
+            e.preventDefault(); // Permitir el "drop"
+            details.style.border = '2px dashed #0056b3'; // Resaltar el área de destino
+        });
+
+        // Evento al salir del área de otro comando
+        details.addEventListener('dragleave', () => {
+            details.style.border = 'none'; // Quitar el resaltado
+        });
+
+        // Evento al soltar el comando
+        details.addEventListener('drop', () => {
+            details.style.border = 'none'; // Quitar el resaltado
+
+            // Intercambiar los comandos en la lista
+            const temp = acs.comandos[draggedIndex];
+            acs.comandos.splice(draggedIndex, 1); // Eliminar el comando arrastrado
+            acs.comandos.splice(idx, 0, temp); // Insertar en la nueva posición
+
+            guardarAcs(); // Guardar los cambios
+            renderAcs(); // Volver a renderizar
+        });
+
+        // Reemplazar variables dinámicas en los comandos
+        const reemplazarVariables = (line) => {
+            return line
+                .replace(/{shelf}/g, acs.shelf)
+                .replace(/{slot}/g, acs.slot)
+                .replace(/{port}/g, acs.port)
+                .replace(/{onuId}/g, acs.onuId);
+        };
+
+        // Título editable con número dinámico
+        const summary = document.createElement('summary');
+        const numeroComando = document.createElement('span');
+        numeroComando.textContent = `${idx + 1}. `; // Número dinámico del comando
+        numeroComando.style.fontWeight = 'bold';
+        numeroComando.style.marginRight = '8px';
+        summary.appendChild(numeroComando);
+
+        const inputTitulo = document.createElement('input');
+        inputTitulo.type = 'text';
+        inputTitulo.value = cmd.summary || `Comando ${idx + 1}`;
+        inputTitulo.className = 'command-title';
+        inputTitulo.style.fontWeight = 'bold';
+        inputTitulo.style.fontSize = '16px';
+        inputTitulo.style.border = 'none';
+        inputTitulo.style.background = 'transparent';
+        inputTitulo.style.width = '70%';
+        inputTitulo.oninput = function () {
+            cmd.summary = inputTitulo.value;
+        };
+        summary.appendChild(inputTitulo);
+        details.appendChild(summary);
+
+        // Comentario editable
+        let comentarioIdx = cmd.lines.findIndex(line => line.trim().startsWith('#'));
+        let comentario = comentarioIdx !== -1 ? cmd.lines[comentarioIdx] : "# Descripción del comando";
+        const inputComentario = document.createElement('input');
+        inputComentario.type = 'text';
+        inputComentario.value = comentario.replace(/^#\s?/, '');
+        inputComentario.className = 'comment';
+        inputComentario.style.width = '100%';
+        inputComentario.style.margin = '8px 0';
+        inputComentario.oninput = function () {
+            const nuevoComentario = "# " + inputComentario.value;
+            if (comentarioIdx !== -1) {
+                cmd.lines[comentarioIdx] = nuevoComentario;
+            } else {
+                cmd.lines.unshift(nuevoComentario);
+                comentarioIdx = 0;
+            }
+        };
+        details.appendChild(inputComentario);
+
+        // Comandos (sin comentarios)
+        const comandosSolo = cmd.lines
+            .filter(line => !line.trim().startsWith('#'))
+            .map(reemplazarVariables); // Reemplazar variables dinámicas
+        const textarea = document.createElement('textarea');
+        textarea.className = 'command';
+        textarea.rows = Math.max(3, comandosSolo.length);
+        textarea.style.resize = 'vertical';
+        textarea.style.width = '100%';
+        textarea.value = comandosSolo.join('\n');
+        textarea.oninput = function () {
+            const nuevasLineas = textarea.value.split('\n');
+            if (comentarioIdx !== -1) {
+                cmd.lines = [cmd.lines[comentarioIdx], ...nuevasLineas];
+            } else {
+                cmd.lines = nuevasLineas;
+            }
+        };
+        details.appendChild(textarea);
+
+        // Botón copiar
+        const btnCopy = document.createElement('button');
+        btnCopy.textContent = '📋 Copiar comandos';
+        btnCopy.className = 'btn btn-primary';
+        btnCopy.style.marginTop = '10px';
+        btnCopy.onclick = function () {
+            navigator.clipboard.writeText(textarea.value);
+            btnCopy.textContent = '✅ Copiado!';
+            setTimeout(() => btnCopy.textContent = '📋 Copiar comandos', 1200);
+        };
+        details.appendChild(btnCopy);
+
+        // Botón eliminar comando
+        const btnDel = document.createElement('button');
+        btnDel.textContent = '🗑️ Eliminar comando';
+        btnDel.className = 'btn btn-secondary';
+        btnDel.style.marginTop = '10px';
+        btnDel.style.marginLeft = '10px';
+        btnDel.onclick = function () {
+            mostrarConfirmacion('¿Seguro que deseas eliminar este comando?', (ok) => {
+                if (ok) {
+                    acs.comandos.splice(idx, 1);
+                    guardarAcs();
+                    renderAcs();
+                }
+            });
+        };
+        details.appendChild(btnDel);
+
+        container.appendChild(details);
+    });
+}
+
+// Guarda todas las configuraciones de ACS
+function guardarAcs() {
+    localStorage.setItem('acs-list', JSON.stringify(acs));
+}
+
+// Renderiza la pestaña ACS
+function renderAcs() {
+    const acsList = document.getElementById('acs-list');
+    acsList.innerHTML = '';
+
+    // Renderiza los comandos de ACS
+    if (acs.length > 0) {
+        const idx = 0; // Puedes ajustar esto para múltiples ACS
+        const acs = acs[0]; // Solo un ejemplo
+        const comandosDiv = document.createElement('div');
+        renderComandosAcs(acs, idx, comandosDiv);
+        acsList.appendChild(comandosDiv);
+    }
+}
+
+function actualizarDato(DataName) {
+    const data = document.getElementById(DataName).value;
+    localStorage.setItem(DataName, data);
+}
+
+function obtenerDato(DataName) {
+    const data = document.getElementById(DataName);
+    data.value = localStorage.getItem(DataName) || data.value;
+    return data;
+}
+
+function copiarCodigo(id) {
+    const codigo = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(codigo).then(() => {
+        alert("Configuración copiada al portapapeles");
+    });
+}
+
+function genConfig() {
+    const auth = obtenerDato("Auth").value;
+    const Authstring = obtenerDato("Authstring").value;
+    const ONUType = obtenerDato("ONUType").value;
+    const shelf = obtenerDato("Shelf").value;
+    const slot = obtenerDato("Slot").value;
+    const port = obtenerDato("Port").value;
+    const onuid = obtenerDato("onuid").value;
+
+    const interfaceOLT = `
+interface gpon_olt-${shelf}/${slot}/${port}
+  onu ${onuid} type ${ONUType} ${auth === "Password" ? `pw ${Authstring}` : `sn ${Authstring}`}
+  exit
+`;
+    document.getElementById("InterfaceOLTTitle").textContent = `interface gpon_olt-${shelf}/${slot}/${port}`;
+    document.getElementById("InterfaceOLTBody").textContent = interfaceOLT;
+
+    // Generar otras configuraciones (ONU, Vport, Management, etc.)
+    // Agrega aquí las funciones para generar las demás configuraciones
+}
+
+// Lista de ONTs
+let onts = JSON.parse(localStorage.getItem('onts-list')) || [];
+let ontSeleccionada = 0;
+
+// Renderiza las ONTs
+function renderOnts() {
+    const tabsContainer = document.getElementById('onts-tabs');
+    const ontsList = document.getElementById('onts-list');
+    tabsContainer.innerHTML = '';
+    ontsList.innerHTML = '';
+
+    // Renderiza las sub-pestañas
+    onts.forEach((ont, idx) => {
+        const tab = document.createElement('div');
+        tab.className = 'tab' + (idx === ontSeleccionada ? ' active' : '');
+        tab.textContent = ont.nombre || 'Sin nombre';
+        tab.style.flex = 'unset';
+        tab.style.padding = '8px 18px';
+        tab.onclick = () => {
+            ontSeleccionada = idx;
+            renderOnts();
+        };
+        tabsContainer.appendChild(tab);
+    });
+
+    // Renderiza solo la ONT seleccionada
+    if (onts.length > 0) {
+        const idx = ontSeleccionada;
+        const ont = onts[idx];
+        const ontDiv = document.createElement('div');
+        ontDiv.className = 'olt-block';
+        ontDiv.style.border = '1px solid #ccc';
+        ontDiv.style.borderRadius = '8px';
+        ontDiv.style.padding = '15px';
+        ontDiv.style.marginBottom = '25px';
+        ontDiv.style.background = '#f9f9f9';
+
+        // Título y botón eliminar
+        const header = document.createElement('div');
+        header.style.display = 'flex';
+        header.style.justifyContent = 'space-between';
+        header.style.alignItems = 'center';
+
+        // Nombre editable
+        const nombreDiv = document.createElement('div');
+        nombreDiv.style.display = 'flex';
+        nombreDiv.style.alignItems = 'center';
+
+        const nombreSpan = document.createElement('span');
+        nombreSpan.textContent = ont.nombre || 'Sin nombre';
+        nombreSpan.style.fontSize = '18px';
+        nombreSpan.style.fontWeight = 'bold';
+        nombreSpan.style.color = 'var(--azul-antel)';
+        nombreSpan.style.marginRight = '10px';
+
+        const btnEdit = document.createElement('button');
+        btnEdit.textContent = '✏️';
+        btnEdit.className = 'btn btn-secondary';
+        btnEdit.style.padding = '4px 10px';
+        btnEdit.style.fontSize = '14px';
+        btnEdit.onclick = function() {
+            const nuevoNombre = prompt('Nuevo nombre para la ONT:', ont.nombre || '');
+            if (nuevoNombre !== null && nuevoNombre.trim() !== '') {
+                ont.nombre = nuevoNombre.trim();
+                guardarOnts();
+                renderOnts();
+            }
+        };
+
+        nombreDiv.appendChild(nombreSpan);
+        nombreDiv.appendChild(btnEdit);
+
+        header.appendChild(nombreDiv);
+
+        // Comandos de la ONT
+        const comandosDiv = document.createElement('div');
+        comandosDiv.className = 'config-section';
+        comandosDiv.innerHTML = `
+            <h4 class="section-title">Comandos de la ONT</h4>
+            <button class="btn btn-secondary" onclick="agregarComandoOnt(${idx})">➕ Agregar Comando</button>
+        `;
+
+        const comandosList = document.createElement('div');
+        renderComandosOnt(ont, idx, comandosList);
+        comandosDiv.appendChild(comandosList);
+
+        // Botones Guardar y Aplicar para los comandos de esta ONT
+        const buttonGroup = document.createElement('div');
+        buttonGroup.className = 'button-group';
+
+        const btnGuardar = document.createElement('button');
+        btnGuardar.className = 'btn btn-primary';
+        btnGuardar.textContent = '💾 Guardar';
+        btnGuardar.onclick = function() {
+            guardarOnts();
+            mostrarMensaje('Comandos de la ONT guardados correctamente!');
+        };
+
+        const btnAplicar = document.createElement('button');
+        btnAplicar.className = 'btn btn-secondary';
+        btnAplicar.textContent = '🔄 Aplicar';
+        btnAplicar.onclick = function() {
+            renderOnts();
+            mostrarMensaje('Comandos de la ONT aplicados correctamente!');
+        };
+
+        buttonGroup.appendChild(btnGuardar);
+        buttonGroup.appendChild(btnAplicar);
+        comandosDiv.appendChild(buttonGroup);
+
+        ontDiv.appendChild(comandosDiv);
+
+        ontsList.appendChild(ontDiv);
+
+        // Botón eliminar ONT
+        const btnDelOnt = document.createElement('button');
+        btnDelOnt.textContent = '🗑️ Eliminar ONT';
+        btnDelOnt.className = 'btn btn-secondary';
+        btnDelOnt.style.marginTop = '20px';
+        btnDelOnt.onclick = function() {
+            mostrarConfirmacion('¿Seguro que deseas eliminar esta ONT?', (ok) => {
+                if (ok) {
+                    onts.splice(idx, 1);
+                    if (ontSeleccionada >= onts.length) ontSeleccionada = Math.max(0, onts.length - 1);
+                    guardarOnts();
+                    renderOnts();
+                }
+            });
+        };
+        ontDiv.appendChild(btnDelOnt);
+    }
+}
+
+// Agrega una nueva ONT
+function agregarOnt() {
+    const nombre = document.getElementById('nombre-ont').value.trim() || '(Sin nombre)';
+    const nuevaOnt = {
+        id: 'ont-' + Date.now(),
+        nombre: nombre,
+        comandos: [
+            {
+                summary: "Nuevo Comando",
+                lines: [
+                    "# Descripción del comando",
+                    "comando-ejemplo"
+                ]
+            }
+        ]
+    };
+    onts.push(nuevaOnt);
+    ontSeleccionada = onts.length - 1;
+    guardarOnts();
+    renderOnts();
+    document.getElementById('nombre-ont').value = "";
+}
+
+// Guarda las ONTs en localStorage
+function guardarOnts() {
+    localStorage.setItem('onts-list', JSON.stringify(onts));
+}
+
+// Renderiza los comandos de una ONT específica
+function renderComandosOnt(ont, idxOnt, container) {
+    container.innerHTML = '';
+    (ont.comandos || []).forEach((cmd, idx) => {
+        const details = document.createElement('details');
+        details.open = false;
+
+        // Título editable
+        const summary = document.createElement('summary');
+        const inputTitulo = document.createElement('input');
+        inputTitulo.type = 'text';
+        inputTitulo.value = cmd.summary || `Comando ${idx + 1}`;
+        inputTitulo.className = 'command-title';
+        inputTitulo.style.fontWeight = 'bold';
+        inputTitulo.style.fontSize = '16px';
+        inputTitulo.style.border = 'none';
+        inputTitulo.style.background = 'transparent';
+        inputTitulo.style.width = '90%';
+        inputTitulo.oninput = function() {
+            cmd.summary = inputTitulo.value;
+        };
+        summary.appendChild(inputTitulo);
+        details.appendChild(summary);
+
+        // Comentario editable
+        let comentarioIdx = cmd.lines.findIndex(line => line.trim().startsWith('#'));
+        let comentario = comentarioIdx !== -1 ? cmd.lines[comentarioIdx] : "# Descripción del comando";
+        const inputComentario = document.createElement('input');
+        inputComentario.type = 'text';
+        inputComentario.value = comentario.replace(/^#\s?/, '');
+        inputComentario.className = 'comment';
+        inputComentario.style.width = '100%';
+        inputComentario.style.margin = '8px 0';
+        inputComentario.oninput = function() {
+            const nuevoComentario = "# " + inputComentario.value;
+            if (comentarioIdx !== -1) {
+                cmd.lines[comentarioIdx] = nuevoComentario;
+            } else {
+                cmd.lines.unshift(nuevoComentario);
+                comentarioIdx = 0;
+            }
+        };
+        details.appendChild(inputComentario);
+
+        // Comandos (sin comentarios)
+        const comandosSolo = cmd.lines.filter(line => !line.trim().startsWith('#'));
+        const textarea = document.createElement('textarea');
+        textarea.className = 'command';
+        textarea.rows = Math.max(3, comandosSolo.length);
+        textarea.style.resize = 'vertical';
+        textarea.style.width = '100%';
+        textarea.value = comandosSolo.join('\n');
+        textarea.oninput = function() {
+            const nuevasLineas = textarea.value.split('\n');
+            if (comentarioIdx !== -1) {
+                cmd.lines = [cmd.lines[comentarioIdx], ...nuevasLineas];
+            } else {
+                cmd.lines = nuevasLineas;
+            }
+        };
+        details.appendChild(textarea);
+
+        // Botón copiar
+        const btnCopy = document.createElement('button');
+        btnCopy.textContent = '📋 Copiar comandos';
+        btnCopy.className = 'btn btn-primary';
+        btnCopy.style.marginTop = '10px';
+        btnCopy.onclick = function() {
+            navigator.clipboard.writeText(textarea.value);
+            btnCopy.textContent = '✅ Copiado!';
+            setTimeout(() => btnCopy.textContent = '📋 Copiar comandos', 1200);
+        };
+        details.appendChild(btnCopy);
+
+        // Botón eliminar comando
+        const btnDel = document.createElement('button');
+        btnDel.textContent = '🗑️ Eliminar comando';
+        btnDel.className = 'btn btn-secondary';
+        btnDel.style.marginTop = '10px';
+        btnDel.style.marginLeft = '10px';
+        btnDel.onclick = function() {
+            mostrarConfirmacion('¿Seguro que deseas eliminar este comando?', (ok) => {
+                if (ok) {
+                    ont.comandos.splice(idx, 1);
+                    guardarOnts();
+                    renderOnts();
+                }
+            });
+        };
+        details.appendChild(btnDel);
+
+        container.appendChild(details);
+    });
+}
+
+// Inicializa la vista de ONTs al cargar la página
+window.addEventListener('load', () => {
+    renderOnts();
+});
+    </script>
+
+    <!-- Modal de confirmación reutilizable -->
+<div id="modal-confirm" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); z-index:99999; align-items:center; justify-content:center;">
+  <div style="background:white; border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.18); padding:32px 28px; min-width:320px; max-width:90vw; text-align:center; position:relative;">
+    <div id="modal-confirm-text" style="font-size:18px; color:#0056b3; margin-bottom:24px;">¿Estás seguro?</div>
+    <div style="display:flex; gap:16px; justify-content:center;">
+      <button id="modal-confirm-yes" class="btn btn-primary">Sí, eliminar</button>
+      <button id="modal-confirm-no" class="btn btn-secondary">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center; color:#888; font-size:14px; margin-top:40px;">
+    Desarrollado por Alejandro Gallo "alito"
+</div>
+</body>
+</html>
