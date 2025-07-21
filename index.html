@@ -293,6 +293,208 @@
             color: #0056b3;
             margin-bottom: 24px;
         }
+
+        /* Mejoras de responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .tabs {
+                flex-direction: column;
+                gap: 2px;
+            }
+            
+            .tab {
+                text-align: center;
+                padding: 10px 15px;
+            }
+            
+            .input-group {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            
+            .input-group label {
+                min-width: unset;
+                margin-bottom: 5px;
+            }
+            
+            .input-group input, 
+            .input-group select {
+                min-width: unset;
+                max-width: unset;
+                width: 100%;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .command {
+                min-width: unset;
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 20px;
+                padding: 15px;
+            }
+            
+            .tab-content {
+                padding: 15px;
+            }
+            
+            .config-section {
+                padding: 10px;
+            }
+        }
+
+        /* Panel de búsqueda */
+        #search-panel {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px var(--sombra);
+            padding: 20px;
+            z-index: 1000;
+            min-width: 300px;
+            max-width: 400px;
+        }
+
+        #search-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--azul-antel);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px var(--sombra);
+            cursor: pointer;
+            font-size: 20px;
+            z-index: 999;
+            transition: all 0.3s ease;
+        }
+
+        #search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px var(--sombra);
+        }
+
+        .search-result {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+
+        .search-result:hover {
+            background: var(--gris-claro);
+        }
+
+        .search-result-title {
+            font-weight: bold;
+            color: var(--azul-antel);
+        }
+
+        .search-result-content {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Mejoras visuales adicionales */
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            position: relative;
+            color: transparent;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--azul-antel);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Tooltips */
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+        }
+
+        /* Syntax highlighting para comandos */
+        .command-syntax .keyword {
+            color: #0066cc;
+            font-weight: bold;
+        }
+
+        .command-syntax .string {
+            color: #008000;
+        }
+
+        .command-syntax .number {
+            color: #ff6600;
+        }
+
+        .command-syntax .variable {
+            color: #9932cc;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -324,6 +526,81 @@
                 <p style="font-size: 16px; line-height: 1.6; color: #555;">
                     Utiliza las pestañas superiores para navegar entre las distintas herramientas y recursos disponibles.
                 </p>
+
+                <!-- Panel de herramientas -->
+                <div class="config-section" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px solid var(--azul-antel); margin-top: 25px;">
+                    <h3 class="section-title" style="color: var(--azul-antel); margin-top: 0;">🛠️ Panel de Herramientas</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <button class="btn btn-primary" onclick="exportarConfiguracion()" style="padding: 15px; font-size: 16px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                            <span style="font-size: 24px;">📤</span>
+                            <span>Exportar Configuración</span>
+                            <small style="opacity: 0.8;">Descargar todas las configuraciones</small>
+                        </button>
+                        <button class="btn btn-secondary" onclick="importarConfiguracion()" style="padding: 15px; font-size: 16px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                            <span style="font-size: 24px;">📥</span>
+                            <span>Importar Configuración</span>
+                            <small style="opacity: 0.8;">Cargar configuraciones desde archivo</small>
+                        </button>
+                        <button class="btn btn-primary" onclick="validarSistema()" style="padding: 15px; font-size: 16px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                            <span style="font-size: 24px;">✅</span>
+                            <span>Validar Sistema</span>
+                            <small style="opacity: 0.8;">Verificar configuraciones</small>
+                        </button>
+                        <button class="btn btn-secondary" onclick="limpiarCache()" style="padding: 15px; font-size: 16px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                            <span style="font-size: 24px;">🧹</span>
+                            <span>Limpiar Cache</span>
+                            <small style="opacity: 0.8;">Borrar datos temporales</small>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Panel de estadísticas -->
+                <div class="config-section" style="background: #f8f9fa; border: 1px solid #dee2e6; margin-top: 20px;">
+                    <h3 class="section-title" style="margin-top: 0;">📊 Estadísticas del Sistema</h3>
+                    <div id="estadisticas-sistema" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; text-align: center;">
+                        <div style="padding: 15px; background: white; border-radius: 8px; border-left: 4px solid var(--azul-antel);">
+                            <div style="font-size: 24px; font-weight: bold; color: var(--azul-antel);" id="stat-olts">-</div>
+                            <div style="font-size: 14px; color: #666;">OLTs Configuradas</div>
+                        </div>
+                        <div style="padding: 15px; background: white; border-radius: 8px; border-left: 4px solid var(--amarillo-antel);">
+                            <div style="font-size: 24px; font-weight: bold; color: var(--amarillo-antel);" id="stat-comandos">-</div>
+                            <div style="font-size: 14px; color: #666;">Comandos Totales</div>
+                        </div>
+                        <div style="padding: 15px; background: white; border-radius: 8px; border-left: 4px solid #28a745;">
+                            <div style="font-size: 24px; font-weight: bold; color: #28a745;" id="stat-onus">-</div>
+                            <div style="font-size: 14px; color: #666;">ONUs Configuradas</div>
+                        </div>
+                        <div style="padding: 15px; background: white; border-radius: 8px; border-left: 4px solid #17a2b8;">
+                            <div style="font-size: 24px; font-weight: bold; color: #17a2b8;" id="stat-storage">-</div>
+                            <div style="font-size: 14px; color: #666;">Datos Almacenados (KB)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enlaces rápidos -->
+                <div class="config-section" style="margin-top: 20px;">
+                    <h3 class="section-title" style="margin-top: 0;">🔗 Enlaces Rápidos</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <a href="#" onclick="document.querySelector('.tab[data-tab=&quot;olt&quot;]').click(); return false;" 
+                           style="display: block; padding: 15px; background: white; border: 1px solid #dee2e6; border-radius: 8px; text-decoration: none; color: inherit; transition: all 0.3s ease;">
+                            <div style="font-size: 20px; margin-bottom: 8px;">🏢</div>
+                            <div style="font-weight: bold; color: var(--azul-antel);">Gestión OLT</div>
+                            <small style="color: #666;">Configurar equipos OLT</small>
+                        </a>
+                        <a href="#" onclick="document.querySelector('.tab[data-tab=&quot;acs&quot;]').click(); return false;" 
+                           style="display: block; padding: 15px; background: white; border: 1px solid #dee2e6; border-radius: 8px; text-decoration: none; color: inherit; transition: all 0.3s ease;">
+                            <div style="font-size: 20px; margin-bottom: 8px;">📡</div>
+                            <div style="font-weight: bold; color: var(--azul-antel);">Gestión ACS</div>
+                            <small style="color: #666;">Configurar servicios ACS</small>
+                        </a>
+                        <a href="#" onclick="abrirBusqueda(); return false;" 
+                           style="display: block; padding: 15px; background: white; border: 1px solid #dee2e6; border-radius: 8px; text-decoration: none; color: inherit; transition: all 0.3s ease;">
+                            <div style="font-size: 20px; margin-bottom: 8px;">🔍</div>
+                            <div style="font-weight: bold; color: var(--azul-antel);">Búsqueda</div>
+                            <small style="color: #666;">Buscar comandos y configuraciones</small>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -393,6 +670,321 @@ pon-onu-mng gpon_onu-{shelf}/{slot}/{port}:{onuId}
 </div>
 
     <script>
+        // ===== SISTEMA DE BÚSQUEDA MEJORADO =====
+        function abrirBusqueda() {
+            document.getElementById('search-panel').style.display = 'block';
+            document.getElementById('search-input').focus();
+        }
+
+        function cerrarBusqueda() {
+            document.getElementById('search-panel').style.display = 'none';
+            document.getElementById('search-input').value = '';
+            document.getElementById('search-results').innerHTML = '';
+        }
+
+        function buscarEnContenido(query) {
+            const resultados = [];
+            const queryLower = query.toLowerCase();
+
+            // Buscar en OLTs
+            olts.forEach((olt, idx) => {
+                if (olt.nombre.toLowerCase().includes(queryLower)) {
+                    resultados.push({
+                        tipo: 'OLT',
+                        titulo: olt.nombre,
+                        contenido: `Shelf: ${olt.shelf}, Slot: ${olt.slot}, Port: ${olt.port}, ONU Id: ${olt.onuId}`,
+                        accion: () => {
+                            document.querySelector('.tab[data-tab="olt"]').click();
+                            oltSeleccionada = idx;
+                            renderOlts();
+                            cerrarBusqueda();
+                        }
+                    });
+                }
+
+                // Buscar en comandos de OLT
+                olt.comandos.forEach((cmd, cmdIdx) => {
+                    if (cmd.summary.toLowerCase().includes(queryLower) || 
+                        cmd.lines.some(line => line.toLowerCase().includes(queryLower))) {
+                        resultados.push({
+                            tipo: 'Comando OLT',
+                            titulo: `${olt.nombre} - ${cmd.summary}`,
+                            contenido: cmd.lines.filter(line => !line.startsWith('#')).join(' '),
+                            accion: () => {
+                                document.querySelector('.tab[data-tab="olt"]').click();
+                                oltSeleccionada = idx;
+                                renderOlts();
+                                cerrarBusqueda();
+                                // Abrir el comando específico
+                                setTimeout(() => {
+                                    const details = document.querySelectorAll('details');
+                                    if (details[cmdIdx]) {
+                                        details[cmdIdx].open = true;
+                                        details[cmdIdx].scrollIntoView({ behavior: 'smooth' });
+                                    }
+                                }, 100);
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Buscar en ONUs
+            onus.forEach((onu, idx) => {
+                if (onu.nombre.toLowerCase().includes(queryLower)) {
+                    resultados.push({
+                        tipo: 'ONU',
+                        titulo: onu.nombre,
+                        contenido: `Modelo: ${onu.modelo || 'No especificado'}`,
+                        accion: () => {
+                            document.querySelector('.tab[data-tab="acs"]').click();
+                            onuSeleccionada = idx;
+                            renderOnus();
+                            cerrarBusqueda();
+                        }
+                    });
+                }
+            });
+
+            return resultados;
+        }
+
+        // Event listener para búsqueda en tiempo real
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    const query = e.target.value.trim();
+                    const resultsContainer = document.getElementById('search-results');
+                    
+                    if (query.length < 2) {
+                        resultsContainer.innerHTML = '';
+                        return;
+                    }
+
+                    const resultados = buscarEnContenido(query);
+                    
+                    if (resultados.length === 0) {
+                        resultsContainer.innerHTML = '<div style="padding:10px; color:#666; text-align:center;">No se encontraron resultados</div>';
+                        return;
+                    }
+
+                    resultsContainer.innerHTML = resultados.map(resultado => `
+                        <div class="search-result" onclick="ejecutarAccionBusqueda(${JSON.stringify(resultado).replace(/"/g, '&quot;')})">
+                            <div class="search-result-title">[${resultado.tipo}] ${resultado.titulo}</div>
+                            <div class="search-result-content">${resultado.contenido.substring(0, 100)}${resultado.contenido.length > 100 ? '...' : ''}</div>
+                        </div>
+                    `).join('');
+                });
+
+                // Cerrar búsqueda con Escape
+                searchInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        cerrarBusqueda();
+                    }
+                });
+            }
+        });
+
+        function ejecutarAccionBusqueda(resultado) {
+            resultado.accion();
+        }
+
+        // ===== MEJORAS DE VALIDACIÓN =====
+        function validarCampoNumerico(input, min = 1, max = 999) {
+            const value = parseInt(input.value);
+            if (isNaN(value) || value < min || value > max) {
+                input.style.borderColor = '#dc3545';
+                input.style.boxShadow = '0 0 0 3px rgba(220, 53, 69, 0.1)';
+                return false;
+            } else {
+                input.style.borderColor = '#28a745';
+                input.style.boxShadow = '0 0 0 3px rgba(40, 167, 69, 0.1)';
+                setTimeout(() => {
+                    input.style.borderColor = '#ced4da';
+                    input.style.boxShadow = 'none';
+                }, 2000);
+                return true;
+            }
+        }
+
+        // ===== SISTEMA DE NOTIFICACIONES MEJORADO =====
+        function mostrarNotificacion(texto, tipo = 'info', duracion = 3000) {
+            const colores = {
+                'success': '#28a745',
+                'error': '#dc3545',
+                'warning': '#ffc107',
+                'info': '#17a2b8'
+            };
+
+            let notificacion = document.getElementById('notificacion-sistema');
+            if (!notificacion) {
+                notificacion = document.createElement('div');
+                notificacion.id = 'notificacion-sistema';
+                document.body.appendChild(notificacion);
+            }
+
+            notificacion.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: ${colores[tipo] || colores.info};
+                color: white;
+                padding: 15px 30px;
+                border-radius: 8px;
+                font-size: 16px;
+                z-index: 10000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+
+            notificacion.textContent = texto;
+            notificacion.style.opacity = '1';
+
+            setTimeout(() => {
+                notificacion.style.opacity = '0';
+                setTimeout(() => {
+                    if (notificacion.parentNode) {
+                        notificacion.parentNode.removeChild(notificacion);
+                    }
+                }, 300);
+            }, duracion);
+        }
+
+        // ===== SISTEMA DE TEMPLATES =====
+        const templates = {
+            olt: {
+                'Factory Reset': {
+                    summary: "Factory Reset",
+                    lines: [
+                        "# Comando para restaurar la configuración de fábrica de una ONU",
+                        "pon-onu-mng gpon_onu-{shelf}/{slot}/{port}:{onuId}",
+                        "restore factory",
+                        "pon-onu-mng gpon_onu-{shelf}/{slot}/{port}:{onuId}"
+                    ]
+                },
+                'Ver Estado ONU': {
+                    summary: "Ver Estado ONU",
+                    lines: [
+                        "# Mostrar el estado actual de la ONU",
+                        "show pon onu state gpon_onu-{shelf}/{slot}/{port}:{onuId}"
+                    ]
+                },
+                'Configurar VLAN': {
+                    summary: "Configurar VLAN",
+                    lines: [
+                        "# Configurar VLAN para la ONU",
+                        "pon-onu-mng gpon_onu-{shelf}/{slot}/{port}:{onuId}",
+                        "service-port 1 vport 1 user-vlan 100 vlan 100",
+                        "quit"
+                    ]
+                }
+            }
+        };
+
+        function aplicarTemplate(tipo, nombreTemplate, idx) {
+            if (templates[tipo] && templates[tipo][nombreTemplate]) {
+                const template = templates[tipo][nombreTemplate];
+                if (tipo === 'olt') {
+                    olts[idx].comandos.push({ ...template });
+                    guardarOlts();
+                    renderOlts();
+                    mostrarNotificacion(`Template "${nombreTemplate}" aplicado correctamente`, 'success');
+                }
+            }
+        }
+
+        // ===== EXPORTAR/IMPORTAR CONFIGURACIONES =====
+        function exportarConfiguracion() {
+            const config = {
+                olts: olts,
+                onus: onus,
+                timestamp: new Date().toISOString(),
+                version: '1.0'
+            };
+
+            const dataStr = JSON.stringify(config, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `antel-config-${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            mostrarNotificacion('Configuración exportada correctamente', 'success');
+        }
+
+        function importarConfiguracion() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const config = JSON.parse(e.target.result);
+                        
+                        if (config.olts) {
+                            olts = config.olts;
+                            olts.forEach(olt => guardarOltIndividual(olt));
+                            localStorage.setItem('olts-index', JSON.stringify(olts.map(o => o.id)));
+                        }
+                        
+                        if (config.onus) {
+                            onus = config.onus;
+                            localStorage.setItem('onus-list', JSON.stringify(onus));
+                        }
+                        
+                        renderOlts();
+                        renderOnus();
+                        mostrarNotificacion('Configuración importada correctamente', 'success');
+                        
+                    } catch (error) {
+                        mostrarNotificacion('Error al importar la configuración: ' + error.message, 'error');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+
+        // ===== VALIDACIÓN MEJORADA DE DATOS =====
+        function validarConfiguracionCompleta() {
+            let errores = [];
+            
+            // Validar OLTs
+            olts.forEach((olt, idx) => {
+                if (!olt.nombre || olt.nombre.trim() === '') {
+                    errores.push(`OLT ${idx + 1}: Nombre vacío`);
+                }
+                if (!olt.shelf || olt.shelf < 1) {
+                    errores.push(`OLT ${idx + 1}: Shelf inválido`);
+                }
+                if (!olt.slot || olt.slot < 1) {
+                    errores.push(`OLT ${idx + 1}: Slot inválido`);
+                }
+                if (!olt.port || olt.port < 1) {
+                    errores.push(`OLT ${idx + 1}: Port inválido`);
+                }
+                if (!olt.onuId || olt.onuId < 1) {
+                    errores.push(`OLT ${idx + 1}: ONU ID inválido`);
+                }
+            });
+            
+            return errores;
+        }
+
+        // ===== FUNCIONES ORIGINALES MEJORADAS =====
+        
         // Reemplaza tu script de pestañas por este:
 document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -406,17 +998,24 @@ document.querySelectorAll('.tab').forEach(tab => {
 
         // Mostrar u ocultar sub-pestañas OLT según la pestaña activa
         const mostrarOlts = tab.dataset.tab === 'olt';
-        document.getElementById('olts-tabs').style.display = mostrarOlts ? '' : 'none';
-        document.getElementById('olts-list').style.display = mostrarOlts ? '' : 'none';
+        const oltsTabsEl = document.getElementById('olts-tabs');
+        const oltsListEl = document.getElementById('olts-list');
+        if (oltsTabsEl) oltsTabsEl.style.display = mostrarOlts ? '' : 'none';
+        if (oltsListEl) oltsListEl.style.display = mostrarOlts ? '' : 'none';
 
-        // Mostrar u ocultar sub-pestañas ONU solo en ACS
-        const mostrarOnus = tab.dataset.tab === 'acs';
-        document.getElementById('onus-tabs').style.display = mostrarOnus ? '' : 'none';
-        document.getElementById('onus-list').style.display = mostrarOnus ? '' : 'none';
+        // Mostrar u ocultar sub-pestañas ONT en ACS
+        const mostrarOnts = tab.dataset.tab === 'acs';
+        const ontsTabsEl = document.getElementById('onts-tabs');
+        const ontsListEl = document.getElementById('onts-list');
+        if (ontsTabsEl) ontsTabsEl.style.display = mostrarOnts ? '' : 'none';
+        if (ontsListEl) ontsListEl.style.display = mostrarOnts ? '' : 'none';
 
-        // Renderiza las sub-pestañas y contenido de ONU solo si está activa la pestaña ACS
-        if (mostrarOnus) {
-            renderOnus();
+        // Renderizar según la pestaña activa
+        if (mostrarOnts) {
+            renderOnts();
+        }
+        if (mostrarOlts) {
+            renderOlts();
         }
     });
 });
@@ -424,60 +1023,78 @@ document.querySelectorAll('.tab').forEach(tab => {
 // Al cargar la página, asegúrate de mostrar solo si ACS está activa
 window.addEventListener('load', () => {
     const tabAcs = document.querySelector('.tab[data-tab="acs"]');
-    const mostrarOnus = tabAcs.classList.contains('active');
-    document.getElementById('onus-tabs').style.display = mostrarOnus ? '' : 'none';
-    document.getElementById('onus-list').style.display = mostrarOnus ? '' : 'none';
-    if (mostrarOnus) renderOnus();
+    const mostrarOnts = tabAcs && tabAcs.classList.contains('active');
+    const ontsTabsEl = document.getElementById('onts-tabs');
+    const ontsListEl = document.getElementById('onts-list');
+    if (ontsTabsEl) ontsTabsEl.style.display = mostrarOnts ? '' : 'none';
+    if (ontsListEl) ontsListEl.style.display = mostrarOnts ? '' : 'none';
+    if (mostrarOnts) renderOnts();
 });
 
-        // Sistema de guardado
+        // Sistema de guardado mejorado
         function guardarConfig(seccion) {
-            const elementos = document.querySelectorAll(`#${seccion} .dynamic-field`);
-            const config = {};
+            try {
+                const elementos = document.querySelectorAll(`#${seccion} .dynamic-field`);
+                const config = {};
 
-            elementos.forEach(elemento => {
-                config[elemento.id] = elemento.value;
-            });
+                elementos.forEach(elemento => {
+                    config[elemento.id] = elemento.value;
+                });
 
-            localStorage.setItem(`config-${seccion}`, JSON.stringify(config));
-            alert('Configuración guardada correctamente!');
+                localStorage.setItem(`config-${seccion}`, JSON.stringify(config));
+                mostrarNotificacion('Configuración guardada correctamente!', 'success');
+            } catch (error) {
+                mostrarNotificacion('Error al guardar la configuración', 'error');
+            }
         }
 
         function aplicarConfig(seccion) {
-            const guardado = localStorage.getItem(`config-${seccion}`);
-            if (!guardado) {
-                alert('No hay configuraciones guardadas para aplicar.');
-                return;
+            try {
+                const guardado = localStorage.getItem(`config-${seccion}`);
+                if (!guardado) {
+                    mostrarNotificacion('No hay configuraciones guardadas para aplicar.', 'warning');
+                    return;
+                }
+
+                const config = JSON.parse(guardado);
+                Object.keys(config).forEach(id => {
+                    const elemento = document.getElementById(id);
+                    if (elemento) elemento.value = config[id];
+                });
+
+                mostrarNotificacion('Configuración aplicada correctamente!', 'success');
+            } catch (error) {
+                mostrarNotificacion('Error al aplicar la configuración', 'error');
             }
-
-            const config = JSON.parse(guardado);
-            Object.keys(config).forEach(id => {
-                const elemento = document.getElementById(id);
-                if (elemento) elemento.value = config[id];
-            });
-
-            // Mostrar mensaje de confirmación
-            alert('Configuración aplicada correctamente!');
         }
 
-        // Cargar configuraciones al iniciar
+        // Cargar configuraciones al iniciar con manejo de errores
         window.addEventListener('load', () => {
-            ['olt', 'acs', 'ims', 'onu'].forEach(seccion => {
-                const guardado = localStorage.getItem(`config-${seccion}`);
-                if (guardado) {
-                    const config = JSON.parse(guardado);
-                    Object.keys(config).forEach(id => {
-                        const elemento = document.getElementById(id);
-                        if (elemento) elemento.value = config[id];
-                    });
-                }
-            });
+            try {
+                ['olt', 'acs', 'ims', 'onu'].forEach(seccion => {
+                    const guardado = localStorage.getItem(`config-${seccion}`);
+                    if (guardado) {
+                        const config = JSON.parse(guardado);
+                        Object.keys(config).forEach(id => {
+                            const elemento = document.getElementById(id);
+                            if (elemento) elemento.value = config[id];
+                        });
+                    }
+                });
+            } catch (error) {
+                console.warn('Error al cargar configuraciones guardadas:', error);
+            }
         });
 
-        // Estructura para múltiples OLTs
+        // Estructura para múltiples OLTs con manejo de errores mejorado
 let olts = [];
-let oltsIndex = JSON.parse(localStorage.getItem('olts-index')) || [];
-olts = oltsIndex.map(id => JSON.parse(localStorage.getItem(id))).filter(Boolean);
+let oltsIndex = JSON.parse(localStorage.getItem('olts-index') || '[]');
+try {
+    olts = oltsIndex.map(id => JSON.parse(localStorage.getItem(id) || 'null')).filter(Boolean);
+} catch (error) {
+    console.warn('Error al cargar OLTs desde localStorage:', error);
+    olts = [];
+}
 
 // Si no hay ninguna OLT, crea la inicial
 if (olts.length === 0) {
@@ -516,10 +1133,16 @@ if (olts.length === 0) {
 // Variable para llevar el control de la OLT seleccionada
 let oltSeleccionada = 0;
 
-// Renderiza todas las OLTs
+// Renderiza todas las OLTs con mejoras
 function renderOlts() {
     const tabsContainer = document.getElementById('olts-tabs');
     const oltsList = document.getElementById('olts-list');
+    
+    if (!tabsContainer || !oltsList) {
+        console.warn('Contenedores de OLTs no encontrados');
+        return;
+    }
+    
     tabsContainer.innerHTML = '';
     oltsList.innerHTML = '';
 
@@ -538,24 +1161,19 @@ function renderOlts() {
     });
 
     // Si hay OLTs, renderiza solo la seleccionada
-    if (olts.length > 0) {
+    if (olts.length > 0 && oltSeleccionada < olts.length) {
         const idx = oltSeleccionada;
         const olt = olts[idx];
         const oltDiv = document.createElement('div');
         oltDiv.className = 'olt-block';
-        oltDiv.style.border = '1px solid #ccc';
-        oltDiv.style.borderRadius = '8px';
-        oltDiv.style.padding = '15px';
-        oltDiv.style.marginBottom = '25px';
-        oltDiv.style.background = '#f9f9f9';
 
-        // Título y botón eliminar
-        const header = document.createElement('div');
-        header.style.display = 'flex';
-        header.style.justifyContent = 'space-between';
-        header.style.alignItems = 'center';
+        // Crear header con nombre editable y botones
+        const headerDiv = document.createElement('div');
+        headerDiv.style.display = 'flex';
+        headerDiv.style.justifyContent = 'space-between';
+        headerDiv.style.alignItems = 'center';
+        headerDiv.style.marginBottom = '15px';
 
-        // Nombre editable
         const nombreDiv = document.createElement('div');
         nombreDiv.style.display = 'flex';
         nombreDiv.style.alignItems = 'center';
@@ -569,7 +1187,8 @@ function renderOlts() {
 
         const btnEdit = document.createElement('button');
         btnEdit.textContent = '✏️';
-        btnEdit.className = 'btn btn-secondary';
+        btnEdit.className = 'btn btn-secondary tooltip';
+        btnEdit.setAttribute('data-tooltip', 'Editar nombre');
         btnEdit.style.padding = '4px 10px';
         btnEdit.style.fontSize = '14px';
         btnEdit.onclick = function() {
@@ -583,21 +1202,56 @@ function renderOlts() {
 
         nombreDiv.appendChild(nombreSpan);
         nombreDiv.appendChild(btnEdit);
+        
+        // Botones de acción
+        const botonesDiv = document.createElement('div');
+        botonesDiv.style.display = 'flex';
+        botonesDiv.style.gap = '8px';
+        
+        // Botón exportar OLT individual
+        const btnExportar = document.createElement('button');
+        btnExportar.textContent = '📤';
+        btnExportar.className = 'btn btn-secondary tooltip';
+        btnExportar.setAttribute('data-tooltip', 'Exportar esta OLT');
+        btnExportar.style.padding = '4px 10px';
+        btnExportar.onclick = function() {
+            const dataStr = JSON.stringify(olt, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const exportFileDefaultName = `${olt.nombre || 'OLT'}-${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            mostrarNotificacion('OLT exportada correctamente', 'success');
+        };
+        
+        botonesDiv.appendChild(btnExportar);
+        headerDiv.appendChild(nombreDiv);
+        headerDiv.appendChild(botonesDiv);
+        oltDiv.appendChild(headerDiv);
 
-        header.appendChild(nombreDiv);
-
-        // Campos de configuración
+        // Campos de configuración con validación
         const configDiv = document.createElement('div');
         configDiv.className = 'input-group';
         configDiv.innerHTML = `
             <label>Shelf:</label>
-            <input type="number" min="1" value="${olt.shelf}" style="width:60px" onchange="actualizarOltCampo(${idx}, 'shelf', this.value)">
+            <input type="number" min="1" max="99" value="${olt.shelf}" style="width:60px" 
+                   onchange="actualizarOltCampo(${idx}, 'shelf', this.value)" 
+                   onblur="validarCampoNumerico(this, 1, 99)">
             <label>Slot:</label>
-            <input type="number" min="1" value="${olt.slot}" style="width:60px" onchange="actualizarOltCampo(${idx}, 'slot', this.value)">
+            <input type="number" min="1" max="99" value="${olt.slot}" style="width:60px" 
+                   onchange="actualizarOltCampo(${idx}, 'slot', this.value)"
+                   onblur="validarCampoNumerico(this, 1, 99)">
             <label>Port:</label>
-            <input type="number" min="1" value="${olt.port}" style="width:60px" onchange="actualizarOltCampo(${idx}, 'port', this.value)">
+            <input type="number" min="1" max="99" value="${olt.port}" style="width:60px" 
+                   onchange="actualizarOltCampo(${idx}, 'port', this.value)"
+                   onblur="validarCampoNumerico(this, 1, 99)">
             <label>ONU Id:</label>
-            <input type="number" min="1" value="${olt.onuId}" style="width:60px" onchange="actualizarOltCampo(${idx}, 'onuId', this.value)">
+            <input type="number" min="1" max="128" value="${olt.onuId}" style="width:60px" 
+                   onchange="actualizarOltCampo(${idx}, 'onuId', this.value)"
+                   onblur="validarCampoNumerico(this, 1, 128)">
         `;
         oltDiv.appendChild(configDiv);
 
@@ -611,9 +1265,18 @@ function renderOlts() {
         btnAplicar.onclick = function() {
             guardarOlts();
             renderOlts();
+            mostrarNotificacion('Configuración aplicada correctamente', 'success');
+        };
+
+        const btnTemplate = document.createElement('button');
+        btnTemplate.className = 'btn btn-secondary';
+        btnTemplate.textContent = '📋 Agregar Template';
+        btnTemplate.onclick = function() {
+            mostrarMenuTemplates(idx);
         };
 
         buttonGroup.appendChild(btnAplicar);
+        buttonGroup.appendChild(btnTemplate);
         oltDiv.appendChild(buttonGroup);
 
         // Comandos de la OLT
@@ -631,35 +1294,84 @@ function renderOlts() {
         oltDiv.appendChild(comandosDiv);
         oltsList.appendChild(oltDiv);
 
-        // Mueve este bloque al final, después de agregar todos los elementos a oltDiv:
+        // Botón eliminar OLT
         const btnDelOlt = document.createElement('button');
         btnDelOlt.textContent = '🗑️ Eliminar OLT';
         btnDelOlt.className = 'btn btn-secondary';
         btnDelOlt.style.marginTop = '20px';
         btnDelOlt.onclick = function() {
-            mostrarConfirmacion('¿Seguro que deseas eliminar esta OLT?', (ok) => {
-        if (ok) {
-            localStorage.removeItem(olt.id);
-            olts.splice(idx, 1);
-            if (oltSeleccionada >= olts.length) oltSeleccionada = Math.max(0, olts.length - 1);
-            localStorage.setItem('olts-index', JSON.stringify(olts.map(o => o.id)));
-            renderOlts();
-        }
-    });
+            mostrarConfirmacion('¿Seguro que deseas eliminar esta OLT? Esta acción no se puede deshacer.', (ok) => {
+                if (ok) {
+                    localStorage.removeItem(olt.id);
+                    olts.splice(idx, 1);
+                    if (oltSeleccionada >= olts.length) oltSeleccionada = Math.max(0, olts.length - 1);
+                    localStorage.setItem('olts-index', JSON.stringify(olts.map(o => o.id)));
+                    renderOlts();
+                    mostrarNotificacion('OLT eliminada correctamente', 'success');
+                }
+            });
         };
-        oltDiv.appendChild(btnDelOlt); // <-- Ahora está al final
+        oltDiv.appendChild(btnDelOlt);
     }
 }
 
-// Actualiza un campo de la OLT
-function actualizarOltCampo(idx, campo, valor) {
-    olts[idx][campo] = Number(valor);
-    guardarOltIndividual(olts[idx]);
+function mostrarMenuTemplates(idx) {
+    const templateNames = Object.keys(templates.olt);
+    const menu = `
+        <div style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.3); padding:20px; z-index:10000; min-width:300px;">
+            <h3 style="margin:0 0 15px; color:var(--azul-antel);">Seleccionar Template</h3>
+            ${templateNames.map(name => `
+                <button class="btn btn-secondary" style="display:block; width:100%; margin:5px 0; text-align:left;" onclick="aplicarTemplate('olt', '${name}', ${idx}); cerrarMenuTemplates();">
+                    ${name}
+                </button>
+            `).join('')}
+            <button class="btn btn-primary" style="display:block; width:100%; margin:15px 0 5px;" onclick="cerrarMenuTemplates();">Cancelar</button>
+        </div>
+        <div id="template-overlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999;" onclick="cerrarMenuTemplates();"></div>
+    `;
+    
+    const menuDiv = document.createElement('div');
+    menuDiv.id = 'template-menu';
+    menuDiv.innerHTML = menu;
+    document.body.appendChild(menuDiv);
 }
 
-// Agrega una nueva OLT
+function cerrarMenuTemplates() {
+    const menu = document.getElementById('template-menu');
+    if (menu) {
+        menu.remove();
+    }
+}
+
+// Actualiza un campo de la OLT con validación
+function actualizarOltCampo(idx, campo, valor) {
+    const valorNumerico = Number(valor);
+    if (!isNaN(valorNumerico) && valorNumerico > 0) {
+        olts[idx][campo] = valorNumerico;
+        guardarOltIndividual(olts[idx]);
+        mostrarNotificacion(`${campo} actualizado correctamente`, 'success', 1500);
+    } else {
+        mostrarNotificacion(`Valor inválido para ${campo}`, 'error');
+    }
+}
+
+// Agrega una nueva OLT con validación mejorada
 function agregarOlt() {
-    const nombre = document.getElementById('nombre-olt').value.trim() || '(Sin nombre)';
+    const nombreInput = document.getElementById('nombre-olt');
+    const nombre = nombreInput.value.trim();
+    
+    if (!nombre) {
+        mostrarNotificacion('Por favor ingresa un nombre para la OLT', 'warning');
+        nombreInput.focus();
+        return;
+    }
+    
+    // Verificar si ya existe una OLT con ese nombre
+    if (olts.some(olt => olt.nombre.toLowerCase() === nombre.toLowerCase())) {
+        mostrarNotificacion('Ya existe una OLT con ese nombre', 'warning');
+        return;
+    }
+    
     const id = 'olt-' + Date.now();
     const nuevaOlt = {
         id: id,
@@ -678,63 +1390,65 @@ function agregarOlt() {
             }
         ]
     };
+    
     olts.push(nuevaOlt);
     oltSeleccionada = olts.length - 1;
     guardarOltIndividual(nuevaOlt);
-    localStorage.setItem('olts-index', JSON.stringify(olts.map(o => o.id))); // <-- actualiza índice
+    localStorage.setItem('olts-index', JSON.stringify(olts.map(o => o.id)));
     renderOlts();
-    document.getElementById('nombre-olt').value = "";
+    nombreInput.value = "";
+    mostrarNotificacion('OLT agregada correctamente', 'success');
 }
 
-// Guarda una OLT individual en localStorage
+// Guarda una OLT individual en localStorage con manejo de errores
 function guardarOltIndividual(olt) {
-    localStorage.setItem(olt.id, JSON.stringify(olt));
-    mostrarMensaje('OLT guardada correctamente!');
-}
-
-// Agrega esta función en tu script:
-function mostrarMensaje(texto) {
-    let msg = document.getElementById('mensaje-guardado');
-    if (!msg) {
-        msg = document.createElement('div');
-        msg.id = 'mensaje-guardado';
-        msg.style.position = 'fixed';
-        msg.style.bottom = '30px';
-        msg.style.left = '50%';
-        msg.style.transform = 'translateX(-50%)';
-        msg.style.background = '#0056b3';
-        msg.style.color = 'white';
-        msg.style.padding = '12px 30px';
-        msg.style.borderRadius = '8px';
-        msg.style.fontSize = '16px';
-        msg.style.zIndex = '9999';
-        document.body.appendChild(msg);
+    try {
+        localStorage.setItem(olt.id, JSON.stringify(olt));
+        // Actualizar el índice si no existe
+        const currentIndex = JSON.parse(localStorage.getItem('olts-index') || '[]');
+        if (!currentIndex.includes(olt.id)) {
+            currentIndex.push(olt.id);
+            localStorage.setItem('olts-index', JSON.stringify(currentIndex));
+        }
+    } catch (error) {
+        console.error('Error al guardar OLT:', error);
+        mostrarNotificacion('Error al guardar la OLT', 'error');
     }
-    msg.textContent = texto;
-    msg.style.display = 'block';
-    setTimeout(() => { msg.style.display = 'none'; }, 1500);
 }
 
-// Guarda todas las OLTs en localStorage
+// Función mejorada para mostrar mensajes
+function mostrarMensaje(texto, tipo = 'info') {
+    mostrarNotificacion(texto, tipo, 2000);
+}
+
+// Guarda todas las OLTs en localStorage con manejo de errores
 function guardarOlts() {
-    olts.forEach(olt => guardarOltIndividual(olt));
-    // alert('OLTs guardadas correctamente!'); // Opcional: sin alert
+    try {
+        olts.forEach(olt => guardarOltIndividual(olt));
+        localStorage.setItem('olts-index', JSON.stringify(olts.map(o => o.id)));
+    } catch (error) {
+        console.error('Error al guardar OLTs:', error);
+        mostrarNotificacion('Error al guardar las OLTs', 'error');
+    }
 }
 
 // Agrega un comando a una OLT
 function agregarComandoOlt(idx) {
-    olts[idx].comandos.push({
-        summary: `Nuevo Comando`,
-        lines: [
-            "# Descripción del comando",
-            "pon-onu-mng gpon_onu-{shelf}/{slot}/{port}:{onuId}"
-        ]
-    });
-    guardarOlts();
-    renderOlts();
+    if (idx >= 0 && idx < olts.length) {
+        olts[idx].comandos.push({
+            summary: `Nuevo Comando ${olts[idx].comandos.length + 1}`,
+            lines: [
+                "# Descripción del comando",
+                "pon-onu-mng gpon_onu-{shelf}/{slot}/{port}:{onuId}"
+            ]
+        });
+        guardarOlts();
+        renderOlts();
+        mostrarNotificacion('Comando agregado correctamente', 'success');
+    }
 }
 
-// Renderiza los comandos de una OLT específica
+// Renderiza los comandos de una OLT específica con mejoras
 function renderComandosOlt(olt, idxOlt, container) {
     container.innerHTML = '';
 
@@ -744,45 +1458,49 @@ function renderComandosOlt(olt, idxOlt, container) {
     olt.comandos.forEach((cmd, idx) => {
         const details = document.createElement('details');
         details.open = false;
-        details.draggable = true; // Hacer que el comando sea arrastrable
+        details.draggable = true;
         details.style.cursor = 'grab';
+        details.style.marginBottom = '10px';
+        details.style.border = '1px solid #ddd';
+        details.style.borderRadius = '5px';
+        details.style.padding = '5px';
 
-        // Evento al iniciar el arrastre
+        // Eventos de drag and drop
         details.addEventListener('dragstart', () => {
             draggedIndex = idx;
-            details.style.opacity = '0.5'; // Cambiar la opacidad mientras se arrastra
+            details.style.opacity = '0.5';
         });
 
-        // Evento al terminar el arrastre
         details.addEventListener('dragend', () => {
-            details.style.opacity = '1'; // Restaurar la opacidad
+            details.style.opacity = '1';
         });
 
-        // Evento al pasar sobre otro comando
         details.addEventListener('dragover', (e) => {
-            e.preventDefault(); // Permitir el "drop"
-            details.style.border = '2px dashed #0056b3'; // Resaltar el área de destino
+            e.preventDefault();
+            details.style.border = '2px dashed var(--azul-antel)';
         });
 
-        // Evento al salir del área de otro comando
         details.addEventListener('dragleave', () => {
-            details.style.border = 'none'; // Quitar el resaltado
+            details.style.border = '1px solid #ddd';
         });
 
-        // Evento al soltar el comando
-        details.addEventListener('drop', () => {
-            details.style.border = 'none'; // Quitar el resaltado
+        details.addEventListener('drop', (e) => {
+            e.preventDefault();
+            details.style.border = '1px solid #ddd';
 
-            // Intercambiar los comandos en la lista
-            const temp = olt.comandos[draggedIndex];
-            olt.comandos.splice(draggedIndex, 1); // Eliminar el comando arrastrado
-            olt.comandos.splice(idx, 0, temp); // Insertar en la nueva posición
+            if (draggedIndex !== null && draggedIndex !== idx) {
+                // Intercambiar los comandos
+                const temp = olt.comandos[draggedIndex];
+                olt.comandos.splice(draggedIndex, 1);
+                olt.comandos.splice(idx, 0, temp);
 
-            guardarOlts(); // Guardar los cambios
-            renderOlts(); // Volver a renderizar
+                guardarOlts();
+                renderOlts();
+                mostrarNotificacion('Orden de comandos actualizado', 'success', 1500);
+            }
         });
 
-        // Reemplazar variables dinámicas en los comandos
+        // Función para reemplazar variables dinámicas
         const reemplazarVariables = (line) => {
             return line
                 .replace(/{shelf}/g, olt.shelf)
@@ -791,27 +1509,71 @@ function renderComandosOlt(olt, idxOlt, container) {
                 .replace(/{onuId}/g, olt.onuId);
         };
 
+        // Función para syntax highlighting básico
+        const aplicarSyntaxHighlighting = (texto) => {
+            return texto
+                .replace(/\b(pon-onu-mng|show|interface|gpon_olt|restore|factory|quit|exit)\b/g, '<span class="keyword">$1</span>')
+                .replace(/\b(\d+)\b/g, '<span class="number">$1</span>')
+                .replace(/{[^}]+}/g, '<span class="variable">$&</span>');
+        };
+
         // Título editable con número dinámico
         const summary = document.createElement('summary');
+        summary.style.padding = '8px';
+        summary.style.backgroundColor = '#f8f9fa';
+        summary.style.borderRadius = '4px';
+        summary.style.marginBottom = '8px';
+        summary.style.display = 'flex';
+        summary.style.alignItems = 'center';
+        summary.style.justifyContent = 'space-between';
+
+        const tituloDiv = document.createElement('div');
+        tituloDiv.style.display = 'flex';
+        tituloDiv.style.alignItems = 'center';
+        tituloDiv.style.flex = '1';
+
         const numeroComando = document.createElement('span');
-        numeroComando.textContent = `${idx + 1}. `; // Número dinámico del comando
+        numeroComando.textContent = `${idx + 1}. `;
         numeroComando.style.fontWeight = 'bold';
         numeroComando.style.marginRight = '8px';
-        summary.appendChild(numeroComando);
+        numeroComando.style.color = 'var(--azul-antel)';
 
         const inputTitulo = document.createElement('input');
         inputTitulo.type = 'text';
         inputTitulo.value = cmd.summary || `Comando ${idx + 1}`;
-        inputTitulo.className = 'command-title';
         inputTitulo.style.fontWeight = 'bold';
         inputTitulo.style.fontSize = '16px';
         inputTitulo.style.border = 'none';
         inputTitulo.style.background = 'transparent';
-        inputTitulo.style.width = '70%';
+        inputTitulo.style.flex = '1';
+        inputTitulo.style.color = 'var(--azul-antel)';
         inputTitulo.oninput = function () {
             cmd.summary = inputTitulo.value;
+            guardarOlts();
         };
-        summary.appendChild(inputTitulo);
+
+        // Botón de duplicar comando
+        const btnDuplicate = document.createElement('button');
+        btnDuplicate.textContent = '📄';
+        btnDuplicate.className = 'btn btn-secondary tooltip';
+        btnDuplicate.setAttribute('data-tooltip', 'Duplicar comando');
+        btnDuplicate.style.padding = '4px 8px';
+        btnDuplicate.style.fontSize = '12px';
+        btnDuplicate.style.marginLeft = '8px';
+        btnDuplicate.onclick = function(e) {
+            e.stopPropagation();
+            const duplicado = JSON.parse(JSON.stringify(cmd));
+            duplicado.summary = `${duplicado.summary} (Copia)`;
+            olt.comandos.splice(idx + 1, 0, duplicado);
+            guardarOlts();
+            renderOlts();
+            mostrarNotificacion('Comando duplicado correctamente', 'success');
+        };
+
+        tituloDiv.appendChild(numeroComando);
+        tituloDiv.appendChild(inputTitulo);
+        summary.appendChild(tituloDiv);
+        summary.appendChild(btnDuplicate);
         details.appendChild(summary);
 
         // Comentario editable
@@ -823,6 +1585,9 @@ function renderComandosOlt(olt, idxOlt, container) {
         inputComentario.className = 'comment';
         inputComentario.style.width = '100%';
         inputComentario.style.margin = '8px 0';
+        inputComentario.style.padding = '6px 10px';
+        inputComentario.style.border = '1px solid #ddd';
+        inputComentario.style.borderRadius = '4px';
         inputComentario.oninput = function () {
             const nuevoComentario = "# " + inputComentario.value;
             if (comentarioIdx !== -1) {
@@ -831,18 +1596,23 @@ function renderComandosOlt(olt, idxOlt, container) {
                 cmd.lines.unshift(nuevoComentario);
                 comentarioIdx = 0;
             }
+            guardarOlts();
         };
         details.appendChild(inputComentario);
 
-        // Comandos (sin comentarios)
+        // Comandos con syntax highlighting
         const comandosSolo = cmd.lines
             .filter(line => !line.trim().startsWith('#'))
-            .map(reemplazarVariables); // Reemplazar variables dinámicas
+            .map(reemplazarVariables);
+        
         const textarea = document.createElement('textarea');
         textarea.className = 'command';
-        textarea.rows = Math.max(3, comandosSolo.length);
+        textarea.rows = Math.max(3, comandosSolo.length + 1);
         textarea.style.resize = 'vertical';
         textarea.style.width = '100%';
+        textarea.style.fontFamily = '"Fira Code", "Courier New", Courier, monospace';
+        textarea.style.fontSize = '14px';
+        textarea.style.lineHeight = '1.4';
         textarea.value = comandosSolo.join('\n');
         textarea.oninput = function () {
             const nuevasLineas = textarea.value.split('\n');
@@ -851,44 +1621,572 @@ function renderComandosOlt(olt, idxOlt, container) {
             } else {
                 cmd.lines = nuevasLineas;
             }
+            guardarOlts();
         };
         details.appendChild(textarea);
 
+        // Vista previa con syntax highlighting
+        const preview = document.createElement('div');
+        preview.style.background = '#f8f9fa';
+        preview.style.padding = '10px';
+        preview.style.borderRadius = '4px';
+        preview.style.marginTop = '8px';
+        preview.style.fontFamily = '"Fira Code", "Courier New", Courier, monospace';
+        preview.style.fontSize = '13px';
+        preview.style.lineHeight = '1.4';
+        preview.innerHTML = '<strong>Vista previa:</strong><br>' + 
+                           comandosSolo.map(line => aplicarSyntaxHighlighting(line)).join('<br>');
+        details.appendChild(preview);
+
+        // Grupo de botones
+        const btnGroup = document.createElement('div');
+        btnGroup.style.display = 'flex';
+        btnGroup.style.gap = '8px';
+        btnGroup.style.marginTop = '10px';
+        btnGroup.style.flexWrap = 'wrap';
+
         // Botón copiar
         const btnCopy = document.createElement('button');
-        btnCopy.textContent = '📋 Copiar comandos';
+        btnCopy.textContent = '📋 Copiar';
         btnCopy.className = 'btn btn-primary';
-        btnCopy.style.marginTop = '10px';
+        btnCopy.style.fontSize = '14px';
         btnCopy.onclick = function () {
-            navigator.clipboard.writeText(textarea.value);
-            btnCopy.textContent = '✅ Copiado!';
-            setTimeout(() => btnCopy.textContent = '📋 Copiar comandos', 1200);
+            navigator.clipboard.writeText(comandosSolo.join('\n')).then(() => {
+                btnCopy.textContent = '✅ Copiado!';
+                btnCopy.style.background = '#28a745';
+                setTimeout(() => {
+                    btnCopy.textContent = '📋 Copiar';
+                    btnCopy.style.background = '';
+                }, 1500);
+                mostrarNotificacion('Comandos copiados al portapapeles', 'success', 1500);
+            }).catch(() => {
+                mostrarNotificacion('Error al copiar al portapapeles', 'error');
+            });
         };
-        details.appendChild(btnCopy);
+
+        // Botón ejecutar simulación
+        const btnSimular = document.createElement('button');
+        btnSimular.textContent = '🧪 Simular';
+        btnSimular.className = 'btn btn-secondary tooltip';
+        btnSimular.setAttribute('data-tooltip', 'Simular ejecución del comando');
+        btnSimular.style.fontSize = '14px';
+        btnSimular.onclick = function () {
+            mostrarSimulacionComando(comandosSolo);
+        };
 
         // Botón eliminar comando
         const btnDel = document.createElement('button');
-        btnDel.textContent = '🗑️ Eliminar comando';
+        btnDel.textContent = '🗑️ Eliminar';
         btnDel.className = 'btn btn-secondary';
-        btnDel.style.marginTop = '10px';
-        btnDel.style.marginLeft = '10px';
+        btnDel.style.fontSize = '14px';
         btnDel.onclick = function () {
             mostrarConfirmacion('¿Seguro que deseas eliminar este comando?', (ok) => {
                 if (ok) {
                     olt.comandos.splice(idx, 1);
                     guardarOlts();
                     renderOlts();
+                    mostrarNotificacion('Comando eliminado correctamente', 'success');
                 }
             });
         };
-        details.appendChild(btnDel);
+
+        btnGroup.appendChild(btnCopy);
+        btnGroup.appendChild(btnSimular);
+        btnGroup.appendChild(btnDel);
+        details.appendChild(btnGroup);
 
         container.appendChild(details);
     });
 }
 
-// Inicializa la vista de OLTs al cargar la página
-renderOlts();
+function mostrarSimulacionComando(comandos) {
+    const simulacion = `
+        <div style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.3); padding:20px; z-index:10000; min-width:400px; max-width:80vw; max-height:80vh; overflow-y:auto;">
+            <h3 style="margin:0 0 15px; color:var(--azul-antel);">🧪 Simulación de Comando</h3>
+            <div style="background:#1e1e1e; color:#fff; padding:15px; border-radius:5px; font-family:monospace; margin:10px 0;">
+                ${comandos.map((cmd, idx) => `<div style="margin:5px 0;"><span style="color:#888;">$ </span>${cmd}</div><div style="color:#90EE90; margin:5px 0 15px 20px;">[Simulado] Comando ejecutado correctamente</div>`).join('')}
+            </div>
+            <div style="text-align:center;">
+                <button class="btn btn-primary" onclick="cerrarSimulacion();">Cerrar</button>
+            </div>
+        </div>
+        <div id="simulacion-overlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999;" onclick="cerrarSimulacion();"></div>
+    `;
+    
+    const simulDiv = document.createElement('div');
+    simulDiv.id = 'simulacion-modal';
+    simulDiv.innerHTML = simulacion;
+    document.body.appendChild(simulDiv);
+}
+
+function cerrarSimulacion() {
+    const simul = document.getElementById('simulacion-modal');
+    if (simul) {
+        simul.remove();
+    }
+}
+
+// Inicializa la vista de OLTs al cargar la página con manejo de errores
+try {
+    renderOlts();
+} catch (error) {
+    console.error('Error al inicializar OLTs:', error);
+    mostrarNotificacion('Error al cargar las configuraciones', 'error');
+}
+
+// ===== FUNCIONES ADICIONALES =====
+
+// Función de validación del sistema
+function validarSistema() {
+    const errores = validarConfiguracionCompleta();
+    
+    if (errores.length === 0) {
+        mostrarNotificacion('✅ Sistema validado correctamente. No se encontraron errores.', 'success', 3000);
+    } else {
+        const mensajeErrores = `Se encontraron ${errores.length} errores:\n${errores.join('\n')}`;
+        mostrarNotificacion('⚠️ Se encontraron errores en la validación', 'warning', 4000);
+        
+        // Mostrar detalles en modal
+        const modal = `
+            <div style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.3); padding:20px; z-index:10000; min-width:400px; max-width:80vw; max-height:80vh; overflow-y:auto;">
+                <h3 style="margin:0 0 15px; color:#dc3545;">⚠️ Errores de Validación</h3>
+                <div style="background:#f8f9fa; padding:15px; border-radius:5px; margin:10px 0;">
+                    ${errores.map(error => `<div style="margin:5px 0; color:#dc3545;">• ${error}</div>`).join('')}
+                </div>
+                <div style="text-align:center; margin-top:20px;">
+                    <button class="btn btn-primary" onclick="cerrarModalValidacion();">Cerrar</button>
+                </div>
+            </div>
+            <div id="validacion-overlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999;" onclick="cerrarModalValidacion();"></div>
+        `;
+        
+        const modalDiv = document.createElement('div');
+        modalDiv.id = 'validacion-modal';
+        modalDiv.innerHTML = modal;
+        document.body.appendChild(modalDiv);
+    }
+    
+    actualizarEstadisticas();
+}
+
+function cerrarModalValidacion() {
+    const modal = document.getElementById('validacion-modal');
+    if (modal) modal.remove();
+}
+
+// Función para limpiar cache
+function limpiarCache() {
+    mostrarConfirmacion('¿Estás seguro de que deseas limpiar el cache? Esta acción eliminará todas las configuraciones guardadas.', (ok) => {
+        if (ok) {
+            try {
+                // Mantener solo lo esencial
+                const keysToKeep = ['olts-index'];
+                const allKeys = Object.keys(localStorage);
+                
+                allKeys.forEach(key => {
+                    if (!keysToKeep.includes(key) && !key.startsWith('olt-')) {
+                        localStorage.removeItem(key);
+                    }
+                });
+                
+                mostrarNotificacion('Cache limpiado correctamente', 'success');
+                actualizarEstadisticas();
+            } catch (error) {
+                mostrarNotificacion('Error al limpiar el cache', 'error');
+            }
+        }
+    });
+}
+
+// Función para actualizar estadísticas
+function actualizarEstadisticas() {
+    try {
+        // Actualizar estadísticas de OLTs
+        document.getElementById('stat-olts').textContent = olts.length;
+        
+        // Contar comandos totales
+        const totalComandos = olts.reduce((total, olt) => total + (olt.comandos ? olt.comandos.length : 0), 0);
+        document.getElementById('stat-comandos').textContent = totalComandos;
+        
+        // Actualizar estadísticas de ONUs
+        const totalOnus = onus ? onus.length : 0;
+        document.getElementById('stat-onus').textContent = totalOnus;
+        
+        // Calcular espacio usado en localStorage
+        let totalSize = 0;
+        for (let key in localStorage) {
+            if (localStorage.hasOwnProperty(key)) {
+                totalSize += localStorage[key].length;
+            }
+        }
+        document.getElementById('stat-storage').textContent = Math.round(totalSize / 1024);
+        
+    } catch (error) {
+        console.warn('Error al actualizar estadísticas:', error);
+    }
+}
+
+// Inicializar estadísticas al cargar
+window.addEventListener('load', () => {
+    setTimeout(actualizarEstadisticas, 1000);
+});
+
+// ===== MEJORAS EN LAS FUNCIONES EXISTENTES =====
+
+function mostrarAcsProduccion() {
+    const panel = document.getElementById('acs-produccion-panel');
+    const iframe = document.getElementById('acs-produccion-iframe');
+    if (panel && iframe) {
+        panel.style.display = 'block';
+        iframe.src = 'http://acs.in.iantel.com.uy/live/manage';
+    }
+}
+
+function cerrarAcsProduccion() {
+    const panel = document.getElementById('acs-produccion-panel');
+    const iframe = document.getElementById('acs-produccion-iframe');
+    if (panel && iframe) {
+        panel.style.display = 'none';
+        iframe.src = '';
+    }
+}
+
+// --- Estructura y renderizado de ONUs mejorado ---
+// Inicializar variables solo una vez
+if (typeof onus === 'undefined') {
+    var onus = [];
+    try {
+        onus = JSON.parse(localStorage.getItem('onus-list') || '[]');
+    } catch (error) {
+        console.warn('Error al cargar ONUs:', error);
+        onus = [{ id: 'onu-1', nombre: 'ZTE F670v1', modelo: 'ZTE-F670v1', vlan: 10 }];
+    }
+}
+
+if (typeof onuSeleccionada === 'undefined') {
+    var onuSeleccionada = 0;
+}
+
+function renderOnus() {
+    const tabsContainer = document.getElementById('onts-tabs');
+    const onusList = document.getElementById('onts-list');
+    
+    if (!tabsContainer || !onusList) {
+        console.warn('Contenedores de ONUs no encontrados');
+        return;
+    }
+    
+    tabsContainer.innerHTML = '';
+    onusList.innerHTML = '';
+
+    // Renderiza las sub-pestañas
+    onus.forEach((onu, idx) => {
+        const tab = document.createElement('div');
+        tab.className = 'tab' + (idx === onuSeleccionada ? ' active' : '');
+        tab.textContent = onu.nombre || 'Sin nombre';
+        tab.style.flex = 'unset';
+        tab.style.padding = '8px 18px';
+        tab.onclick = () => {
+            onuSeleccionada = idx;
+            renderOnus();
+        };
+        tabsContainer.appendChild(tab);
+    });
+
+    // Renderiza solo la ONU seleccionada
+    if (onus.length > 0 && onuSeleccionada < onus.length) {
+        const idx = onuSeleccionada;
+        const onu = onus[idx];
+        const onuDiv = document.createElement('div');
+        onuDiv.className = 'olt-block';
+
+        // Header con nombre y botones
+        const headerDiv = document.createElement('div');
+        headerDiv.style.display = 'flex';
+        headerDiv.style.justifyContent = 'space-between';
+        headerDiv.style.alignItems = 'center';
+        headerDiv.style.marginBottom = '15px';
+
+        const nombreDiv = document.createElement('div');
+        nombreDiv.style.display = 'flex';
+        nombreDiv.style.alignItems = 'center';
+
+        const nombreSpan = document.createElement('span');
+        nombreSpan.textContent = onu.nombre || 'Sin nombre';
+        nombreSpan.style.fontSize = '18px';
+        nombreSpan.style.fontWeight = 'bold';
+        nombreSpan.style.color = 'var(--azul-antel)';
+        nombreSpan.style.marginRight = '10px';
+
+        const btnEdit = document.createElement('button');
+        btnEdit.textContent = '✏️';
+        btnEdit.className = 'btn btn-secondary tooltip';
+        btnEdit.setAttribute('data-tooltip', 'Editar nombre');
+        btnEdit.style.padding = '4px 10px';
+        btnEdit.style.fontSize = '14px';
+        btnEdit.onclick = function() {
+            const nuevoNombre = prompt('Nuevo nombre para la ONU:', onu.nombre || '');
+            if (nuevoNombre !== null && nuevoNombre.trim() !== '') {
+                onu.nombre = nuevoNombre.trim();
+                guardarOnus();
+                renderOnus();
+                mostrarNotificacion('Nombre actualizado correctamente', 'success');
+            }
+        };
+
+        nombreDiv.appendChild(nombreSpan);
+        nombreDiv.appendChild(btnEdit);
+        headerDiv.appendChild(nombreDiv);
+        onuDiv.appendChild(headerDiv);
+
+        // Comandos de la ONU
+        const comandosDiv = document.createElement('div');
+        comandosDiv.className = 'config-section';
+        comandosDiv.innerHTML = `
+            <h4 class="section-title">Comandos ACS</h4>
+            <button class="btn btn-secondary" onclick="agregarComandoOnu(${idx})">➕ Agregar Comando</button>
+        `;
+
+        const comandosList = document.createElement('div');
+        renderComandosOnu(onu, idx, comandosList);
+        comandosDiv.appendChild(comandosList);
+
+        // Botones de acción
+        const buttonGroup = document.createElement('div');
+        buttonGroup.className = 'button-group';
+
+        const btnGuardar = document.createElement('button');
+        btnGuardar.className = 'btn btn-primary';
+        btnGuardar.textContent = '💾 Guardar';
+        btnGuardar.onclick = function() {
+            guardarOnus();
+            mostrarNotificacion('Comandos de la ONU guardados correctamente!', 'success');
+        };
+
+        const btnAplicar = document.createElement('button');
+        btnAplicar.className = 'btn btn-secondary';
+        btnAplicar.textContent = '🔄 Aplicar';
+        btnAplicar.onclick = function() {
+            renderOnus();
+            mostrarNotificacion('Comandos de la ONU aplicados correctamente!', 'success');
+        };
+
+        buttonGroup.appendChild(btnGuardar);
+        buttonGroup.appendChild(btnAplicar);
+        comandosDiv.appendChild(buttonGroup);
+
+        onuDiv.appendChild(comandosDiv);
+        onusList.appendChild(onuDiv);
+
+        // Botón eliminar ONU
+        const btnDelOnu = document.createElement('button');
+        btnDelOnu.textContent = '🗑️ Eliminar ONU';
+        btnDelOnu.className = 'btn btn-secondary';
+        btnDelOnu.style.marginTop = '20px';
+        btnDelOnu.onclick = function() {
+            mostrarConfirmacion('¿Seguro que deseas eliminar esta ONU?', (ok) => {
+                if (ok) {
+                    onus.splice(idx, 1);
+                    if (onuSeleccionada >= onus.length) onuSeleccionada = Math.max(0, onus.length - 1);
+                    guardarOnus();
+                    renderOnus();
+                    mostrarNotificacion('ONU eliminada correctamente', 'success');
+                    actualizarEstadisticas();
+                }
+            });
+        };
+        onuDiv.appendChild(btnDelOnu);
+    }
+    
+    actualizarEstadisticas();
+}
+
+function actualizarOnuCampo(idx, campo, valor) {
+    if (idx >= 0 && idx < onus.length) {
+        onus[idx][campo] = campo === 'vlan' ? Number(valor) : valor;
+        guardarOnus();
+        mostrarNotificacion(`${campo} actualizado`, 'success', 1500);
+    }
+}
+
+function agregarOnt() {
+    const nombreInput = document.getElementById('nombre-ont');
+    const nombre = nombreInput ? nombreInput.value.trim() : '';
+    
+    if (!nombre) {
+        mostrarNotificacion('Por favor ingresa un nombre para la ONT', 'warning');
+        if (nombreInput) nombreInput.focus();
+        return;
+    }
+    
+    const nuevaOnt = {
+        id: 'ont-' + Date.now(),
+        nombre: nombre,
+        comandos: []
+    };
+    
+    onus.push(nuevaOnt);
+    onuSeleccionada = onus.length - 1;
+    guardarOnus();
+    renderOnus();
+    if (nombreInput) nombreInput.value = "";
+    mostrarNotificacion('ONT agregada correctamente', 'success');
+}
+
+function guardarOnus() {
+    try {
+        localStorage.setItem('onus-list', JSON.stringify(onus));
+    } catch (error) {
+        console.error('Error al guardar ONUs:', error);
+        mostrarNotificacion('Error al guardar las ONUs', 'error');
+    }
+}
+
+function agregarComandoOnu(idx) {
+    if (idx >= 0 && idx < onus.length) {
+        onus[idx].comandos = onus[idx].comandos || [];
+        onus[idx].comandos.push({
+            summary: `Nuevo Comando ACS`,
+            lines: [
+                "# Descripción del comando ACS",
+                "comando-ejemplo-acs"
+            ]
+        });
+        guardarOnus();
+        renderOnus();
+        mostrarNotificacion('Comando ACS agregado correctamente', 'success');
+    }
+}
+
+function renderComandosOnu(onu, idxOnu, container) {
+    container.innerHTML = '';
+    const comandos = onu.comandos || [];
+    
+    comandos.forEach((cmd, idx) => {
+        const details = document.createElement('details');
+        details.open = false;
+        details.style.marginBottom = '10px';
+        details.style.border = '1px solid #ddd';
+        details.style.borderRadius = '5px';
+        details.style.padding = '5px';
+
+        // Título editable
+        const summary = document.createElement('summary');
+        summary.style.padding = '8px';
+        summary.style.backgroundColor = '#f8f9fa';
+        summary.style.borderRadius = '4px';
+        summary.style.cursor = 'pointer';
+
+        const inputTitulo = document.createElement('input');
+        inputTitulo.type = 'text';
+        inputTitulo.value = cmd.summary || `Comando ${idx + 1}`;
+        inputTitulo.style.fontWeight = 'bold';
+        inputTitulo.style.fontSize = '16px';
+        inputTitulo.style.border = 'none';
+        inputTitulo.style.background = 'transparent';
+        inputTitulo.style.width = '90%';
+        inputTitulo.style.color = 'var(--azul-antel)';
+        inputTitulo.oninput = function() {
+            cmd.summary = inputTitulo.value;
+            guardarOnus();
+        };
+        summary.appendChild(inputTitulo);
+        details.appendChild(summary);
+
+        // Comentario editable
+        let comentarioIdx = cmd.lines.findIndex(line => line.trim().startsWith('#'));
+        let comentario = comentarioIdx !== -1 ? cmd.lines[comentarioIdx] : "# Descripción del comando";
+        const inputComentario = document.createElement('input');
+        inputComentario.type = 'text';
+        inputComentario.value = comentario.replace(/^#\s?/, '');
+        inputComentario.style.width = '100%';
+        inputComentario.style.margin = '8px 0';
+        inputComentario.style.padding = '6px 10px';
+        inputComentario.style.border = '1px solid #ddd';
+        inputComentario.style.borderRadius = '4px';
+        inputComentario.oninput = function() {
+            const nuevoComentario = "# " + inputComentario.value;
+            if (comentarioIdx !== -1) {
+                cmd.lines[comentarioIdx] = nuevoComentario;
+            } else {
+                cmd.lines.unshift(nuevoComentario);
+                comentarioIdx = 0;
+            }
+            guardarOnus();
+        };
+        details.appendChild(inputComentario);
+
+        // Comandos (sin comentarios)
+        const comandosSolo = cmd.lines.filter(line => !line.trim().startsWith('#'));
+        const textarea = document.createElement('textarea');
+        textarea.rows = Math.max(3, comandosSolo.length + 1);
+        textarea.style.resize = 'vertical';
+        textarea.style.width = '100%';
+        textarea.style.fontFamily = '"Fira Code", "Courier New", Courier, monospace';
+        textarea.style.fontSize = '14px';
+        textarea.style.padding = '10px';
+        textarea.style.border = '1px solid #ddd';
+        textarea.style.borderRadius = '4px';
+        textarea.value = comandosSolo.join('\n');
+        textarea.oninput = function() {
+            const nuevasLineas = textarea.value.split('\n');
+            if (comentarioIdx !== -1) {
+                cmd.lines = [cmd.lines[comentarioIdx], ...nuevasLineas];
+            } else {
+                cmd.lines = nuevasLineas;
+            }
+            guardarOnus();
+        };
+        details.appendChild(textarea);
+
+        // Botones de acción
+        const btnGroup = document.createElement('div');
+        btnGroup.style.display = 'flex';
+        btnGroup.style.gap = '8px';
+        btnGroup.style.marginTop = '10px';
+
+        // Botón copiar
+        const btnCopy = document.createElement('button');
+        btnCopy.textContent = '📋 Copiar';
+        btnCopy.className = 'btn btn-primary';
+        btnCopy.style.fontSize = '14px';
+        btnCopy.onclick = function() {
+            navigator.clipboard.writeText(comandosSolo.join('\n')).then(() => {
+                btnCopy.textContent = '✅ Copiado!';
+                btnCopy.style.background = '#28a745';
+                setTimeout(() => {
+                    btnCopy.textContent = '📋 Copiar';
+                    btnCopy.style.background = '';
+                }, 1500);
+                mostrarNotificacion('Comandos copiados al portapapeles', 'success', 1500);
+            }).catch(() => {
+                mostrarNotificacion('Error al copiar al portapapeles', 'error');
+            });
+        };
+
+        // Botón eliminar comando
+        const btnDel = document.createElement('button');
+        btnDel.textContent = '🗑️ Eliminar';
+        btnDel.className = 'btn btn-secondary';
+        btnDel.style.fontSize = '14px';
+        btnDel.onclick = function() {
+            mostrarConfirmacion('¿Seguro que deseas eliminar este comando?', (ok) => {
+                if (ok) {
+                    onu.comandos.splice(idx, 1);
+                    guardarOnus();
+                    renderOnus();
+                    mostrarNotificacion('Comando eliminado correctamente', 'success');
+                }
+            });
+        };
+
+        btnGroup.appendChild(btnCopy);
+        btnGroup.appendChild(btnDel);
+        details.appendChild(btnGroup);
+
+        container.appendChild(details);
+    });
+}
 
 function mostrarAcsProduccion() {
     const panel = document.getElementById('acs-produccion-panel');
@@ -904,11 +2202,7 @@ function cerrarAcsProduccion() {
     iframe.src = '';
 }
 
-// --- Estructura y renderizado de ONUs ---
-let onus = JSON.parse(localStorage.getItem('onus-list')) || [
-    { id: 'onu-1', nombre: 'ZTE F670v1', modelo: 'ZTE-F670v1', vlan: 10 }
-];
-let onuSeleccionada = 0;
+// Las variables de ONUs ya están declaradas arriba
 
 function renderOnus() {
     const tabsContainer = document.getElementById('onus-tabs');
@@ -1708,9 +3002,80 @@ function renderComandosOnt(ont, idxOnt, container) {
     });
 }
 
+// Modal de confirmación mejorado
+function mostrarConfirmacion(texto, callback) {
+    const modal = document.getElementById('modal-confirm');
+    const txt = document.getElementById('modal-confirm-text');
+    
+    if (!modal || !txt) {
+        console.warn('Modal de confirmación no encontrado');
+        callback(confirm(texto));
+        return;
+    }
+    
+    txt.textContent = texto || '¿Estás seguro?';
+    modal.style.display = 'flex';
+
+    const btnYes = document.getElementById('modal-confirm-yes');
+    const btnNo = document.getElementById('modal-confirm-no');
+    
+    if (btnYes && btnNo) {
+        // Limpiar eventos previos
+        btnYes.replaceWith(btnYes.cloneNode(true));
+        btnNo.replaceWith(btnNo.cloneNode(true));
+        
+        const newBtnYes = document.getElementById('modal-confirm-yes');
+        const newBtnNo = document.getElementById('modal-confirm-no');
+        
+        newBtnYes.onclick = () => {
+            modal.style.display = 'none';
+            callback(true);
+        };
+        newBtnNo.onclick = () => {
+            modal.style.display = 'none';
+            callback(false);
+        };
+        
+        // Cerrar con Escape
+        const handleKeydown = (e) => {
+            if (e.key === 'Escape') {
+                modal.style.display = 'none';
+                callback(false);
+                document.removeEventListener('keydown', handleKeydown);
+            }
+        };
+        document.addEventListener('keydown', handleKeydown);
+        
+        setTimeout(() => newBtnYes.focus(), 100);
+    }
+}
+
+// Funciones finales de inicialización
+window.addEventListener('load', () => {
+    try {
+        // Renderizar componentes
+        if (typeof renderOlts === 'function') renderOlts();
+        if (typeof renderOnus === 'function') renderOnus();
+        
+        // Actualizar estadísticas después de un momento
+        setTimeout(() => {
+            if (typeof actualizarEstadisticas === 'function') {
+                actualizarEstadisticas();
+            }
+        }, 500);
+        
+        console.log('✅ Sistema inicializado correctamente');
+        
+    } catch (error) {
+        console.error('❌ Error en la inicialización:', error);
+    }
+});
+
 // Inicializa la vista de ONTs al cargar la página
 window.addEventListener('load', () => {
-    renderOnts();
+    if (typeof renderOnts === 'function') {
+        renderOnts();
+    }
 });
     </script>
 
@@ -1725,8 +3090,22 @@ window.addEventListener('load', () => {
   </div>
 </div>
 
+    <!-- Panel flotante para búsqueda -->
+    <div id="search-panel" style="display:none; position:fixed; top:20px; right:20px; background:white; border-radius:10px; box-shadow:0 4px 12px var(--sombra); padding:20px; z-index:1000; min-width:300px; max-width:400px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
+            <input type="text" id="search-input" placeholder="Buscar comandos, OLTs..." style="flex:1; padding:8px 12px; border:1px solid #ced4da; border-radius:5px; font-size:14px;">
+            <button onclick="cerrarBusqueda()" class="btn btn-secondary" style="padding:8px 12px;">✕</button>
+        </div>
+        <div id="search-results" style="max-height:300px; overflow-y:auto;"></div>
+    </div>
+
+    <!-- Botón flotante de búsqueda -->
+    <button id="search-btn" onclick="abrirBusqueda()" style="position:fixed; bottom:20px; right:20px; width:60px; height:60px; border-radius:50%; background:var(--azul-antel); color:white; border:none; box-shadow:0 4px 12px var(--sombra); cursor:pointer; font-size:20px; z-index:999; transition:all 0.3s ease;">
+        🔍
+    </button>
+
 <div style="text-align:center; color:#888; font-size:14px; margin-top:40px;">
-    Desarrollado por Alejandro Gallo "alito"
+    Desarrollado por Alejandro Gallo "alito" - Versión 2.0 Mejorada
 </div>
 </body>
 </html>
