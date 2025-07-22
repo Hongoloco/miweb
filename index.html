@@ -24,6 +24,142 @@
             min-height: 100vh;
         }
 
+        /* ===== PANTALLA DE LOGIN ===== */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 86, 179, 0.9) 0%, rgba(33, 150, 243, 0.9) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(10px);
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            animation: loginFadeIn 0.8s ease-out;
+        }
+
+        @keyframes loginFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .login-logo {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--azul-antel);
+        }
+
+        .login-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--azul-antel);
+            margin-bottom: 10px;
+        }
+
+        .login-subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .login-input-group {
+            position: relative;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .login-input:focus {
+            border-color: var(--azul-antel);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
+            outline: none;
+        }
+
+        .login-input::placeholder {
+            color: #999;
+        }
+
+        .login-btn {
+            background: linear-gradient(45deg, var(--azul-antel) 0%, #1976d2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 86, 179, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-error {
+            background: #fee;
+            color: #c62828;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border: 1px solid #ffcdd2;
+            display: none;
+        }
+
+        .login-footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* ===== CONTENIDO PRINCIPAL (OCULTO INICIALMENTE) ===== */
+        .main-content {
+            display: none;
+        }
+
+        .main-content.authenticated {
+            display: block;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -310,6 +446,54 @@
     </style>
 </head>
 <body>
+    <!-- ===== PANTALLA DE LOGIN ===== -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-container">
+            <div class="login-logo">🔐</div>
+            <h1 class="login-title">Sistema OLT Antel</h1>
+            <p class="login-subtitle">Acceso Restringido - Ingrese sus credenciales</p>
+            
+            <form class="login-form" onsubmit="return login(event)">
+                <div class="login-input-group">
+                    <input 
+                        type="text" 
+                        id="username" 
+                        class="login-input" 
+                        placeholder="👤 Usuario" 
+                        required
+                        autocomplete="username"
+                    >
+                </div>
+                
+                <div class="login-input-group">
+                    <input 
+                        type="password" 
+                        id="password" 
+                        class="login-input" 
+                        placeholder="🔑 Contraseña" 
+                        required
+                        autocomplete="current-password"
+                    >
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    🚀 Acceder al Sistema
+                </button>
+                
+                <div class="login-error" id="loginError">
+                    ❌ Usuario o contraseña incorrectos. Intente nuevamente.
+                </div>
+            </form>
+            
+            <div class="login-footer">
+                <p>🌐 ZTE C600 Management System</p>
+                <p style="margin-top: 5px; font-size: 12px;">Unidad de Desarrollo Residenciales</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CONTENIDO PRINCIPAL ===== -->
+    <div class="main-content" id="mainContent">
     <div class="container">
         <h1>🌐 Sistema OLT Antel</h1>
         <h2 style="text-align:center; color:var(--azul-antel); margin-bottom:20px; margin-top:0;">
@@ -482,11 +666,91 @@
                         <li><strong>Ver VoIP:</strong> Consulta estado de líneas telefónicas</li>
                     </ul>
                 </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        // ===== SISTEMA DE AUTENTICACIÓN =====
+        const VALID_CREDENTIALS = {
+            username: 'alito',
+            password: 'vinil28'
+        };
+
+        function login(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            // Validar credenciales
+            if (username === VALID_CREDENTIALS.username && password === VALID_CREDENTIALS.password) {
+                // Login exitoso
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('mainContent').classList.add('authenticated');
+                
+                // Guardar sesión
+                sessionStorage.setItem('authenticated', 'true');
+                sessionStorage.setItem('loginTime', new Date().getTime());
+                
+                // Mostrar notificación de bienvenida
+                setTimeout(() => {
+                    mostrarNotificacion('🎉 ¡Bienvenido al Sistema OLT Antel!', 'success', 3000);
+                    // Inicializar el sistema
+                    actualizarSelectorOLT();
+                    renderComandos();
+                    // Agregar botón de logout
+                    mostrarSistemaAutenticado();
+                }, 500);
+                
+                return false;
+            } else {
+                // Login fallido
+                errorDiv.style.display = 'block';
+                
+                // Limpiar campos
+                document.getElementById('password').value = '';
+                document.getElementById('username').focus();
+                
+                // Ocultar error después de 3 segundos
+                setTimeout(() => {
+                    errorDiv.style.display = 'none';
+                }, 3000);
+                
+                return false;
+            }
+        }
+
+        // Verificar sesión al cargar la página
+        function verificarSesion() {
+            const authenticated = sessionStorage.getItem('authenticated');
+            const loginTime = sessionStorage.getItem('loginTime');
+            const currentTime = new Date().getTime();
+            
+            // Sesión válida por 8 horas (28800000 ms)
+            if (authenticated === 'true' && loginTime && (currentTime - loginTime) < 28800000) {
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('mainContent').classList.add('authenticated');
+                return true;
+            } else {
+                // Limpiar sesión expirada
+                sessionStorage.removeItem('authenticated');
+                sessionStorage.removeItem('loginTime');
+                return false;
+            }
+        }
+
+        // Función para cerrar sesión
+        function logout() {
+            if (confirm('¿Está seguro que desea cerrar sesión?')) {
+                sessionStorage.removeItem('authenticated');
+                sessionStorage.removeItem('loginTime');
+                location.reload();
+            }
+        }
+
         // ===== CONFIGURACIÓN INICIAL =====
         let olts = [
             {
@@ -1270,16 +1534,60 @@
 
         // ===== INICIALIZACIÓN =====
         window.addEventListener('load', () => {
-            actualizarSelectorOLT();
-            renderComandos();
-            // Actualizar contador de comandos en la página de inicio
-            const totalComandos = olts.reduce((total, olt) => total + olt.comandos.length, 0);
-            const totalOLTsElement = document.querySelector('[style*="color: #7b1fa2;"]');
-            const totalComandosElement = document.getElementById('total-comandos');
-            
-            if (totalComandosElement) totalComandosElement.textContent = totalComandos;
-            if (document.getElementById('total-olts')) document.getElementById('total-olts').textContent = olts.length;
+            // Verificar si hay sesión activa
+            if (verificarSesion()) {
+                actualizarSelectorOLT();
+                renderComandos();
+                mostrarSistemaAutenticado();
+                // Actualizar contador de comandos en la página de inicio
+                const totalComandos = olts.reduce((total, olt) => total + olt.comandos.length, 0);
+                const totalOLTsElement = document.querySelector('[style*="color: #7b1fa2;"]');
+                const totalComandosElement = document.getElementById('total-comandos');
+                
+                if (totalComandosElement) totalComandosElement.textContent = totalComandos;
+                if (document.getElementById('total-olts')) document.getElementById('total-olts').textContent = olts.length;
+            }
         });
+
+        // Agregar botón de logout al header cuando esté autenticado
+        function agregarBotonLogout() {
+            const header = document.querySelector('h1');
+            if (header && !document.getElementById('logout-btn')) {
+                const logoutBtn = document.createElement('button');
+                logoutBtn.id = 'logout-btn';
+                logoutBtn.innerHTML = '🚪 Cerrar Sesión';
+                logoutBtn.onclick = logout;
+                logoutBtn.style.cssText = `
+                    position: absolute;
+                    top: 20px;
+                    right: 20px;
+                    background: #dc3545;
+                    color: white;
+                    border: none;
+                    padding: 8px 16px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    transition: all 0.3s ease;
+                `;
+                logoutBtn.onmouseover = function() {
+                    this.style.background = '#c82333';
+                    this.style.transform = 'translateY(-2px)';
+                };
+                logoutBtn.onmouseout = function() {
+                    this.style.background = '#dc3545';
+                    this.style.transform = 'translateY(0)';
+                };
+                document.body.appendChild(logoutBtn);
+            }
+        }
+
+        // Agregar el botón de logout cuando se autentica
+        function mostrarSistemaAutenticado() {
+            setTimeout(() => {
+                agregarBotonLogout();
+            }, 1000);
+        }
     </script>
 </body>
 </html>
