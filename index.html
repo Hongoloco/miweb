@@ -2413,22 +2413,30 @@ CNL URCNL: TYPE=IMPU,IMPU="tel:+59898465369";`;
                     </div>
                     
                     ${cantidadComandos > 0 ? `
-                    <div style="background: #fff; padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #ddd;">
-                        <h5 style="margin: 0 0 8px 0; font-size: 12px; color: #333;">⚡ Comandos Específicos (${cantidadComandos}):</h5>
-                        <div style="display: grid; gap: 6px; max-height: 120px; overflow-y: auto;">
+                    <details style="background: #fff; padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #ddd;">
+                        <summary style="cursor: pointer; font-weight: bold; color: var(--azul-antel); padding: 5px 0;">
+                            ⚡ Comandos Específicos (${cantidadComandos}) - Click para expandir
+                        </summary>
+                        <div style="display: grid; gap: 8px; max-height: 200px; overflow-y: auto; margin-top: 10px;">
                             ${modelo.comandos.map(cmd => `
-                                <div style="background: #f8f9fa; padding: 6px 8px; border-radius: 4px; border: 1px solid #e9ecef;">
-                                    <div style="font-family: monospace; font-size: 10px; color: #333; margin-bottom: 2px;">${cmd.comando}</div>
-                                    <div style="font-size: 9px; color: #666;">${cmd.descripcion}</div>
+                                <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; border: 1px solid #e9ecef; position: relative;">
+                                    <div style="font-family: monospace; font-size: 11px; color: #333; margin-bottom: 4px; padding-right: 30px;">${cmd.comando}</div>
+                                    <div style="font-size: 10px; color: #666; margin-bottom: 6px;">${cmd.descripcion}</div>
+                                    <div style="display: flex; gap: 4px;">
+                                        <button class="btn btn-primary btn-small" onclick="copiarComandoIndividualONT('${cmd.comando}')" style="padding: 2px 6px; font-size: 9px;" title="Copiar comando">📋</button>
+                                        <button class="btn btn-secondary btn-small" onclick="editarComandoDeModelo('${modelo.id}', '${cmd.id}')" style="padding: 2px 6px; font-size: 9px;" title="Editar comando">✏️</button>
+                                        <button class="btn btn-danger btn-small" onclick="eliminarComandoDeModelo('${modelo.id}', '${cmd.id}')" style="padding: 2px 6px; font-size: 9px;" title="Eliminar comando">🗑️</button>
+                                    </div>
                                 </div>
                             `).join('')}
                         </div>
-                    </div>
+                    </details>
                     ` : ''}
                     
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                         <button class="btn btn-primary btn-small" onclick="copiarModeloONT('${modelo.id}')">📋 Copiar Info</button>
                         <button class="btn btn-secondary btn-small" onclick="editarModeloONT('${modelo.id}')">✏️ Editar</button>
+                        <button class="btn btn-warning btn-small" onclick="agregarComandoAModeloExistente('${modelo.id}')">➕ Agregar Comando</button>
                         <button class="btn btn-info btn-small" onclick="generarComandosModeloONT('${modelo.id}')">⚡ Todos los Comandos</button>
                         ${cantidadComandos > 0 ? `<button class="btn btn-success btn-small" onclick="copiarComandosEspecificosModelo('${modelo.id}')">🎯 Comandos Específicos</button>` : ''}
                     </div>
@@ -2579,6 +2587,148 @@ Fecha Creación: ${modelo.fechaCreacion}
             mostrarModal('Exportación Completa', 
                 `📤 ${modelosONT.length} modelos ONT exportados correctamente.`, 
                 'success');
+        }
+
+        // Función para copiar comando individual de ONT
+        function copiarComandoIndividualONT(comando) {
+            copiarTexto(comando);
+            mostrarModal('Comando Copiado', '📋 Comando copiado al portapapeles.', 'success');
+        }
+
+        // Función para eliminar comando específico de un modelo guardado
+        function eliminarComandoDeModelo(modeloId, comandoId) {
+            const modelo = modelosONT.find(m => m.id === modeloId);
+            if (!modelo) return;
+
+            const comandoIndex = modelo.comandos.findIndex(cmd => cmd.id === comandoId);
+            if (comandoIndex === -1) return;
+
+            const comandoNombre = modelo.comandos[comandoIndex].comando;
+
+            mostrarModal('Confirmar Eliminación', 
+                `⚠️ ¿Está seguro que desea eliminar este comando del modelo ${modelo.fabricante} ${modelo.modelo}?\n\nComando: ${comandoNombre}`, 
+                'warning',
+                [
+                    {
+                        text: 'Eliminar',
+                        class: 'btn-danger',
+                        action: () => {
+                            // Eliminar el comando del array
+                            modelo.comandos.splice(comandoIndex, 1);
+                            
+                            // Actualizar localStorage
+                            localStorage.setItem('modelosONT', JSON.stringify(modelosONT));
+                            
+                            // Recargar la vista
+                            cargarModelosONT();
+                            
+                            mostrarModal('Comando Eliminado', 
+                                `✅ Comando eliminado del modelo ${modelo.fabricante} ${modelo.modelo}.`, 
+                                'success');
+                        }
+                    },
+                    {
+                        text: 'Cancelar',
+                        class: 'btn-secondary',
+                        action: () => {}
+                    }
+                ]
+            );
+        }
+
+        // Función para editar comando específico de un modelo guardado
+        function editarComandoDeModelo(modeloId, comandoId) {
+            const modelo = modelosONT.find(m => m.id === modeloId);
+            if (!modelo) return;
+
+            const comandoIndex = modelo.comandos.findIndex(cmd => cmd.id === comandoId);
+            if (comandoIndex === -1) return;
+
+            const comandoActual = modelo.comandos[comandoIndex];
+
+            // Solicitar nuevo comando
+            mostrarPrompt(
+                'Editar Comando',
+                'Edite el comando:',
+                'Comando ACS',
+                comandoActual.comando
+            ).then(nuevoComando => {
+                if (!nuevoComando || nuevoComando.trim() === '') return;
+
+                // Solicitar nueva descripción
+                mostrarPrompt(
+                    'Editar Descripción',
+                    'Edite la descripción:',
+                    'Descripción del comando',
+                    comandoActual.descripcion
+                ).then(nuevaDescripcion => {
+                    if (nuevaDescripcion === null) return;
+
+                    // Actualizar el comando
+                    modelo.comandos[comandoIndex] = {
+                        ...comandoActual,
+                        comando: nuevoComando.trim(),
+                        descripcion: nuevaDescripcion.trim() || comandoActual.descripcion
+                    };
+
+                    // Actualizar localStorage
+                    localStorage.setItem('modelosONT', JSON.stringify(modelosONT));
+
+                    // Recargar la vista
+                    cargarModelosONT();
+
+                    mostrarModal('Comando Editado', 
+                        `✅ Comando del modelo ${modelo.fabricante} ${modelo.modelo} editado correctamente.`, 
+                        'success');
+                });
+            });
+        }
+
+        // Función para agregar comando a modelo existente
+        function agregarComandoAModeloExistente(modeloId) {
+            const modelo = modelosONT.find(m => m.id === modeloId);
+            if (!modelo) return;
+
+            // Solicitar nuevo comando
+            mostrarPrompt(
+                'Nuevo Comando',
+                `Ingrese el comando para el modelo ${modelo.fabricante} ${modelo.modelo}:`,
+                'Comando ACS (ej: GetParameterValues: Device.WiFi.Radio.1.Enable)',
+                ''
+            ).then(nuevoComando => {
+                if (!nuevoComando || nuevoComando.trim() === '') return;
+
+                // Solicitar descripción
+                mostrarPrompt(
+                    'Descripción del Comando',
+                    'Ingrese una descripción para el comando:',
+                    'Descripción del comando',
+                    ''
+                ).then(descripcion => {
+                    if (descripcion === null) return;
+
+                    // Crear nuevo comando
+                    const comando = {
+                        id: Date.now().toString(),
+                        comando: nuevoComando.trim(),
+                        descripcion: descripcion.trim() || 'Sin descripción'
+                    };
+
+                    // Agregar al modelo
+                    if (!modelo.comandos) modelo.comandos = [];
+                    modelo.comandos.push(comando);
+
+                    // Actualizar localStorage
+                    localStorage.setItem('modelosONT', JSON.stringify(modelosONT));
+
+                    // Recargar la vista
+                    cargarModelosONT();
+
+                    mostrarModal('Comando Agregado', 
+                        `✅ Comando agregado al modelo ${modelo.fabricante} ${modelo.modelo}.`, 
+                        'success');
+                });
+            });
         }
 
         // Funciones para comandos ACS
