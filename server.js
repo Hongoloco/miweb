@@ -251,22 +251,217 @@ app.put('/api/comandos/:id', (req, res) => {
 // Eliminar comando
 app.delete('/api/comandos/:id', (req, res) => {
     const comandoId = req.params.id;
+    const { userId } = req.body;
 
-    db.run(`UPDATE comandos SET activo = 0 WHERE id = ?`, [comandoId], function(err) {
+    // Primero obtener información del comando para el log
+    db.get(`SELECT c.nombre, o.nombre as olt_nombre 
+            FROM comandos c 
+            JOIN olts o ON c.olt_id = o.id 
+            WHERE c.id = ?`, [comandoId], (err, comando) => {
+        
         if (err) {
-            console.error('Error al eliminar comando:', err);
+            console.error('Error al obtener comando:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
         }
 
-        if (this.changes === 0) {
+        if (!comando) {
             return res.status(404).json({ success: false, message: 'Comando no encontrado' });
         }
 
-        logActivity(req.body.userId, 'eliminar_comando', `Comando ID: ${comandoId}`, req.ip);
-        
-        res.json({ success: true, message: 'Comando eliminado correctamente' });
+        // Eliminar el comando completamente de la base de datos
+        db.run(`DELETE FROM comandos WHERE id = ?`, [comandoId], function(err) {
+            if (err) {
+                console.error('Error al eliminar comando:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+
+            if (this.changes === 0) {
+                return res.status(404).json({ success: false, message: 'Comando no encontrado' });
+            }
+
+            logActivity(userId, 'eliminar_comando', `Comando: ${comando.nombre} de OLT: ${comando.olt_nombre}`, req.ip);
+            
+            res.json({ 
+                success: true, 
+                message: 'Comando eliminado correctamente',
+                comando_eliminado: comando.nombre
+            });
+        });
     });
 });
+
+// ===== NUEVAS RUTAS DE REORDENAMIENTO =====
+
+// Mover comando hacia arriba o abajo
+app.post('/api/comandos/:id/mover', (req, res) => {
+    const comandoId = parseInt(req.params.id);
+    const { direccion, oltId, userId } = req.body;
+    const clientIP = req.ip || req.connection.remoteAddress;
+
+    if (!['up', 'down'].includes(direccion)) {
+        return res.status(400).json({ success: false, message: 'Dirección inválida' });
+    }
+
+    console.log(`Moviendo comando ${comandoId} ${direccion} en OLT ${oltId}`);
+
+    // Obtener el comando actual y su orden
+    db.get(`SELECT orden, nombre FROM comandos WHERE id = ? AND olt_id = ?`, [comandoId, oltId], (err, comandoActual) => {
+        if (err) {
+            console.error('Error al obtener comando:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+
+        if (!comandoActual) {
+            return res.status(404).json({ success: false, message: 'Comando no encontrado' });
+        }
+
+        const ordenActual = comandoActual.orden || 0;
+        const nuevoOrden = direccion === 'up' ? ordenActual - 1 : ordenActual + 1;
+
+        console.log(`Comando actual orden: ${ordenActual}, nuevo orden: ${nuevoOrden}`);
+
+        // Verificar si hay un comando en la posición destino
+        db.get(`SELECT id, orden FROM comandos WHERE olt_id = ? AND orden = ?`, 
+               [oltId, nuevoOrden], (err, comandoDestino) => {
+            if (err) {
+                console.error('Error al verificar posición destino:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+
+            if (!comandoDestino) {
+                console.log(`No hay comando en posición ${nuevoOrden}`);
+                return res.status(400).json({ 
+                    success: false, 
+                    message: `No se puede mover ${direccion === 'up' ? 'más arriba' : 'más abajo'}` 
+                });
+            }
+
+            console.log(`Intercambiando con comando ID: ${comandoDestino.id}`);
+
+            // Intercambiar posiciones
+            db.serialize(() => {
+                db.run('BEGIN TRANSACTION');
+                
+                // Actualizar comando actual
+                db.run(`UPDATE comandos SET orden = ? WHERE id = ?`, [nuevoOrden, comandoId], (err) => {
+                    if (err) {
+                        console.error('Error al actualizar comando actual:', err);
+                        db.run('ROLLBACK');
+                        return res.status(500).json({ success: false, message: 'Error al actualizar orden' });
+                    }
+                });
+
+                // Actualizar comando destino
+                db.run(`UPDATE comandos SET orden = ? WHERE id = ?`, [ordenActual, comandoDestino.id], (err) => {
+                    if (err) {
+                        console.error('Error al actualizar comando destino:', err);
+                        db.run('ROLLBACK');
+                        return res.status(500).json({ success: false, message: 'Error al actualizar orden' });
+                    }
+                });
+
+                db.run('COMMIT', (err) => {
+                    if (err) {
+                        console.error('Error al confirmar transacción:', err);
+                        return res.status(500).json({ success: false, message: 'Error del servidor' });
+                    }
+
+                    logActivity(userId, 'reordenar_comando', 
+                               `Comando "${comandoActual.nombre}" movido ${direccion}`, clientIP);
+                    console.log('✅ Comando reordenado exitosamente');
+                    res.json({ success: true, message: 'Comando reordenado correctamente' });
+                });
+            });
+        });
+    });
+});
+
+// Reordenar comando por drag & drop
+app.post('/api/comandos/:id/reordenar', (req, res) => {
+    const comandoId = parseInt(req.params.id);
+    const { targetId, posicion, oltId, userId } = req.body;
+    const targetIdInt = parseInt(targetId);
+    const clientIP = req.ip || req.connection.remoteAddress;
+
+    if (!['before', 'after'].includes(posicion)) {
+        return res.status(400).json({ success: false, message: 'Posición inválida' });
+    }
+
+    console.log(`Reordenando comando ${comandoId} ${posicion} del comando ${targetIdInt} en OLT ${oltId}`);
+
+    // Obtener información de ambos comandos
+    db.all(`SELECT id, orden, nombre FROM comandos WHERE id IN (?, ?) AND olt_id = ?`, 
+           [comandoId, targetIdInt, oltId], (err, comandos) => {
+        if (err) {
+            console.error('Error al obtener comandos:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+
+        console.log('Comandos encontrados:', comandos);
+
+        if (comandos.length !== 2) {
+            console.error(`Solo se encontraron ${comandos.length} comandos de 2 esperados`);
+            return res.status(404).json({ success: false, message: 'Comandos no encontrados' });
+        }
+
+        const comandoMovido = comandos.find(c => c.id === comandoId);
+        const comandoDestino = comandos.find(c => c.id === targetIdInt);
+
+        if (!comandoMovido || !comandoDestino) {
+            console.error('Comando movido o destino no encontrado:', { comandoMovido, comandoDestino });
+            return res.status(404).json({ success: false, message: 'Error al identificar comandos' });
+        }
+
+        const ordenDestino = comandoDestino.orden;
+        let nuevoOrden;
+
+        if (posicion === 'before') {
+            nuevoOrden = ordenDestino - 0.5;
+        } else {
+            nuevoOrden = ordenDestino + 0.5;
+        }
+
+        console.log(`Moviendo comando "${comandoMovido.nombre}" a orden ${nuevoOrden}`);
+
+        // Actualizar el orden del comando movido
+        db.run(`UPDATE comandos SET orden = ? WHERE id = ?`, [nuevoOrden, comandoId], function(err) {
+            if (err) {
+                console.error('Error al reordenar comando:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+
+            // Reorganizar todos los órdenes para evitar decimales
+            reorganizarOrdenes(oltId, () => {
+                logActivity(userId, 'reordenar_comando_drag', 
+                           `Comando "${comandoMovido.nombre}" reubicado`, clientIP);
+                res.json({ success: true, message: 'Comando reordenado correctamente' });
+            });
+        });
+    });
+});
+
+// Función auxiliar para reorganizar órdenes
+function reorganizarOrdenes(oltId, callback) {
+    db.all(`SELECT id FROM comandos WHERE olt_id = ? ORDER BY orden, nombre`, 
+           [oltId], (err, comandos) => {
+        if (err) {
+            console.error('Error al reorganizar órdenes:', err);
+            return callback();
+        }
+
+        const updates = comandos.map((cmd, index) => {
+            return new Promise((resolve) => {
+                db.run(`UPDATE comandos SET orden = ? WHERE id = ?`, [index + 1, cmd.id], () => {
+                    resolve();
+                });
+            });
+        });
+
+        Promise.all(updates).then(() => {
+            callback();
+        });
+    });
+}
 
 // Buscar comandos
 app.get('/api/comandos/buscar', (req, res) => {

@@ -9,6 +9,7 @@
 - **API REST** - Comunicación entre frontend y backend
 - **Gestión de OLTs** - CRUD completo de equipos OLT
 - **Comandos dinámicos** - Variables reemplazables {shelf}/{slot}/{port}:{onuId}
+- **Eliminar comandos** - Eliminar comandos innecesarios individualmente ✨ NUEVO
 - **Sistema de usuarios** - Autenticación y control de acceso
 - **Logs de actividad** - Registro de todas las acciones del sistema
 - **Búsqueda inteligente** - Búsqueda en tiempo real en la base de datos

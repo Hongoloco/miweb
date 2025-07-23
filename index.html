@@ -260,6 +260,54 @@
             flex-wrap: wrap;
         }
 
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 11px;
+            min-width: auto;
+        }
+
+        .btn-warning {
+            background: linear-gradient(145deg, #ffc107 0%, #e0a800 100%);
+            color: #212529;
+            border: 1px solid #ffc107;
+        }
+
+        .btn-warning:hover {
+            background: linear-gradient(145deg, #e0a800 0%, #d39e00 100%);
+            border-color: #d39e00;
+        }
+
+        .btn-info {
+            background: linear-gradient(145deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            border: 1px solid #17a2b8;
+        }
+
+        .btn-info:hover {
+            background: linear-gradient(145deg, #138496 0%, #117a8b 100%);
+            border-color: #117a8b;
+        }
+
+        .btn-danger {
+            background: linear-gradient(145deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: 1px solid #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(145deg, #c82333 0%, #bd2130 100%);
+            border-color: #bd2130;
+        }
+
+        .comando-individual {
+            transition: all 0.2s ease;
+        }
+
+        .comando-individual:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
         .btn {
             padding: 12px 24px;
             border: none;
@@ -285,6 +333,19 @@
         .btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-delete {
+            background: #dc3545 !important;
+            color: white !important;
+            border: 2px solid #c82333 !important;
+        }
+
+        .btn-delete:hover {
+            background: #c82333 !important;
+            border-color: #bd2130 !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
         }
 
         .section-title {
@@ -415,6 +476,355 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* ===== MODALES Y NOTIFICACIONES MEJORADAS ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10001;
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            animation: modalSlideIn 0.4s ease;
+            position: relative;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .modal-icon.success { color: #28a745; }
+        .modal-icon.warning { color: #ffc107; }
+        .modal-icon.error { color: #dc3545; }
+        .modal-icon.info { color: #17a2b8; }
+        .modal-icon.confirm { color: #ff9800; }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .modal-message {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .modal-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .modal-btn-primary {
+            background: var(--azul-antel);
+            color: white;
+        }
+
+        .modal-btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .modal-btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10002;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+
+        .notification {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            animation: notificationSlideIn 0.4s ease;
+            border-left: 5px solid;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes notificationSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(400px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .notification.success { border-left-color: #28a745; }
+        .notification.error { border-left-color: #dc3545; }
+        .notification.warning { border-left-color: #ffc107; }
+        .notification.info { border-left-color: #17a2b8; }
+
+        .notification-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #333;
+        }
+
+        .notification-message {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #999;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .notification-close:hover {
+            background: #f1f1f1;
+            color: #333;
+        }
+
+        .notification-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.1);
+            animation: progressBar linear;
+        }
+
+        @keyframes progressBar {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+
+        /* ===== MODALES PARA PROMPTS Y ALERTS ===== */
+        .prompt-input-container {
+            margin: 20px 0;
+        }
+
+        .prompt-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            background: white;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .prompt-input:focus {
+            outline: none;
+            border-color: var(--azul-antel);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        .textarea-input-container {
+            margin: 20px 0;
+        }
+
+        .textarea-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            background: white;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .textarea-input:focus {
+            outline: none;
+            border-color: var(--azul-antel);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        .textarea-help {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666;
+            font-style: italic;
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 4px solid var(--azul-antel);
+        }
+
+        /* ===== DRAG & DROP Y REORDENAR ===== */
+        .comando-item {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .comando-item.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+            z-index: 1000;
+        }
+
+        .comando-item.drag-over {
+            border-top: 3px solid var(--azul-antel) !important;
+        }
+
+        .comando-controls {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+
+        .comando-item:hover .comando-controls {
+            opacity: 1;
+        }
+
+        .btn-reorder {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-move-up {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-move-up:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+
+        .btn-move-down {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-move-down:hover {
+            background: #e0a800;
+            transform: translateY(-1px);
+        }
+
+        .btn-drag-handle {
+            background: #6c757d;
+            color: white;
+            cursor: grab;
+        }
+
+        .btn-drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .btn-drag-handle:hover {
+            background: #5a6268;
+        }
+
+        .orden-info {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: var(--azul-antel);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 5;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -436,15 +846,270 @@
             
             .button-group {
                 flex-direction: column;
+
+        /* ===== ESTILOS ESPECÍFICOS PARA IMS ===== */
+        .ims-search-container {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .ims-search-container:hover {
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .ims-results {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.5s ease-in-out;
+        }
+
+        .ims-command-group {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .ims-command-group:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .ims-command-group summary {
+            transition: all 0.3s ease;
+        }
+
+        .ims-command-group[open] summary {
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        .ims-custom-commands {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .ims-custom-commands:hover {
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .ims-notes {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            animation: slideInLeft 0.5s ease-in-out;
+        }
+
+        .info-card {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .comando-personalizado {
+            transition: all 0.3s ease;
+        }
+
+        .comando-personalizado:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+        }
+
+        /* Animaciones IMS */
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        @keyframes slideInLeft {
+            from { 
+                opacity: 0; 
+                transform: translateX(-30px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+
+        /* Estilos específicos para inputs IMS */
+        .ims-search-container input,
+        .ims-search-container select {
+            transition: all 0.3s ease;
+        }
+
+        .ims-search-container input:focus,
+        .ims-search-container select:focus {
+            border-color: var(--azul-antel);
+            box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
+            outline: none;
+        }
+
+        /* Indicadores de estado IMS */
+        .estado-registrado {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .estado-desregistrado {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .estado-pendiente {
+            color: #ffc107;
+            font-weight: bold;
+        }
+
+        /* Botones especializados IMS */
+        .btn-ims {
+            background: linear-gradient(145deg, #0066CC, #004A99);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-ims:hover {
+            background: linear-gradient(145deg, #004A99, #003366);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 102, 204, 0.3);
+        }
+
+        /* Estilo para números de teléfono uruguayos */
+        .numero-uruguay {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #0066CC;
+            background: rgba(0, 102, 204, 0.1);
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        /* Responsividad para IMS */
+        @media (max-width: 768px) {
+            .ims-search-container {
+                margin: 10px;
+            }
+            
+            .info-card {
+                margin-bottom: 10px;
+            }
+            
+            .ims-command-group {
+                margin-bottom: 10px;
+            }
+        }
+        /* ===== FIN ESTILOS IMS ===== */
             }
             
             .command {
                 font-size: 12px;
             }
+
+            .notification-container {
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+
+            .modal-content {
+                margin: 20px;
+                padding: 25px;
+            }
+
+            .modal-buttons {
+                flex-direction: column;
+            }
+
+            .modal-btn {
+                min-width: auto;
+            }
+
+            .comando-controls {
+                position: relative;
+                opacity: 1;
+                top: auto;
+                right: auto;
+                margin-top: 10px;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- ===== MODAL PARA CONFIRMACIONES ===== -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-content">
+            <div class="modal-icon confirm" id="confirmIcon">⚠️</div>
+            <div class="modal-title" id="confirmTitle">Confirmar Acción</div>
+            <div class="modal-message" id="confirmMessage">¿Está seguro de realizar esta acción?</div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-danger" id="confirmYes">Sí, confirmar</button>
+                <button class="modal-btn modal-btn-secondary" id="confirmNo">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL PARA PROMPTS (ENTRADA DE TEXTO) ===== -->
+    <div class="modal-overlay" id="promptModal">
+        <div class="modal-content">
+            <div class="modal-icon info" id="promptIcon">📝</div>
+            <div class="modal-title" id="promptTitle">Ingrese Información</div>
+            <div class="modal-message" id="promptMessage">Por favor, ingrese el valor solicitado:</div>
+            <div class="prompt-input-container">
+                <input type="text" id="promptInput" class="prompt-input" placeholder="">
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-primary" id="promptOk">✅ Aceptar</button>
+                <button class="modal-btn modal-btn-secondary" id="promptCancel">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL PARA TEXTAREA (MÚLTIPLES LÍNEAS) ===== -->
+    <div class="modal-overlay" id="textareaModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-icon info" id="textareaIcon">📄</div>
+            <div class="modal-title" id="textareaTitle">Ingrese Comandos</div>
+            <div class="modal-message" id="textareaMessage">Por favor, ingrese los comandos (uno por línea):</div>
+            <div class="textarea-input-container">
+                <textarea id="textareaInput" class="textarea-input" rows="8" placeholder=""></textarea>
+                <div class="textarea-help">💡 Puede usar variables: {shelf}, {slot}, {port}, {onuId}</div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-primary" id="textareaOk">✅ Aceptar</button>
+                <button class="modal-btn modal-btn-secondary" id="textareaCancel">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL PARA ALERTS (SOLO INFORMACIÓN) ===== -->
+    <div class="modal-overlay" id="alertModal">
+        <div class="modal-content">
+            <div class="modal-icon info" id="alertIcon">ℹ️</div>
+            <div class="modal-title" id="alertTitle">Información</div>
+            <div class="modal-message" id="alertMessage">Mensaje de información</div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-primary" id="alertOk">✅ Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CONTENEDOR DE NOTIFICACIONES ===== -->
+    <div class="notification-container" id="notificationContainer"></div>
+
     <!-- ===== INFO DE USUARIO ===== -->
     <div class="user-info" id="userInfo">
         <span id="userDisplay"></span>
@@ -508,6 +1173,8 @@
             <div class="tabs">
                 <div class="tab active" data-tab="inicio">🏠 Inicio</div>
                 <div class="tab" data-tab="olt">⚡ OLT ZTE C600</div>
+                <div class="tab" data-tab="ims">📞 IMS Antel</div>
+                <div class="tab" data-tab="acs">🔧 ACS ONT</div>
                 <div class="tab" data-tab="configuracion">⚙️ Configuración</div>
                 <div class="tab" data-tab="ayuda">❓ Ayuda</div>
             </div>
@@ -636,6 +1303,582 @@
                 </div>
             </div>
 
+            <!-- Contenido IMS -->
+            <div class="tab-content" id="ims">
+                <!-- Acceso al Sistema IMS -->
+                <div class="config-section">
+                    <h2 class="section-title">📞 Sistema IMS - Gestión de Abonados</h2>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        Gestión de abonados del sistema IP Multimedia Subsystem (IMS) de Antel
+                    </p>
+
+                    <!-- Acceso Web -->
+                    <div style="background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%); padding: 20px; border-radius: 12px; margin-bottom: 25px; text-align: center;">
+                        <h3 style="color: var(--azul-antel); margin-top: 0;">🌐 Acceso al Sistema IMS</h3>
+                        <p style="margin: 15px 0; color: #555;">
+                            <strong>⚠️ Importante:</strong> Debe accederse desde Internet Explorer
+                        </p>
+                        <a href="https://10.64.128.42:31943/unisso/login.action?service=%2Funisess%2Fv1%2Fauth%3Fservice%3D%252Fossfacewebsite%252Findex.html&decision=1#Home?switch" 
+                           target="_blank" 
+                           class="btn btn-primary" 
+                           style="font-size: 16px; padding: 15px 30px; text-decoration: none; display: inline-block;">
+                            🔗 Acceder al Sistema IMS
+                        </a>
+                        <p style="margin: 10px 0 0 0; font-size: 12px; color: #666;">
+                            URL: https://10.64.128.42:31943/unisso/login.action...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Comandos de Consulta -->
+                <div class="config-section">
+                    <h3 class="section-title">🔍 Comandos de Consulta (EXP USRINF)</h3>
+                    <p style="color: #666; margin-bottom: 15px;">
+                        Comandos para consultar el estado de abonados. Ruta: <strong>Maintenance → MML command → NE → CSCF</strong>
+                    </p>
+                    
+                    <details style="border: 1px solid #e1e5e9; border-radius: 8px; padding: 8px; margin-bottom: 15px;" open>
+                        <summary style="padding: 12px; background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%); border-radius: 6px; cursor: pointer; font-weight: bold; color: var(--azul-antel);">
+                            📋 Plantilla de Comando de Consulta
+                        </summary>
+                        <div style="padding: 15px;">
+                            <textarea class="command" rows="2" readonly>EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+598XXXXXXXX";</textarea>
+                            <div class="button-group" style="margin-top: 10px;">
+                                <button class="btn btn-primary" onclick="copiarTexto('EXP USRINF: ENTITYPE=SCSCF,IMPU=&quot;tel:+598XXXXXXXX&quot;;')">� Copiar Plantilla</button>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details style="border: 1px solid #e1e5e9; border-radius: 8px; padding: 8px; margin-bottom: 15px;">
+                        <summary style="padding: 12px; background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 6px; cursor: pointer; font-weight: bold; color: var(--azul-antel);">
+                            📞 Comandos de Consulta Individuales
+                        </summary>
+                        <div style="padding: 15px;">
+                            <div style="display: grid; gap: 10px;">
+                                <div class="comando-individual" style="background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829299925";</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-primary btn-small" onclick="copiarComandoIndividual('EXP USRINF: ENTITYPE=SCSCF,IMPU=&quot;tel:+59829299925&quot;;')">📋 Copiar</button>
+                                        <button class="btn btn-secondary btn-small" onclick="agregarComandoIndividual('EXP USRINF: ENTITYPE=SCSCF,IMPU=&quot;tel:+59829299925&quot;;', 'Consulta IMS +59829299925')">➕ Agregar</button>
+                                    </div>
+                                </div>
+                                <div class="comando-individual" style="background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59846642147";</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-primary btn-small" onclick="copiarComandoIndividual('EXP USRINF: ENTITYPE=SCSCF,IMPU=&quot;tel:+59846642147&quot;;')">📋 Copiar</button>
+                                        <button class="btn btn-secondary btn-small" onclick="agregarComandoIndividual('EXP USRINF: ENTITYPE=SCSCF,IMPU=&quot;tel:+59846642147&quot;;', 'Consulta IMS +59846642147')">➕ Agregar</button>
+                                    </div>
+                                </div>
+                                <div class="comando-individual" style="background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59846223181";</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-primary btn-small" onclick="copiarComandoIndividual('EXP USRINF: ENTITYPE=SCSCF,IMPU=&quot;tel:+59846223181&quot;;')">📋 Copiar</button>
+                                        <button class="btn btn-secondary btn-small" onclick="agregarComandoIndividual('EXP USRINF: ENTITYPE=SCSCF,IMPU=&quot;tel:+59846223181&quot;;', 'Consulta IMS +59846223181')">➕ Agregar</button>
+                                    </div>
+                                </div>
+                                <div class="comando-individual" style="background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829299920";</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-primary btn-small" onclick="copiarComandoIndividual('EXP USRINF: ENTITYPE=SCSCF,IMPU=&quot;tel:+59829299920&quot;;')">📋 Copiar</button>
+                                        <button class="btn btn-secondary btn-small" onclick="agregarComandoIndividual('EXP USRINF: ENTITYPE=SCSCF,IMPU=&quot;tel:+59829299920&quot;;', 'Consulta IMS +59829299920')">➕ Agregar</button>
+                                    </div>
+                                </div>
+                                <div class="comando-individual" style="background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829299922";</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-primary btn-small" onclick="copiarComandoIndividual('EXP USRINF: ENTITYPE=SCSCF,IMPU=&quot;tel:+59829299922&quot;;')">📋 Copiar</button>
+                                        <button class="btn btn-secondary btn-small" onclick="agregarComandoIndividual('EXP USRINF: ENTITYPE=SCSCF,IMPU=&quot;tel:+59829299922&quot;;', 'Consulta IMS +59829299922')">➕ Agregar</button>
+                                    </div>
+                                </div>
+                                <div class="comando-individual" style="background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829299921";</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-primary btn-small" onclick="copiarComandoIndividual('EXP USRINF: ENTITYPE=SCSCF,IMPU=&quot;tel:+59829299921&quot;;')">📋 Copiar</button>
+                                        <button class="btn btn-secondary btn-small" onclick="agregarComandoIndividual('EXP USRINF: ENTITYPE=SCSCF,IMPU=&quot;tel:+59829299921&quot;;', 'Consulta IMS +59829299921')">➕ Agregar</button>
+                                    </div>
+                                </div>
+                                <div class="comando-individual" style="background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829299923";</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-primary btn-small" onclick="copiarComandoIndividual('EXP USRINF: ENTITYPE=SCSCF,IMPU=&quot;tel:+59829299923&quot;;')">📋 Copiar</button>
+                                        <button class="btn btn-secondary btn-small" onclick="agregarComandoIndividual('EXP USRINF: ENTITYPE=SCSCF,IMPU=&quot;tel:+59829299923&quot;;', 'Consulta IMS +59829299923')">➕ Agregar</button>
+                                    </div>
+                                </div>
+                                <div class="comando-individual" style="background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829240810";</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-primary btn-small" onclick="copiarComandoIndividual('EXP USRINF: ENTITYPE=SCSCF,IMPU=&quot;tel:+59829240810&quot;;')">📋 Copiar</button>
+                                        <button class="btn btn-secondary btn-small" onclick="agregarComandoIndividual('EXP USRINF: ENTITYPE=SCSCF,IMPU=&quot;tel:+59829240810&quot;;', 'Consulta IMS +59829240810')">➕ Agregar</button>
+                                    </div>
+                                </div>
+                                <div class="comando-individual" style="background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829243299";</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-primary btn-small" onclick="copiarComandoIndividual('EXP USRINF: ENTITYPE=SCSCF,IMPU=&quot;tel:+59829243299&quot;;')">📋 Copiar</button>
+                                        <button class="btn btn-secondary btn-small" onclick="agregarComandoIndividual('EXP USRINF: ENTITYPE=SCSCF,IMPU=&quot;tel:+59829243299&quot;;', 'Consulta IMS +59829243299')">➕ Agregar</button>
+                                    </div>
+                                </div>
+                                <div class="comando-individual" style="background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829248976";</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-primary btn-small" onclick="copiarComandoIndividual('EXP USRINF: ENTITYPE=SCSCF,IMPU=&quot;tel:+59829248976&quot;;')">📋 Copiar</button>
+                                        <button class="btn btn-secondary btn-small" onclick="agregarComandoIndividual('EXP USRINF: ENTITYPE=SCSCF,IMPU=&quot;tel:+59829248976&quot;;', 'Consulta IMS +59829248976')">➕ Agregar</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="button-group" style="margin-top: 15px;">
+                                <button class="btn btn-primary" onclick="copiarComandosConsulta()">📋 Copiar Todos</button>
+                                <button class="btn btn-secondary" onclick="agregarComandosConsultaIMS()">➕ Agregar Todos a BD</button>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- Comandos de Desregistro -->
+                <div class="config-section">
+                    <h3 class="section-title">⚠️ Comandos de Desregistro (CNL URCNL)</h3>
+                    <p style="color: #666; margin-bottom: 15px;">
+                        <strong>⚠️ Precaución:</strong> Estos comandos desconectan a los usuarios del servicio IMS
+                    </p>
+                    
+                    <details style="border: 1px solid #e1e5e9; border-radius: 8px; padding: 8px; margin-bottom: 15px;">
+                        <summary style="padding: 12px; background: linear-gradient(145deg, #fff3cd 0%, #ffeaa7 100%); border-radius: 6px; cursor: pointer; font-weight: bold; color: #d68910;">
+                            📋 Plantilla de Comando de Desregistro
+                        </summary>
+                        <div style="padding: 15px;">
+                            <textarea class="command" rows="2" readonly>CNL URCNL: TYPE=IMPU,IMPU="tel:+598XXXXXXXX";</textarea>
+                            <div class="button-group" style="margin-top: 10px;">
+                                <button class="btn btn-secondary" onclick="copiarTexto('CNL URCNL: TYPE=IMPU,IMPU=&quot;tel:+598XXXXXXXX&quot;;')">� Copiar Plantilla</button>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details style="border: 1px solid #e1e5e9; border-radius: 8px; padding: 8px; margin-bottom: 15px;">
+                        <summary style="padding: 12px; background: linear-gradient(145deg, #f8d7da 0%, #f5c6cb 100%); border-radius: 6px; cursor: pointer; font-weight: bold; color: #721c24;">
+                            ⚠️ Comandos de Desregistro Individuales
+                        </summary>
+                        <div style="padding: 15px;">
+                            <div style="display: grid; gap: 10px;">
+                                <div class="comando-individual" style="background: #fff3cd; padding: 12px; border-radius: 6px; border: 1px solid #ffeaa7;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">CNL URCNL: TYPE=IMPU,IMPU="tel:+59829299921";</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-secondary btn-small" onclick="copiarComandoIndividual('CNL URCNL: TYPE=IMPU,IMPU=&quot;tel:+59829299921&quot;;')">📋 Copiar</button>
+                                        <button class="btn btn-warning btn-small" onclick="agregarComandoIndividual('CNL URCNL: TYPE=IMPU,IMPU=&quot;tel:+59829299921&quot;;', 'Desregistro IMS +59829299921')">⚠️ Agregar</button>
+                                    </div>
+                                </div>
+                                <div class="comando-individual" style="background: #fff3cd; padding: 12px; border-radius: 6px; border: 1px solid #ffeaa7;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">CNL URCNL: TYPE=IMPU,IMPU="tel:+59829299923";</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-secondary btn-small" onclick="copiarComandoIndividual('CNL URCNL: TYPE=IMPU,IMPU=&quot;tel:+59829299923&quot;;')">📋 Copiar</button>
+                                        <button class="btn btn-warning btn-small" onclick="agregarComandoIndividual('CNL URCNL: TYPE=IMPU,IMPU=&quot;tel:+59829299923&quot;;', 'Desregistro IMS +59829299923')">⚠️ Agregar</button>
+                                    </div>
+                                </div>
+                                <div class="comando-individual" style="background: #fff3cd; padding: 12px; border-radius: 6px; border: 1px solid #ffeaa7;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">CNL URCNL: TYPE=IMPU,IMPU="tel:+59829299925";</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-secondary btn-small" onclick="copiarComandoIndividual('CNL URCNL: TYPE=IMPU,IMPU=&quot;tel:+59829299925&quot;;')">📋 Copiar</button>
+                                        <button class="btn btn-warning btn-small" onclick="agregarComandoIndividual('CNL URCNL: TYPE=IMPU,IMPU=&quot;tel:+59829299925&quot;;', 'Desregistro IMS +59829299925')">⚠️ Agregar</button>
+                                    </div>
+                                </div>
+                                <div class="comando-individual" style="background: #fff3cd; padding: 12px; border-radius: 6px; border: 1px solid #ffeaa7;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">CNL URCNL: TYPE=IMPU,IMPU="tel:+59829240810";</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-secondary btn-small" onclick="copiarComandoIndividual('CNL URCNL: TYPE=IMPU,IMPU=&quot;tel:+59829240810&quot;;')">📋 Copiar</button>
+                                        <button class="btn btn-warning btn-small" onclick="agregarComandoIndividual('CNL URCNL: TYPE=IMPU,IMPU=&quot;tel:+59829240810&quot;;', 'Desregistro IMS +59829240810')">⚠️ Agregar</button>
+                                    </div>
+                                </div>
+                                <div class="comando-individual" style="background: #fff3cd; padding: 12px; border-radius: 6px; border: 1px solid #ffeaa7;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">CNL URCNL: TYPE=IMPU,IMPU="tel:+59829243299";</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-secondary btn-small" onclick="copiarComandoIndividual('CNL URCNL: TYPE=IMPU,IMPU=&quot;tel:+59829243299&quot;;')">📋 Copiar</button>
+                                        <button class="btn btn-warning btn-small" onclick="agregarComandoIndividual('CNL URCNL: TYPE=IMPU,IMPU=&quot;tel:+59829243299&quot;;', 'Desregistro IMS +59829243299')">⚠️ Agregar</button>
+                                    </div>
+                                </div>
+                                <div class="comando-individual" style="background: #fff3cd; padding: 12px; border-radius: 6px; border: 1px solid #ffeaa7;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">CNL URCNL: TYPE=IMPU,IMPU="tel:+59829248976";</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-secondary btn-small" onclick="copiarComandoIndividual('CNL URCNL: TYPE=IMPU,IMPU=&quot;tel:+59829248976&quot;;')">📋 Copiar</button>
+                                        <button class="btn btn-warning btn-small" onclick="agregarComandoIndividual('CNL URCNL: TYPE=IMPU,IMPU=&quot;tel:+59829248976&quot;;', 'Desregistro IMS +59829248976')">⚠️ Agregar</button>
+                                    </div>
+                                </div>
+                                <div class="comando-individual" style="background: #fff3cd; padding: 12px; border-radius: 6px; border: 1px solid #ffeaa7;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">CNL URCNL: TYPE=IMPU,IMPU="tel:+59898465369";</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-secondary btn-small" onclick="copiarComandoIndividual('CNL URCNL: TYPE=IMPU,IMPU=&quot;tel:+59898465369&quot;;')">📋 Copiar</button>
+                                        <button class="btn btn-warning btn-small" onclick="agregarComandoIndividual('CNL URCNL: TYPE=IMPU,IMPU=&quot;tel:+59898465369&quot;;', 'Desregistro IMS +59898465369')">⚠️ Agregar</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="button-group" style="margin-top: 10px;">
+                                <button class="btn btn-secondary" onclick="copiarComandosDesregistro()">� Copiar Todos</button>
+                                <button class="btn btn-secondary" onclick="agregarComandosDesregistroIMS()">➕ Agregar a BD</button>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- Crear Comando Personalizado -->
+                <div class="config-section">
+                    <h3 class="section-title">🛠️ Crear Comando Personalizado</h3>
+                    <p style="color: #666; margin-bottom: 15px;">
+                        Genere comandos IMS personalizados con números de teléfono específicos
+                    </p>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #e9ecef;">
+                        <div class="input-group" style="margin-bottom: 15px;">
+                            <label style="margin-right: 10px;">Número de Teléfono:</label>
+                            <input type="text" id="numeroPersonalizado" placeholder="+59899123456" 
+                                   style="padding: 8px 12px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; min-width: 150px;">
+                        </div>
+                        
+                        <div class="button-group">
+                            <button class="btn btn-primary" onclick="generarComandoConsulta()">� Generar Consulta</button>
+                            <button class="btn btn-secondary" onclick="generarComandoDesregistro()">⚠️ Generar Desregistro</button>
+                            <button class="btn btn-secondary" onclick="generarNumeroUruguayoSimple()">🇺🇾 Número Aleatorio</button>
+                        </div>
+                        
+                        <div id="comandoGenerado" style="margin-top: 15px; display: none;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Comando Generado:</label>
+                            <textarea id="resultadoComando" class="command" rows="2" readonly></textarea>
+                            <div class="button-group" style="margin-top: 10px;">
+                                <button class="btn btn-primary" onclick="copiarComandoGenerado()">📋 Copiar</button>
+                                <button class="btn btn-secondary" onclick="agregarComandoPersonalizadoIMS()">➕ Agregar a BD</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información Técnica -->
+                <div class="config-section">
+                    <h3 class="section-title">📋 Información Técnica</h3>
+                    <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid var(--azul-antel);">
+                        <ul style="margin: 0; padding-left: 20px; color: #555; line-height: 1.6;">
+                            <li><strong>ENTITYPE:</strong> SCSCF (Serving Call Session Control Function)</li>
+                            <li><strong>IMPU:</strong> IP Multimedia Public Identity</li>
+                            <li><strong>EXP USRINF:</strong> Comando para consultar información de usuario</li>
+                            <li><strong>CNL URCNL:</strong> Comando para desregistrar usuarios</li>
+                            <li><strong>Formato números Uruguay:</strong> +598 + 8 dígitos</li>
+                            <li><strong>Acceso requerido:</strong> Internet Explorer</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenido ACS -->
+            <div class="tab-content" id="acs">
+                <!-- Acceso al Sistema ACS -->
+                <div class="config-section">
+                    <h2 class="section-title">🔧 Sistema ACS - Gestión de ONTs</h2>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        Auto Configuration Server para gestión de parámetros de equipos ONT de Antel
+                    </p>
+
+                    <!-- Enlaces de Acceso ACS -->
+                    <div style="background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%); padding: 20px; border-radius: 12px; margin-bottom: 25px;">
+                        <h3 style="color: var(--azul-antel); margin-top: 0;">🌐 Acceso a Sistemas ACS</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                            <div style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #e1e5e9;">
+                                <h4 style="color: #28a745; margin: 0 0 10px 0;">🟢 ACS Producción</h4>
+                                <p style="margin: 5px 0; font-size: 12px; color: #666;">Sistema en producción</p>
+                                <a href="http://acs.in.iantel.com.uy/live/manage" target="_blank" class="btn btn-primary" style="font-size: 14px; text-decoration: none; display: inline-block;">
+                                    🔗 Acceder a Producción
+                                </a>
+                            </div>
+                            <div style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #e1e5e9;">
+                                <h4 style="color: #ffc107; margin: 0 0 10px 0;">🟡 ACS Stage</h4>
+                                <p style="margin: 5px 0; font-size: 12px; color: #666;">Ambiente de testing</p>
+                                <a href="http://10.69.100.14:9673/live/manage" target="_blank" class="btn btn-secondary" style="font-size: 14px; text-decoration: none; display: inline-block;">
+                                    🔗 Acceder a Stage
+                                </a>
+                            </div>
+                            <div style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #e1e5e9;">
+                                <h4 style="color: #17a2b8; margin: 0 0 10px 0;">🔵 ACS Maqueta</h4>
+                                <p style="margin: 5px 0; font-size: 12px; color: #666;">Ambiente de desarrollo</p>
+                                <a href="http://10.69.100.14:8673/live/manage" target="_blank" class="btn btn-info" style="font-size: 14px; text-decoration: none; display: inline-block;">
+                                    🔗 Acceder a Maqueta
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gestión de Modelos ONT -->
+                <div class="config-section">
+                    <h3 class="section-title">📱 Gestión de Modelos ONT</h3>
+                    <p style="color: #666; margin-bottom: 15px;">
+                        Administre los diferentes modelos de ONT configurables en el sistema ACS
+                    </p>
+                    
+                    <!-- Agregar Nuevo Modelo -->
+                    <details style="border: 1px solid #e1e5e9; border-radius: 8px; padding: 8px; margin-bottom: 15px;" open>
+                        <summary style="padding: 12px; background: linear-gradient(145deg, #d4edda 0%, #c3e6cb 100%); border-radius: 6px; cursor: pointer; font-weight: bold; color: var(--azul-antel);">
+                            ➕ Agregar Nuevo Modelo ONT
+                        </summary>
+                        <div style="padding: 15px;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Fabricante:</label>
+                                    <select id="ontFabricante" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                        <option value="">Seleccionar fabricante</option>
+                                        <option value="ZTE">ZTE</option>
+                                        <option value="Huawei">Huawei</option>
+                                        <option value="Tozed">Tozed</option>
+                                        <option value="Nokia">Nokia</option>
+                                        <option value="Otros">Otros</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Modelo:</label>
+                                    <input type="text" id="ontModelo" placeholder="Ej: F670L" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Versión Software:</label>
+                                    <input type="text" id="ontVersion" placeholder="Ej: V6.0.10P2N14" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Tipo:</label>
+                                    <select id="ontTipo" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                        <option value="GPON">GPON (Fibra Óptica)</option>
+                                        <option value="EPON">EPON (Fibra Óptica)</option>
+                                        <option value="XGS-PON">XGS-PON (10G PON)</option>
+                                        <option value="FWA-5G">🔥 FWA 5G (Fixed Wireless Access)</option>
+                                        <option value="FWA-4G">📶 FWA 4G (Fixed Wireless Access)</option>
+                                        <option value="NG-PON2">NG-PON2 (Next Gen PON)</option>
+                                        <option value="DOCSIS">DOCSIS (Cable)</option>
+                                        <option value="DSL">DSL (Línea de Abonado)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Descripción:</label>
+                                <textarea id="ontDescripcion" placeholder="Descripción del modelo ONT..." rows="3" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+                            </div>
+                            
+                            <!-- Comandos específicos del modelo -->
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: bold;">⚡ Comandos Específicos del Modelo:</label>
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
+                                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                        <input type="text" id="nuevoComandoONT" placeholder="Comando ACS (ej: GetParameterValues: Device.WiFi.Radio.1.Enable)" 
+                                               style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                        <input type="text" id="descripcionComandoONT" placeholder="Descripción del comando" 
+                                               style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                        <button type="button" class="btn btn-secondary btn-small" onclick="agregarComandoAModelo()">➕</button>
+                                    </div>
+                                    <div id="comandosModeloONT" style="display: grid; gap: 8px;">
+                                        <!-- Los comandos del modelo se mostrarán aquí -->
+                                    </div>
+                                    <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                                        💡 <strong>Comandos sugeridos para FWA 5G:</strong><br>
+                                        • GetParameterValues: Device.Cellular.Interface.1.Stats<br>
+                                        • GetParameterValues: Device.Cellular.Interface.1.SignalStrength<br>
+                                        • SetParameterValues: Device.Cellular.Interface.1.Enable=true<br>
+                                        • GetParameterValues: Device.Cellular.Interface.1.PLMNID
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="button-group">
+                                <button class="btn btn-primary" onclick="agregarModeloONT()">➕ Agregar Modelo</button>
+                                <button class="btn btn-secondary" onclick="limpiarFormularioONT()">🧹 Limpiar</button>
+                            </div>
+                        </div>
+                    </details>
+
+                    <!-- Lista de Modelos Existentes -->
+                    <details style="border: 1px solid #e1e5e9; border-radius: 8px; padding: 8px; margin-bottom: 15px;">
+                        <summary style="padding: 12px; background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 6px; cursor: pointer; font-weight: bold; color: var(--azul-antel);">
+                            📱 Modelos ONT Configurados
+                        </summary>
+                        <div style="padding: 15px;">
+                            <div id="listaModelosONT" style="display: grid; gap: 10px;">
+                                <!-- Los modelos se cargarán aquí dinámicamente -->
+                            </div>
+                            <div class="button-group" style="margin-top: 15px;">
+                                <button class="btn btn-info" onclick="cargarModelosONT()">🔄 Actualizar Lista</button>
+                                <button class="btn btn-secondary" onclick="exportarModelosONT()">📤 Exportar Modelos</button>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- Comandos ACS -->
+                <div class="config-section">
+                    <h3 class="section-title">⚡ Comandos ACS</h3>
+                    <p style="color: #666; margin-bottom: 15px;">
+                        Los comandos ACS se gestionan específicamente para cada modelo ONT que agregue. 
+                        Cada modelo tendrá sus propios comandos personalizados según su fabricante y tecnología.
+                    </p>
+                    
+                    <!-- Información sobre comandos por modelo -->
+                    <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid var(--azul-antel); margin-bottom: 15px;">
+                        <h4 style="margin: 0 0 10px 0; color: var(--azul-antel);">💡 Gestión de Comandos por Modelo ONT</h4>
+                        <ul style="margin: 0; padding-left: 20px; color: #555; line-height: 1.6;">
+                            <li>Cada modelo ONT que agregue puede tener sus <strong>comandos específicos</strong></li>
+                            <li>Los comandos se almacenan <strong>junto con cada modelo</strong> individual</li>
+                            <li>Puede copiar comandos específicos o todos los comandos de un modelo</li>
+                            <li>Para <strong>🔥 FWA 5G</strong>: agregue comandos de interfaz celular específicos</li>
+                            <li>Para <strong>🌐 GPON/EPON</strong>: agregue comandos de fibra óptica específicos</li>
+                            <li>Marcas compatibles: <strong>ZTE, Huawei, Tozed, Nokia</strong> y otros</li>
+                        </ul>
+                    </div>
+
+                    <!-- Crear Comando Personalizado ACS -->
+                    <details style="border: 1px solid #e1e5e9; border-radius: 8px; padding: 8px; margin-bottom: 15px;">
+                        <summary style="padding: 12px; background: linear-gradient(145deg, #fff3cd 0%, #ffeaa7 100%); border-radius: 6px; cursor: pointer; font-weight: bold; color: #d68910;">
+                            �️ Crear Comando Personalizado ACS
+                        </summary>
+                        <div style="padding: 15px;">
+                            <div style="display: grid; gap: 10px;">
+                                <div class="comando-individual" style="background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">GetParameterValues: Device.DeviceInfo.ModelName</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-primary btn-small" onclick="copiarComandoACS('GetParameterValues: Device.DeviceInfo.ModelName')">📋 Copiar</button>
+                                        <button class="btn btn-secondary btn-small" onclick="agregarComandoACS('GetParameterValues: Device.DeviceInfo.ModelName', 'Obtener modelo de ONT')">➕ Agregar</button>
+                                    </div>
+                                </div>
+                                <div class="comando-individual" style="background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">GetParameterValues: Device.DeviceInfo.SoftwareVersion</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-primary btn-small" onclick="copiarComandoACS('GetParameterValues: Device.DeviceInfo.SoftwareVersion')">📋 Copiar</button>
+                                        <button class="btn btn-secondary btn-small" onclick="agregarComandoACS('GetParameterValues: Device.DeviceInfo.SoftwareVersion', 'Obtener versión software')">➕ Agregar</button>
+                                    </div>
+                                </div>
+                                <div class="comando-individual" style="background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">SetParameterValues: Device.WiFi.Radio.1.Enable=true</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-primary btn-small" onclick="copiarComandoACS('SetParameterValues: Device.WiFi.Radio.1.Enable=true')">📋 Copiar</button>
+                                        <button class="btn btn-secondary btn-small" onclick="agregarComandoACS('SetParameterValues: Device.WiFi.Radio.1.Enable=true', 'Habilitar WiFi')">➕ Agregar</button>
+                                    </div>
+                                </div>
+                                <div class="comando-individual" style="background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">Reboot</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-primary btn-small" onclick="copiarComandoACS('Reboot')">📋 Copiar</button>
+                                        <button class="btn btn-warning btn-small" onclick="agregarComandoACS('Reboot', 'Reiniciar ONT')">⚠️ Agregar</button>
+                                    </div>
+                                </div>
+                                <div class="comando-individual" style="background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
+                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">FactoryReset</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-primary btn-small" onclick="copiarComandoACS('FactoryReset')">📋 Copiar</button>
+                                        <button class="btn btn-danger btn-small" onclick="agregarComandoACS('FactoryReset', 'Reset de fábrica')">🚨 Agregar</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Comandos específicos para FWA 5G -->
+                                <div style="background: linear-gradient(145deg, #fff3cd 0%, #ffeaa7 100%); padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #f39c12;">
+                                    <h4 style="margin: 0 0 10px 0; color: #d68910;">🔥 Comandos FWA 5G (Fixed Wireless Access)</h4>
+                                    <div style="display: grid; gap: 10px;">
+                                        <div class="comando-individual" style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #ffeaa7;">
+                                            <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">GetParameterValues: Device.Cellular.Interface.1.Stats</div>
+                                            <div style="display: flex; gap: 8px;">
+                                                <button class="btn btn-primary btn-small" onclick="copiarComandoACS('GetParameterValues: Device.Cellular.Interface.1.Stats')">📋 Copiar</button>
+                                                <button class="btn btn-secondary btn-small" onclick="agregarComandoACS('GetParameterValues: Device.Cellular.Interface.1.Stats', 'Estadísticas celular FWA 5G')">➕ Agregar</button>
+                                            </div>
+                                        </div>
+                                        <div class="comando-individual" style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #ffeaa7;">
+                                            <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">GetParameterValues: Device.Cellular.Interface.1.SignalStrength</div>
+                                            <div style="display: flex; gap: 8px;">
+                                                <button class="btn btn-primary btn-small" onclick="copiarComandoACS('GetParameterValues: Device.Cellular.Interface.1.SignalStrength')">📋 Copiar</button>
+                                                <button class="btn btn-secondary btn-small" onclick="agregarComandoACS('GetParameterValues: Device.Cellular.Interface.1.SignalStrength', 'Intensidad señal 5G')">➕ Agregar</button>
+                                            </div>
+                                        </div>
+                                        <div class="comando-individual" style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #ffeaa7;">
+                                            <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">GetParameterValues: Device.Cellular.Interface.1.AccessPointName</div>
+                                            <div style="display: flex; gap: 8px;">
+                                                <button class="btn btn-primary btn-small" onclick="copiarComandoACS('GetParameterValues: Device.Cellular.Interface.1.AccessPointName')">📋 Copiar</button>
+                                                <button class="btn btn-secondary btn-small" onclick="agregarComandoACS('GetParameterValues: Device.Cellular.Interface.1.AccessPointName', 'APN configurado')">➕ Agregar</button>
+                                            </div>
+                                        </div>
+                                        <div class="comando-individual" style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #ffeaa7;">
+                                            <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">SetParameterValues: Device.Cellular.Interface.1.Enable=true</div>
+                                            <div style="display: flex; gap: 8px;">
+                                                <button class="btn btn-primary btn-small" onclick="copiarComandoACS('SetParameterValues: Device.Cellular.Interface.1.Enable=true')">📋 Copiar</button>
+                                                <button class="btn btn-secondary btn-small" onclick="agregarComandoACS('SetParameterValues: Device.Cellular.Interface.1.Enable=true', 'Habilitar interface celular')">➕ Agregar</button>
+                                            </div>
+                                        </div>
+                                        <div class="comando-individual" style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #ffeaa7;">
+                                            <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">GetParameterValues: Device.Cellular.Interface.1.PLMNID</div>
+                                            <div style="display: flex; gap: 8px;">
+                                                <button class="btn btn-primary btn-small" onclick="copiarComandoACS('GetParameterValues: Device.Cellular.Interface.1.PLMNID')">📋 Copiar</button>
+                                                <button class="btn btn-secondary btn-small" onclick="agregarComandoACS('GetParameterValues: Device.Cellular.Interface.1.PLMNID', 'ID de red móvil')">➕ Agregar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <!-- Crear Comando Personalizado ACS -->
+                    <details style="border: 1px solid #e1e5e9; border-radius: 8px; padding: 8px; margin-bottom: 15px;">
+                        <summary style="padding: 12px; background: linear-gradient(145deg, #fff3cd 0%, #ffeaa7 100%); border-radius: 6px; cursor: pointer; font-weight: bold; color: #d68910;">
+                            🛠️ Crear Comando Personalizado ACS
+                        </summary>
+                        <div style="padding: 15px;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Tipo de Comando:</label>
+                                    <select id="acsComandoTipo" onchange="actualizarPlantillaACS()" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                        <option value="">Seleccionar tipo</option>
+                                        <option value="GetParameterValues">GetParameterValues</option>
+                                        <option value="SetParameterValues">SetParameterValues</option>
+                                        <option value="AddObject">AddObject</option>
+                                        <option value="DeleteObject">DeleteObject</option>
+                                        <option value="Reboot">Reboot</option>
+                                        <option value="FactoryReset">FactoryReset</option>
+                                        <option value="Download">Download</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Parámetro/Objeto:</label>
+                                    <input type="text" id="acsParametro" placeholder="Ej: Device.WiFi.Radio.1.Enable" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Valor (si aplica):</label>
+                                    <input type="text" id="acsValor" placeholder="Ej: true, false, etc." style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Descripción:</label>
+                                <input type="text" id="acsDescripcion" placeholder="Descripción del comando..." style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            <div id="acsComandoGenerado" style="margin-top: 15px; display: none;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Comando Generado:</label>
+                                <textarea id="acsResultadoComando" class="command" rows="2" readonly></textarea>
+                            </div>
+                            <div class="button-group" style="margin-top: 15px;">
+                                <button class="btn btn-primary" onclick="generarComandoACS()">🔧 Generar Comando</button>
+                                <button class="btn btn-secondary" onclick="copiarComandoGeneradoACS()">📋 Copiar</button>
+                                <button class="btn btn-secondary" onclick="agregarComandoPersonalizadoACS()">➕ Agregar a BD</button>
+                                <button class="btn btn-secondary" onclick="limpiarFormularioComandoACS()">🧹 Limpiar</button>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- Información Técnica ACS -->
+                <div class="config-section">
+                    <h3 class="section-title">📋 Información Técnica ACS</h3>
+                    <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid var(--azul-antel);">
+                        <ul style="margin: 0; padding-left: 20px; color: #555; line-height: 1.6;">
+                            <li><strong>ACS:</strong> Auto Configuration Server para gestión remota de ONTs</li>
+                            <li><strong>TR-069:</strong> Protocolo técnico utilizado para gestión de dispositivos CPE</li>
+                            <li><strong>GetParameterValues:</strong> Comando para obtener valores de parámetros</li>
+                            <li><strong>SetParameterValues:</strong> Comando para establecer valores de parámetros</li>
+                            <li><strong>AddObject/DeleteObject:</strong> Comandos para crear/eliminar objetos</li>
+                            <li><strong>Reboot/FactoryReset:</strong> Comandos de reinicio y reset</li>
+                            <li><strong>🔥 FWA 5G:</strong> Fixed Wireless Access con tecnología 5G para acceso inalámbrico fijo</li>
+                            <li><strong>📶 FWA 4G:</strong> Fixed Wireless Access con tecnología 4G LTE</li>
+                            <li><strong>PLMNID:</strong> Public Land Mobile Network Identifier (ID de operador)</li>
+                            <li><strong>Cellular Interface:</strong> Parámetros específicos para conectividad celular</li>
+                            <li><strong>Producción:</strong> Sistema en vivo para clientes</li>
+                            <li><strong>Stage/Maqueta:</strong> Ambientes de testing y desarrollo</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
             <!-- Contenido Configuración -->
             <div class="tab-content" id="configuracion">
                 <div class="config-section">
@@ -668,6 +1911,7 @@
                             <li><strong>API REST:</strong> Comunicación con el servidor backend</li>
                             <li><strong>Logs de actividad:</strong> Registro de todas las acciones</li>
                             <li><strong>Búsqueda en BD:</strong> Búsqueda rápida en todos los comandos</li>
+                            <li><strong>Eliminar comandos:</strong> ✨ Eliminar comandos innecesarios individualmente</li>
                             <li><strong>Gestión multiusuario:</strong> Sistema de usuarios y roles</li>
                         </ul>
                         
@@ -675,6 +1919,7 @@
                         <ul style="margin-left: 20px;">
                             <li><strong>OLTs persistentes:</strong> Los datos se guardan en la base de datos</li>
                             <li><strong>Comandos dinámicos:</strong> Variables {shelf}, {slot}, {port}, {onuId}</li>
+                            <li><strong>Gestión de comandos:</strong> ✨ Agregar, copiar y eliminar comandos fácilmente</li>
                             <li><strong>Búsqueda inteligente:</strong> Busca en nombres, descripciones y comandos</li>
                             <li><strong>Respaldo automático:</strong> Los datos están seguros en SQLite</li>
                         </ul>
@@ -737,7 +1982,7 @@
                     sessionStorage.setItem('authenticated', 'true');
                     sessionStorage.setItem('user', JSON.stringify(data.user));
                     
-                    mostrarNotificacion('🎉 ¡Bienvenido al Sistema OLT Antel!', 'success', 3000);
+                    mostrarNotificacion('🎉 ¡Bienvenido al Sistema OLT Antel!', 'success', 3000, 'Acceso Concedido');
                     
                     // Cargar datos
                     await cargarOLTs();
@@ -782,11 +2027,764 @@
 
         // Función para cerrar sesión
         function logout() {
-            if (confirm('¿Está seguro que desea cerrar sesión?')) {
-                sessionStorage.removeItem('authenticated');
-                sessionStorage.removeItem('user');
-                location.reload();
+            mostrarConfirmacion(
+                'Cerrar Sesión',
+                '¿Está seguro que desea cerrar sesión?',
+                () => {
+                    sessionStorage.removeItem('authenticated');
+                    sessionStorage.removeItem('user');
+                    location.reload();
+                },
+                null,
+                'question'
+            );
+        }
+
+        // ===== SISTEMA DE GESTIÓN IMS =====
+        
+        // Base de datos de comandos IMS
+        const comandosIMS = {
+            consultaPorTelefono: {
+                nombre: "Consulta por Número de Teléfono",
+                descripcion: "Consulta información de un abonado usando su número de teléfono",
+                template: "EXP USRINF:MSISDN=\"{telefono}\";"
+            },
+            consultaPorIMPU: {
+                nombre: "Consulta por IMPU",
+                descripcion: "Consulta información de un abonado usando su IMPU (Identidad Pública)",
+                template: "EXP USRINF:IMPU=\"{impu}\";"
+            },
+            consultaCompleta: {
+                nombre: "Consulta Completa de Usuario",
+                descripcion: "Consulta completa incluyendo todos los datos del abonado",
+                template: "EXP USRINF:MSISDN=\"{telefono}\",IMPU=\"{impu}\",SCSCF=\"{scscf}\";"
+            },
+            desregistroPorTelefono: {
+                nombre: "Desregistro por Teléfono",
+                descripcion: "Desregistra un abonado usando su número de teléfono",
+                template: "CNL URCNL:MSISDN=\"{telefono}\";"
+            },
+            desregistroPorIMPU: {
+                nombre: "Desregistro por IMPU",
+                descripcion: "Desregistra un abonado usando su IMPU",
+                template: "CNL URCNL:IMPU=\"{impu}\";"
+            },
+            desregistroForzado: {
+                nombre: "Desregistro Forzado",
+                descripcion: "Fuerza el desregistro de un abonado (usar con precaución)",
+                template: "CNL URCNL:MSISDN=\"{telefono}\",FORCE=TRUE;"
+            },
+            estadisticasSCSCF: {
+                nombre: "Estadísticas S-CSCF",
+                descripcion: "Obtiene estadísticas del servidor S-CSCF",
+                template: "EXP SCSCFSTAT:SCSCF=\"{scscf}\";"
+            },
+            listarRegistros: {
+                nombre: "Listar Registros Activos",
+                descripcion: "Lista todos los registros activos en el S-CSCF",
+                template: "EXP URCREG:SCSCF=\"{scscf}\";"
+            },
+            verificarConectividad: {
+                nombre: "Verificar Conectividad IMS",
+                descripcion: "Verifica la conectividad con el núcleo IMS",
+                template: "EXP IMSCONN:SCSCF=\"{scscf}\";"
             }
+        };
+
+        // Funciones IMS simplificadas
+        function copiarComandosConsulta() {
+            const comandos = `EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829299925";
+EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59846642147";
+EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59846223181";
+EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829299920";
+EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829299922";
+EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829299921";
+EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829299923";
+EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829240810";
+EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829243299";
+EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829248976";`;
+            copiarTexto(comandos);
+            mostrarModal('Comandos Copiados', '📋 Todos los comandos de consulta han sido copiados al portapapeles.', 'success');
+        }
+
+        function copiarComandosDesregistro() {
+            const comandos = `CNL URCNL: TYPE=IMPU,IMPU="tel:+59829299921";
+CNL URCNL: TYPE=IMPU,IMPU="tel:+59829299923";
+CNL URCNL: TYPE=IMPU,IMPU="tel:+59829299925";
+CNL URCNL: TYPE=IMPU,IMPU="tel:+59829240810";
+CNL URCNL: TYPE=IMPU,IMPU="tel:+59829243299";
+CNL URCNL: TYPE=IMPU,IMPU="tel:+59829248976";
+CNL URCNL: TYPE=IMPU,IMPU="tel:+59898465369";`;
+            copiarTexto(comandos);
+            mostrarModal('Comandos Copiados', '⚠️ Comandos de desregistro copiados. Use con precaución ya que desconectan usuarios.', 'warning');
+        }
+
+        function agregarComandosConsultaIMS() {
+            const comandos = [
+                'EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829299925";',
+                'EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59846642147";',
+                'EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59846223181";',
+                'EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829299920";',
+                'EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829299922";',
+                'EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829299921";',
+                'EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829299923";',
+                'EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829240810";',
+                'EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829243299";',
+                'EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:+59829248976";'
+            ];
+            
+            let agregados = 0;
+            comandos.forEach(comando => {
+                if (agregarComandoABaseDatos(comando, 'Consulta IMS - EXP USRINF')) {
+                    agregados++;
+                }
+            });
+            
+            mostrarModal('Comandos Agregados', `✅ ${agregados} comandos de consulta IMS agregados a la base de datos.`, 'success');
+            cargarComandos();
+        }
+
+        function agregarComandosDesregistroIMS() {
+            const comandos = [
+                'CNL URCNL: TYPE=IMPU,IMPU="tel:+59829299921";',
+                'CNL URCNL: TYPE=IMPU,IMPU="tel:+59829299923";',
+                'CNL URCNL: TYPE=IMPU,IMPU="tel:+59829299925";',
+                'CNL URCNL: TYPE=IMPU,IMPU="tel:+59829240810";',
+                'CNL URCNL: TYPE=IMPU,IMPU="tel:+59829243299";',
+                'CNL URCNL: TYPE=IMPU,IMPU="tel:+59829248976";',
+                'CNL URCNL: TYPE=IMPU,IMPU="tel:+59898465369";'
+            ];
+            
+            let agregados = 0;
+            comandos.forEach(comando => {
+                if (agregarComandoABaseDatos(comando, 'Desregistro IMS - CNL URCNL')) {
+                    agregados++;
+                }
+            });
+            
+            mostrarModal('Comandos Agregados', `⚠️ ${agregados} comandos de desregistro IMS agregados a la base de datos.`, 'warning');
+            cargarComandos();
+        }
+
+        function generarComandoConsulta() {
+            const numero = document.getElementById('numeroPersonalizado').value.trim();
+            if (!numero) {
+                mostrarModal('Error', '⚠️ Debe ingresar un número de teléfono.', 'error');
+                return;
+            }
+
+            const comando = `EXP USRINF: ENTITYPE=SCSCF,IMPU="tel:${numero}";`;
+            document.getElementById('resultadoComando').value = comando;
+            document.getElementById('comandoGenerado').style.display = 'block';
+            mostrarModal('Comando Generado', '✅ Comando de consulta IMS generado correctamente.', 'success');
+        }
+
+        function generarComandoDesregistro() {
+            const numero = document.getElementById('numeroPersonalizado').value.trim();
+            if (!numero) {
+                mostrarModal('Error', '⚠️ Debe ingresar un número de teléfono.', 'error');
+                return;
+            }
+
+            const comando = `CNL URCNL: TYPE=IMPU,IMPU="tel:${numero}";`;
+            document.getElementById('resultadoComando').value = comando;
+            document.getElementById('comandoGenerado').style.display = 'block';
+            mostrarModal('Comando Generado', '⚠️ Comando de desregistro IMS generado. Use con precaución.', 'warning');
+        }
+
+        function generarNumeroUruguayoSimple() {
+            // Generar número uruguayo aleatorio
+            const prefijos = ['99', '98', '97', '96', '95', '94', '93', '92', '91', '90'];
+            const prefijo = prefijos[Math.floor(Math.random() * prefijos.length)];
+            const numero = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+            const numeroCompleto = `+598${prefijo}${numero}`;
+            
+            document.getElementById('numeroPersonalizado').value = numeroCompleto;
+            mostrarModal('Número Generado', `📱 Número uruguayo generado: ${numeroCompleto}`, 'info');
+        }
+
+        function copiarComandoGenerado() {
+            const comando = document.getElementById('resultadoComando').value;
+            if (comando) {
+                copiarTexto(comando);
+                mostrarModal('Comando Copiado', '📋 Comando copiado al portapapeles.', 'success');
+            }
+        }
+
+        function agregarComandoPersonalizadoIMS() {
+            const comando = document.getElementById('resultadoComando').value;
+            if (!comando) {
+                mostrarModal('Error', '⚠️ No hay comando generado para agregar.', 'error');
+                return;
+            }
+
+            const descripcion = comando.includes('EXP USRINF') ? 'Consulta IMS personalizada' : 'Desregistro IMS personalizado';
+            
+            if (agregarComandoABaseDatos(comando, descripcion)) {
+                mostrarModal('Comando Agregado', '✅ Comando personalizado agregado a la base de datos.', 'success');
+                cargarComandos();
+                document.getElementById('numeroPersonalizado').value = '';
+                document.getElementById('comandoGenerado').style.display = 'none';
+            }
+        }
+
+        // Nuevas funciones para comandos individuales
+        function copiarComandoIndividual(comando) {
+            copiarTexto(comando);
+            mostrarModal('Comando Copiado', '📋 Comando copiado al portapapeles.', 'success');
+        }
+
+        function agregarComandoIndividual(comando, descripcion) {
+            if (agregarComandoABaseDatos(comando, descripcion)) {
+                mostrarModal('Comando Agregado', `✅ ${descripcion} agregado a la base de datos.`, 'success');
+                cargarComandos();
+            }
+        }
+
+        // ===== FUNCIONES DE INICIALIZACIÓN =====
+
+        // Función para inicializar la pestaña IMS
+        function inicializarIMS() {
+            // No necesita inicialización específica por ahora
+            console.log('Pestaña IMS inicializada');
+        }
+
+        // Función para inicializar la pestaña ACS
+        function inicializarACS() {
+            try {
+                // Cargar modelos ONT existentes
+                cargarModelosONT();
+                console.log('Pestaña ACS inicializada - modelos ONT cargados');
+            } catch (error) {
+                console.error('Error al inicializar ACS:', error);
+                // En caso de error, inicializar array vacío
+                modelosONT = [];
+                localStorage.setItem('modelosONT', JSON.stringify(modelosONT));
+                cargarModelosONT();
+            }
+        }
+
+        // ===== FUNCIONES ACS =====
+
+        // Variables globales para ACS
+        let modelosONT = [];
+        let comandosModeloTemporal = []; // Para comandos del modelo en edición
+
+        // Función para agregar comando al modelo temporal
+        function agregarComandoAModelo() {
+            const comando = document.getElementById('nuevoComandoONT').value.trim();
+            const descripcion = document.getElementById('descripcionComandoONT').value.trim();
+
+            if (!comando) {
+                mostrarModal('Error', '⚠️ Debe ingresar un comando ACS.', 'error');
+                return;
+            }
+
+            const nuevoComando = {
+                id: Date.now().toString(),
+                comando: comando,
+                descripcion: descripcion || 'Sin descripción'
+            };
+
+            comandosModeloTemporal.push(nuevoComando);
+            actualizarVistaComandosModelo();
+            
+            // Limpiar campos
+            document.getElementById('nuevoComandoONT').value = '';
+            document.getElementById('descripcionComandoONT').value = '';
+        }
+
+        // Función para actualizar la vista de comandos del modelo
+        function actualizarVistaComandosModelo() {
+            const container = document.getElementById('comandosModeloONT');
+            
+            if (comandosModeloTemporal.length === 0) {
+                container.innerHTML = '<p style="color: #666; font-style: italic; text-align: center; padding: 10px;">No hay comandos agregados</p>';
+                return;
+            }
+
+            container.innerHTML = comandosModeloTemporal.map(cmd => `
+                <div style="background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="flex: 1;">
+                        <div style="font-family: monospace; font-size: 11px; color: #333; margin-bottom: 3px;">${cmd.comando}</div>
+                        <div style="font-size: 10px; color: #666;">${cmd.descripcion}</div>
+                    </div>
+                    <button type="button" class="btn btn-danger btn-small" onclick="eliminarComandoModelo('${cmd.id}')" style="padding: 4px 8px; font-size: 10px;">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        // Función para eliminar comando del modelo temporal
+        function eliminarComandoModelo(comandoId) {
+            comandosModeloTemporal = comandosModeloTemporal.filter(cmd => cmd.id !== comandoId);
+            actualizarVistaComandosModelo();
+        }
+
+        // Función para agregar modelo ONT (actualizada)
+        function agregarModeloONT() {
+            const fabricante = document.getElementById('ontFabricante').value;
+            const modelo = document.getElementById('ontModelo').value.trim();
+            const version = document.getElementById('ontVersion').value.trim();
+            const tipo = document.getElementById('ontTipo').value;
+            const descripcion = document.getElementById('ontDescripcion').value.trim();
+
+            if (!fabricante || !modelo) {
+                mostrarModal('Error', '⚠️ Debe completar al menos el fabricante y modelo.', 'error');
+                return;
+            }
+
+            const nuevoModelo = {
+                id: Date.now().toString(),
+                fabricante: fabricante,
+                modelo: modelo,
+                version: version,
+                tipo: tipo,
+                descripcion: descripcion,
+                comandos: [...comandosModeloTemporal], // Copiar comandos específicos
+                fechaCreacion: new Date().toLocaleString()
+            };
+
+            // Agregar a la lista local
+            modelosONT.push(nuevoModelo);
+            
+            // Guardar en localStorage
+            localStorage.setItem('modelosONT', JSON.stringify(modelosONT));
+            
+            // Actualizar visualización
+            cargarModelosONT();
+            limpiarFormularioONT();
+            
+            mostrarModal('Modelo Agregado', `✅ Modelo ${fabricante} ${modelo} agregado con ${comandosModeloTemporal.length} comandos específicos.`, 'success');
+        }
+
+        // Función para limpiar formulario ONT
+        function limpiarFormularioONT() {
+            document.getElementById('ontFabricante').value = '';
+            document.getElementById('ontModelo').value = '';
+            document.getElementById('ontVersion').value = '';
+            document.getElementById('ontTipo').value = 'GPON';
+            document.getElementById('ontDescripcion').value = '';
+            
+            // Limpiar comandos temporales
+            comandosModeloTemporal = [];
+            actualizarVistaComandosModelo();
+            
+            // Limpiar campos de comandos
+            document.getElementById('nuevoComandoONT').value = '';
+            document.getElementById('descripcionComandoONT').value = '';
+        }
+
+        // Función para cargar modelos ONT
+        function cargarModelosONT() {
+            try {
+                // Cargar desde localStorage
+                modelosONT = JSON.parse(localStorage.getItem('modelosONT') || '[]');
+                console.log('Modelos ONT cargados:', modelosONT.length, 'modelos encontrados');
+                
+                const container = document.getElementById('listaModelosONT');
+                if (!container) {
+                    console.error('No se encontró el contenedor listaModelosONT');
+                    return;
+                }
+                
+                if (modelosONT.length === 0) {
+                    container.innerHTML = '<p style="color: #666; font-style: italic; text-align: center; padding: 20px;">No hay modelos ONT configurados</p>';
+                    return;
+                }
+
+                container.innerHTML = modelosONT.map(modelo => {
+                const cantidadComandos = modelo.comandos ? modelo.comandos.length : 0;
+                const tipoIcon = modelo.tipo === 'FWA-5G' ? '🔥' : modelo.tipo === 'FWA-4G' ? '📶' : '🌐';
+                
+                return `
+                <div class="comando-individual" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                        <div style="flex: 1;">
+                            <h4 style="margin: 0 0 5px 0; color: var(--azul-antel);">${tipoIcon} ${modelo.fabricante} ${modelo.modelo}</h4>
+                            <p style="margin: 0; font-size: 12px; color: #666;">
+                                <strong>Tipo:</strong> ${modelo.tipo} | 
+                                <strong>Versión:</strong> ${modelo.version || 'N/A'} | 
+                                <strong>Comandos:</strong> ${cantidadComandos} |
+                                <strong>Creado:</strong> ${modelo.fechaCreacion}
+                            </p>
+                            ${modelo.descripcion ? `<p style="margin: 5px 0 0 0; font-size: 12px; color: #555;">${modelo.descripcion}</p>` : ''}
+                        </div>
+                        <button class="btn btn-danger btn-small" onclick="eliminarModeloONT('${modelo.id}')" style="margin-left: 10px;">🗑️</button>
+                    </div>
+                    
+                    ${cantidadComandos > 0 ? `
+                    <div style="background: #fff; padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #ddd;">
+                        <h5 style="margin: 0 0 8px 0; font-size: 12px; color: #333;">⚡ Comandos Específicos (${cantidadComandos}):</h5>
+                        <div style="display: grid; gap: 6px; max-height: 120px; overflow-y: auto;">
+                            ${modelo.comandos.map(cmd => `
+                                <div style="background: #f8f9fa; padding: 6px 8px; border-radius: 4px; border: 1px solid #e9ecef;">
+                                    <div style="font-family: monospace; font-size: 10px; color: #333; margin-bottom: 2px;">${cmd.comando}</div>
+                                    <div style="font-size: 9px; color: #666;">${cmd.descripcion}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="btn btn-primary btn-small" onclick="copiarModeloONT('${modelo.id}')">📋 Copiar Info</button>
+                        <button class="btn btn-secondary btn-small" onclick="editarModeloONT('${modelo.id}')">✏️ Editar</button>
+                        <button class="btn btn-info btn-small" onclick="generarComandosModeloONT('${modelo.id}')">⚡ Todos los Comandos</button>
+                        ${cantidadComandos > 0 ? `<button class="btn btn-success btn-small" onclick="copiarComandosEspecificosModelo('${modelo.id}')">🎯 Comandos Específicos</button>` : ''}
+                    </div>
+                </div>
+            `;
+            }).join('');
+            } catch (error) {
+                console.error('Error al cargar modelos ONT:', error);
+                const container = document.getElementById('listaModelosONT');
+                if (container) {
+                    container.innerHTML = '<p style="color: #dc3545; font-style: italic; text-align: center; padding: 20px;">❌ Error al cargar modelos ONT</p>';
+                }
+            }
+        }
+
+        // Función para eliminar modelo ONT
+        function eliminarModeloONT(modeloId) {
+            const modelo = modelosONT.find(m => m.id === modeloId);
+            if (!modelo) return;
+
+            mostrarModal('Confirmar Eliminación', 
+                `⚠️ ¿Está seguro que desea eliminar el modelo ${modelo.fabricante} ${modelo.modelo}?`, 
+                'warning',
+                [
+                    {
+                        text: 'Eliminar',
+                        style: 'danger',
+                        callback: () => {
+                            modelosONT = modelosONT.filter(m => m.id !== modeloId);
+                            localStorage.setItem('modelosONT', JSON.stringify(modelosONT));
+                            cargarModelosONT();
+                            mostrarModal('Modelo Eliminado', '✅ Modelo eliminado correctamente.', 'success');
+                        }
+                    },
+                    {
+                        text: 'Cancelar',
+                        style: 'secondary'
+                    }
+                ]
+            );
+        }
+
+        // Función para copiar información del modelo ONT
+        function copiarModeloONT(modeloId) {
+            const modelo = modelosONT.find(m => m.id === modeloId);
+            if (!modelo) return;
+
+            const info = `MODELO ONT - ${modelo.fabricante} ${modelo.modelo}
+=====================================
+Fabricante: ${modelo.fabricante}
+Modelo: ${modelo.modelo}
+Tipo: ${modelo.tipo}
+Versión Software: ${modelo.version || 'N/A'}
+Descripción: ${modelo.descripcion || 'N/A'}
+Fecha Creación: ${modelo.fechaCreacion}
+=====================================`;
+
+            copiarTexto(info);
+            mostrarModal('Información Copiada', '📋 Información del modelo copiada al portapapeles.', 'success');
+        }
+
+        // Función para editar modelo ONT
+        function editarModeloONT(modeloId) {
+            const modelo = modelosONT.find(m => m.id === modeloId);
+            if (!modelo) return;
+
+            // Llenar el formulario con los datos del modelo
+            document.getElementById('ontFabricante').value = modelo.fabricante;
+            document.getElementById('ontModelo').value = modelo.modelo;
+            document.getElementById('ontVersion').value = modelo.version;
+            document.getElementById('ontTipo').value = modelo.tipo;
+            document.getElementById('ontDescripcion').value = modelo.descripcion;
+
+            // Cargar comandos específicos del modelo
+            comandosModeloTemporal = modelo.comandos ? [...modelo.comandos] : [];
+            actualizarVistaComandosModelo();
+
+            // Eliminar el modelo actual para reemplazarlo
+            eliminarModeloONT(modeloId);
+            
+            mostrarModal('Modo Edición', 
+                `✏️ Modelo ${modelo.fabricante} ${modelo.modelo} cargado para edición con ${comandosModeloTemporal.length} comandos específicos.`, 
+                'info');
+        }
+
+        // Función para generar comandos específicos del modelo
+        function generarComandosModeloONT(modeloId) {
+            const modelo = modelosONT.find(m => m.id === modeloId);
+            if (!modelo) return;
+
+            let comandos = [
+                `GetParameterValues: Device.DeviceInfo.ModelName`,
+                `GetParameterValues: Device.DeviceInfo.SoftwareVersion`,
+                `SetParameterValues: Device.DeviceInfo.Description="${modelo.fabricante} ${modelo.modelo}"`,
+                `GetParameterValues: Device.Ethernet.Interface.1.Stats`
+            ];
+
+            // Agregar comandos específicos según el tipo
+            if (modelo.tipo === 'FWA-5G' || modelo.tipo === 'FWA-4G') {
+                comandos.push(
+                    `GetParameterValues: Device.Cellular.Interface.1.Stats`,
+                    `GetParameterValues: Device.Cellular.Interface.1.SignalStrength`,
+                    `GetParameterValues: Device.Cellular.Interface.1.PLMNID`
+                );
+            }
+
+            comandos.push(`Reboot`);
+
+            const comandosTexto = comandos.join('\n');
+            copiarTexto(comandosTexto);
+            
+            mostrarModal('Comandos Generados', 
+                `⚡ Comandos básicos para ${modelo.fabricante} ${modelo.modelo} copiados al portapapeles.`, 
+                'success');
+        }
+
+        // Función para copiar solo los comandos específicos del modelo
+        function copiarComandosEspecificosModelo(modeloId) {
+            const modelo = modelosONT.find(m => m.id === modeloId);
+            if (!modelo || !modelo.comandos || modelo.comandos.length === 0) {
+                mostrarModal('Sin Comandos', '⚠️ Este modelo no tiene comandos específicos configurados.', 'warning');
+                return;
+            }
+
+            const comandosTexto = modelo.comandos.map(cmd => cmd.comando).join('\n');
+            copiarTexto(comandosTexto);
+            
+            mostrarModal('Comandos Específicos Copiados', 
+                `🎯 ${modelo.comandos.length} comandos específicos de ${modelo.fabricante} ${modelo.modelo} copiados al portapapeles.`, 
+                'success');
+        }
+
+        // Función para exportar modelos ONT
+        function exportarModelosONT() {
+            if (modelosONT.length === 0) {
+                mostrarModal('Sin Datos', '⚠️ No hay modelos ONT para exportar.', 'warning');
+                return;
+            }
+
+            const dataStr = JSON.stringify(modelosONT, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `modelos-ont-antel-${new Date().toISOString().slice(0,10)}.json`;
+            link.click();
+
+            mostrarModal('Exportación Completa', 
+                `📤 ${modelosONT.length} modelos ONT exportados correctamente.`, 
+                'success');
+        }
+
+        // Funciones para comandos ACS
+        function copiarComandoACS(comando) {
+            copiarTexto(comando);
+            mostrarModal('Comando ACS Copiado', '📋 Comando ACS copiado al portapapeles.', 'success');
+        }
+
+        function agregarComandoACS(comando, descripcion) {
+            if (agregarComandoABaseDatos(comando, `ACS: ${descripcion}`)) {
+                mostrarModal('Comando ACS Agregado', `✅ ${descripcion} agregado a la base de datos.`, 'success');
+                cargarComandos();
+            }
+        }
+
+        // Función para actualizar plantilla ACS
+        function actualizarPlantillaACS() {
+            const tipo = document.getElementById('acsComandoTipo').value;
+            const parametroField = document.getElementById('acsParametro');
+            const valorField = document.getElementById('acsValor');
+
+            // Limpiar campos
+            parametroField.value = '';
+            valorField.value = '';
+
+            // Habilitar/deshabilitar campos según el tipo
+            if (tipo === 'Reboot' || tipo === 'FactoryReset') {
+                parametroField.disabled = true;
+                valorField.disabled = true;
+                parametroField.placeholder = 'No aplica';
+                valorField.placeholder = 'No aplica';
+            } else if (tipo === 'GetParameterValues') {
+                parametroField.disabled = false;
+                valorField.disabled = true;
+                parametroField.placeholder = 'Ej: Device.DeviceInfo.ModelName';
+                valorField.placeholder = 'No aplica';
+            } else {
+                parametroField.disabled = false;
+                valorField.disabled = false;
+                parametroField.placeholder = 'Ej: Device.WiFi.Radio.1.Enable';
+                valorField.placeholder = 'Ej: true, false, etc.';
+            }
+        }
+
+        // Función para generar comando ACS personalizado
+        function generarComandoACS() {
+            const tipo = document.getElementById('acsComandoTipo').value;
+            const parametro = document.getElementById('acsParametro').value.trim();
+            const valor = document.getElementById('acsValor').value.trim();
+
+            if (!tipo) {
+                mostrarModal('Error', '⚠️ Debe seleccionar un tipo de comando.', 'error');
+                return;
+            }
+
+            let comando = '';
+
+            switch(tipo) {
+                case 'GetParameterValues':
+                    if (!parametro) {
+                        mostrarModal('Error', '⚠️ Debe especificar el parámetro para GetParameterValues.', 'error');
+                        return;
+                    }
+                    comando = `GetParameterValues: ${parametro}`;
+                    break;
+                
+                case 'SetParameterValues':
+                    if (!parametro || !valor) {
+                        mostrarModal('Error', '⚠️ Debe especificar el parámetro y valor para SetParameterValues.', 'error');
+                        return;
+                    }
+                    comando = `SetParameterValues: ${parametro}=${valor}`;
+                    break;
+                
+                case 'AddObject':
+                    if (!parametro) {
+                        mostrarModal('Error', '⚠️ Debe especificar el objeto para AddObject.', 'error');
+                        return;
+                    }
+                    comando = `AddObject: ${parametro}`;
+                    break;
+                
+                case 'DeleteObject':
+                    if (!parametro) {
+                        mostrarModal('Error', '⚠️ Debe especificar el objeto para DeleteObject.', 'error');
+                        return;
+                    }
+                    comando = `DeleteObject: ${parametro}`;
+                    break;
+                
+                case 'Download':
+                    if (!parametro) {
+                        mostrarModal('Error', '⚠️ Debe especificar la URL para Download.', 'error');
+                        return;
+                    }
+                    comando = `Download: ${parametro}`;
+                    break;
+                
+                case 'Reboot':
+                    comando = 'Reboot';
+                    break;
+                
+                case 'FactoryReset':
+                    comando = 'FactoryReset';
+                    break;
+                
+                default:
+                    mostrarModal('Error', '⚠️ Tipo de comando no válido.', 'error');
+                    return;
+            }
+
+            document.getElementById('acsResultadoComando').value = comando;
+            document.getElementById('acsComandoGenerado').style.display = 'block';
+            
+            mostrarModal('Comando ACS Generado', '✅ Comando ACS generado correctamente.', 'success');
+        }
+
+        // Función para copiar comando generado ACS
+        function copiarComandoGeneradoACS() {
+            const comando = document.getElementById('acsResultadoComando').value;
+            if (comando) {
+                copiarTexto(comando);
+                mostrarModal('Comando Copiado', '📋 Comando ACS copiado al portapapeles.', 'success');
+            } else {
+                mostrarModal('Error', '⚠️ No hay comando generado para copiar.', 'error');
+            }
+        }
+
+        // Función para agregar comando personalizado ACS a BD
+        function agregarComandoPersonalizadoACS() {
+            const comando = document.getElementById('acsResultadoComando').value;
+            const descripcion = document.getElementById('acsDescripcion').value.trim();
+            
+            if (!comando) {
+                mostrarModal('Error', '⚠️ No hay comando generado para agregar.', 'error');
+                return;
+            }
+
+            const desc = descripcion || 'Comando ACS personalizado';
+            
+            if (agregarComandoABaseDatos(comando, `ACS: ${desc}`)) {
+                mostrarModal('Comando Agregado', '✅ Comando ACS agregado a la base de datos.', 'success');
+                cargarComandos();
+                limpiarFormularioComandoACS();
+            }
+        }
+
+        // Función para limpiar formulario de comando ACS
+        function limpiarFormularioComandoACS() {
+            document.getElementById('acsComandoTipo').value = '';
+            document.getElementById('acsParametro').value = '';
+            document.getElementById('acsValor').value = '';
+            document.getElementById('acsDescripcion').value = '';
+            document.getElementById('acsComandoGenerado').style.display = 'none';
+            
+            // Rehabilitar campos
+            document.getElementById('acsParametro').disabled = false;
+            document.getElementById('acsValor').disabled = false;
+            document.getElementById('acsParametro').placeholder = 'Ej: Device.WiFi.Radio.1.Enable';
+            document.getElementById('acsValor').placeholder = 'Ej: true, false, etc.';
+        }
+
+        // Funciones adicionales para comandos ACS personalizados
+        function copiarTodosComandosPersonalizados() {
+            // Esta función se puede usar para copiar comandos específicos de un modelo
+            mostrarModal('Información', 
+                'ℹ️ Los comandos ACS ahora se gestionan individualmente por cada modelo ONT que agregue.', 
+                'info');
+        }
+
+        // Inicializar ACS al cargar la página
+        function inicializarACS() {
+            cargarModelosONT();
+        }
+
+        // Función para copiar comando personalizado
+        function copiarComandoPersonalizado(comandoId) {
+            const comandosPersonalizados = JSON.parse(localStorage.getItem('comandosIMSPersonalizados') || '[]');
+            const comando = comandosPersonalizados.find(cmd => cmd.id === comandoId);
+            
+            if (!comando) return;
+
+            navigator.clipboard.writeText(comando.template).then(() => {
+                mostrarNotificacion(`Plantilla "${comando.nombre}" copiada`, 'success', 1500, 'Copiado');
+            });
+        }
+
+        // Función para eliminar comando personalizado
+        function eliminarComandoPersonalizado(comandoId) {
+            const comandosPersonalizados = JSON.parse(localStorage.getItem('comandosIMSPersonalizados') || '[]');
+            const comando = comandosPersonalizados.find(cmd => cmd.id === comandoId);
+            
+            if (!comando) return;
+
+            mostrarConfirmacion(
+                'Eliminar Comando Personalizado',
+                `¿Está seguro que desea eliminar el comando "${comando.nombre}"?\n\nEsta acción no se puede deshacer.`,
+                () => {
+                    const comandosActualizados = comandosPersonalizados.filter(cmd => cmd.id !== comandoId);
+                    localStorage.setItem('comandosIMSPersonalizados', JSON.stringify(comandosActualizados));
+                    actualizarComandosPersonalizados();
+                    mostrarNotificacion(`Comando "${comando.nombre}" eliminado`, 'success', 2000, 'Comando Eliminado');
+                },
+                null,
+                'delete'
+            );
         }
 
         // ===== GESTIÓN DE OLTs CON BD =====
@@ -802,11 +2800,11 @@
                         await cargarOLT(olts[0].id);
                     }
                 } else {
-                    mostrarNotificacion('Error al cargar OLTs', 'error');
+                    mostrarNotificacion('Error al cargar OLTs', 'error', 4000);
                 }
             } catch (error) {
                 console.error('Error al cargar OLTs:', error);
-                mostrarNotificacion('Error de conexión al cargar OLTs', 'error');
+                mostrarNotificacion('Error de conexión al cargar OLTs', 'error', 4000);
             }
         }
 
@@ -827,11 +2825,11 @@
                     actualizarDisplayOLT(olt);
                     renderComandos(olt.comandos);
                 } else {
-                    mostrarNotificacion('Error al cargar OLT', 'error');
+                    mostrarNotificacion('Error al cargar OLT', 'error', 4000);
                 }
             } catch (error) {
                 console.error('Error al cargar OLT:', error);
-                mostrarNotificacion('Error de conexión al cargar OLT', 'error');
+                mostrarNotificacion('Error de conexión al cargar OLT', 'error', 4000);
             }
         }
 
@@ -862,13 +2860,19 @@
         async function cambiarOLT(oltId) {
             if (oltId) {
                 await cargarOLT(oltId);
-                mostrarNotificacion('OLT cambiada correctamente', 'info', 1500);
+                mostrarNotificacion('OLT cambiada correctamente', 'info', 1500, 'OLT Activa');
             }
         }
 
         async function agregarNuevaOLT() {
-            const nombre = prompt('Nombre para la nueva OLT:', `ZTE C600 - ${olts.length + 1}`);
-            if (!nombre || nombre.trim() === '') return;
+            const nombre = await mostrarPrompt(
+                'Nueva OLT', 
+                'Ingrese el nombre para la nueva OLT:', 
+                'Ej: ZTE C600 - Central Norte',
+                `ZTE C600 - ${olts.length + 1}`
+            );
+            
+            if (!nombre || nombre === '') return;
             
             try {
                 const response = await fetch(`${API_BASE}/olts`, {
@@ -877,7 +2881,7 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        nombre: nombre.trim(),
+                        nombre: nombre,
                         shelf: 1,
                         slot: 1,
                         port: 1,
@@ -890,13 +2894,13 @@
                 
                 if (data.success) {
                     await cargarOLTs();
-                    mostrarNotificacion(`Nueva OLT "${nombre}" creada correctamente`, 'success');
+                    mostrarNotificacion(`Nueva OLT "${nombre}" creada correctamente`, 'success', 3000, 'OLT Creada');
                 } else {
-                    mostrarNotificacion('Error al crear OLT', 'error');
+                    mostrarNotificacion('Error al crear OLT', 'error', 4000);
                 }
             } catch (error) {
                 console.error('Error al crear OLT:', error);
-                mostrarNotificacion('Error de conexión al crear OLT', 'error');
+                mostrarNotificacion('Error de conexión al crear OLT', 'error', 4000);
             }
         }
 
@@ -927,14 +2931,14 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    mostrarNotificacion('OLT actualizada en la base de datos', 'success');
+                    mostrarNotificacion('OLT actualizada en la base de datos', 'success', 2500, 'Guardado Exitoso');
                     await cargarOLT(oltId);
                 } else {
-                    mostrarNotificacion('Error al guardar OLT', 'error');
+                    mostrarNotificacion('Error al guardar OLT', 'error', 4000);
                 }
             } catch (error) {
                 console.error('Error al guardar OLT:', error);
-                mostrarNotificacion('Error de conexión al guardar OLT', 'error');
+                mostrarNotificacion('Error de conexión al guardar OLT', 'error', 4000);
             }
         }
 
@@ -947,29 +2951,35 @@
             const olt = olts.find(o => o.id === oltId);
             if (!olt) return;
 
-            if (confirm(`¿Seguro que deseas eliminar la OLT "${olt.nombre}"? Esta acción no se puede deshacer.`)) {
-                try {
-                    const response = await fetch(`${API_BASE}/olts/${oltId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ userId: usuarioActual.id })
-                    });
+            mostrarConfirmacion(
+                'Eliminar OLT',
+                `¿Seguro que deseas eliminar la OLT "${olt.nombre}"?\n\nEsta acción no se puede deshacer y eliminará todos los comandos asociados.`,
+                async () => {
+                    try {
+                        const response = await fetch(`${API_BASE}/olts/${oltId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ userId: usuarioActual.id })
+                        });
 
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        await cargarOLTs();
-                        mostrarNotificacion(`OLT "${olt.nombre}" eliminada correctamente`, 'success');
-                    } else {
-                        mostrarNotificacion('Error al eliminar OLT', 'error');
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            await cargarOLTs();
+                            mostrarNotificacion(`OLT "${olt.nombre}" eliminada correctamente`, 'success', 3000, 'OLT Eliminada');
+                        } else {
+                            mostrarNotificacion('Error al eliminar OLT', 'error', 4000);
+                        }
+                    } catch (error) {
+                        console.error('Error al eliminar OLT:', error);
+                        mostrarNotificacion('Error de conexión al eliminar OLT', 'error', 4000);
                     }
-                } catch (error) {
-                    console.error('Error al eliminar OLT:', error);
-                    mostrarNotificacion('Error de conexión al eliminar OLT', 'error');
-                }
-            }
+                },
+                null,
+                'delete'
+            );
         }
 
         // ===== RENDERIZADO DE COMANDOS =====
@@ -981,10 +2991,58 @@
 
             comandos.forEach((cmd, idx) => {
                 const details = document.createElement('details');
+                details.className = 'comando-item';
                 details.style.marginBottom = '15px';
                 details.style.border = '1px solid #e1e5e9';
                 details.style.borderRadius = '8px';
                 details.style.padding = '8px';
+                details.setAttribute('data-comando-id', cmd.id);
+                details.setAttribute('data-orden', cmd.orden || idx);
+                details.draggable = true;
+
+                // Eventos de drag & drop
+                details.addEventListener('dragstart', handleDragStart);
+                details.addEventListener('dragover', handleDragOver);
+                details.addEventListener('drop', handleDrop);
+                details.addEventListener('dragend', handleDragEnd);
+
+                // Indicador de orden
+                const ordenInfo = document.createElement('div');
+                ordenInfo.className = 'orden-info';
+                ordenInfo.textContent = (cmd.orden || idx + 1);
+                details.appendChild(ordenInfo);
+
+                // Controles de reordenamiento
+                const controles = document.createElement('div');
+                controles.className = 'comando-controls';
+
+                const btnDrag = document.createElement('button');
+                btnDrag.className = 'btn-reorder btn-drag-handle';
+                btnDrag.innerHTML = '⋮⋮';
+                btnDrag.title = 'Arrastrar para reordenar';
+
+                const btnUp = document.createElement('button');
+                btnUp.className = 'btn-reorder btn-move-up';
+                btnUp.innerHTML = '↑';
+                btnUp.title = 'Mover hacia arriba';
+                btnUp.onclick = (e) => {
+                    e.stopPropagation();
+                    moverComando(cmd.id, 'up');
+                };
+
+                const btnDown = document.createElement('button');
+                btnDown.className = 'btn-reorder btn-move-down';
+                btnDown.innerHTML = '↓';
+                btnDown.title = 'Mover hacia abajo';
+                btnDown.onclick = (e) => {
+                    e.stopPropagation();
+                    moverComando(cmd.id, 'down');
+                };
+
+                controles.appendChild(btnDrag);
+                controles.appendChild(btnUp);
+                controles.appendChild(btnDown);
+                details.appendChild(controles);
 
                 // Título del comando
                 const summary = document.createElement('summary');
@@ -992,6 +3050,7 @@
                 summary.style.display = 'flex';
                 summary.style.alignItems = 'center';
                 summary.style.justifyContent = 'space-between';
+                summary.style.paddingRight = '120px'; // Espacio para los controles
 
                 const tituloDiv = document.createElement('div');
                 tituloDiv.style.display = 'flex';
@@ -999,7 +3058,7 @@
                 tituloDiv.style.flex = '1';
 
                 const numeroComando = document.createElement('span');
-                numeroComando.textContent = `${idx + 1}. `;
+                numeroComando.textContent = `${cmd.orden || idx + 1}. `;
                 numeroComando.style.fontWeight = 'bold';
                 numeroComando.style.marginRight = '8px';
                 numeroComando.style.color = 'var(--azul-antel)';
@@ -1065,7 +3124,7 @@
                 btnCopy.onclick = function () {
                     const textoCompleto = comandosReemplazados.join('\n');
                     navigator.clipboard.writeText(textoCompleto).then(() => {
-                        mostrarNotificacion('Comandos copiados al portapapeles', 'success', 1500);
+                        mostrarNotificacion('Comandos copiados al portapapeles', 'success', 1500, 'Copiado');
                     }).catch(() => {
                         const textArea = document.createElement('textarea');
                         textArea.value = textoCompleto;
@@ -1073,11 +3132,30 @@
                         textArea.select();
                         document.execCommand('copy');
                         document.body.removeChild(textArea);
-                        mostrarNotificacion('Comandos copiados al portapapeles', 'success', 1500);
+                        mostrarNotificacion('Comandos copiados al portapapeles', 'success', 1500, 'Copiado');
                     });
                 };
 
                 btnGroup.appendChild(btnCopy);
+
+                // Botón eliminar
+                const btnDelete = document.createElement('button');
+                btnDelete.textContent = '🗑️ Eliminar';
+                btnDelete.className = 'btn btn-delete';
+                btnDelete.style.fontSize = '14px';
+                btnDelete.onclick = function () {
+                    mostrarConfirmacion(
+                        'Eliminar Comando',
+                        `¿Estás seguro de que deseas eliminar el comando "${cmd.nombre}"?\n\nEsta acción no se puede deshacer.`,
+                        () => {
+                            eliminarComando(cmd.id, cmd.nombre);
+                        },
+                        null,
+                        'delete'
+                    );
+                };
+
+                btnGroup.appendChild(btnDelete);
                 details.appendChild(btnGroup);
                 container.appendChild(details);
             });
@@ -1124,6 +3202,174 @@
         function limpiarBusqueda() {
             document.getElementById('busqueda-comandos').value = '';
             document.getElementById('resultados-busqueda').innerHTML = '';
+        }
+
+        // ===== ELIMINAR COMANDO =====
+        async function eliminarComando(comandoId, nombreComando) {
+            try {
+                const response = await fetch(`${API_BASE}/comandos/${comandoId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userId: usuarioActual.id })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarNotificacion(`Comando "${nombreComando}" eliminado correctamente`, 'success', 3000, 'Comando Eliminado');
+                    
+                    // Recargar la OLT actual para reflejar los cambios
+                    const selector = document.getElementById('selector-olt');
+                    const oltId = selector.value;
+                    if (oltId) {
+                        await cargarOLT(oltId);
+                        await cargarEstadisticas(); // Actualizar estadísticas
+                    }
+                } else {
+                    mostrarNotificacion('Error al eliminar comando: ' + data.message, 'error', 4000);
+                }
+            } catch (error) {
+                console.error('Error al eliminar comando:', error);
+                mostrarNotificacion('Error de conexión al eliminar comando', 'error', 4000);
+            }
+        }
+
+        // ===== SISTEMA DE REORDENAMIENTO =====
+        let draggedElement = null;
+
+        function handleDragStart(e) {
+            draggedElement = e.target.closest('.comando-item');
+            draggedElement.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', draggedElement.outerHTML);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            
+            const targetElement = e.target.closest('.comando-item');
+            if (targetElement && targetElement !== draggedElement) {
+                // Remover clases de otros elementos
+                document.querySelectorAll('.comando-item').forEach(el => {
+                    el.classList.remove('drag-over');
+                });
+                
+                targetElement.classList.add('drag-over');
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const targetElement = e.target.closest('.comando-item');
+            
+            if (targetElement && draggedElement && targetElement !== draggedElement) {
+                const draggedId = draggedElement.getAttribute('data-comando-id');
+                const targetId = targetElement.getAttribute('data-comando-id');
+                
+                // Determinar si se mueve hacia arriba o abajo
+                const draggedOrder = parseInt(draggedElement.getAttribute('data-orden'));
+                const targetOrder = parseInt(targetElement.getAttribute('data-orden'));
+                
+                if (draggedOrder !== targetOrder) {
+                    reordenarComando(draggedId, targetId, draggedOrder < targetOrder ? 'after' : 'before');
+                }
+            }
+            
+            // Limpiar estados
+            document.querySelectorAll('.comando-item').forEach(el => {
+                el.classList.remove('drag-over');
+            });
+        }
+
+        function handleDragEnd(e) {
+            if (draggedElement) {
+                draggedElement.classList.remove('dragging');
+            }
+            
+            document.querySelectorAll('.comando-item').forEach(el => {
+                el.classList.remove('drag-over');
+            });
+            
+            draggedElement = null;
+        }
+
+        async function moverComando(comandoId, direccion) {
+            const selector = document.getElementById('selector-olt');
+            const oltId = selector.value;
+            
+            if (!oltId) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/comandos/${comandoId}/mover`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        direccion: direccion,
+                        oltId: oltId,
+                        userId: usuarioActual.id
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarNotificacion(
+                        `Comando movido ${direccion === 'up' ? 'hacia arriba' : 'hacia abajo'}`, 
+                        'success', 
+                        1500, 
+                        'Reordenado'
+                    );
+                    
+                    // Recargar comandos para mostrar el nuevo orden
+                    await cargarOLT(oltId);
+                } else {
+                    mostrarNotificacion('Error al mover comando: ' + data.message, 'error', 3000);
+                }
+            } catch (error) {
+                console.error('Error al mover comando:', error);
+                mostrarNotificacion('Error de conexión al mover comando', 'error', 3000);
+            }
+        }
+
+        async function reordenarComando(comandoId, targetId, posicion) {
+            const selector = document.getElementById('selector-olt');
+            const oltId = selector.value;
+            
+            if (!oltId) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/comandos/${comandoId}/reordenar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        targetId: targetId,
+                        posicion: posicion,
+                        oltId: oltId,
+                        userId: usuarioActual.id
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarNotificacion('Comandos reordenados correctamente', 'success', 1500, 'Reordenado');
+                    
+                    // Recargar comandos para mostrar el nuevo orden
+                    await cargarOLT(oltId);
+                } else {
+                    mostrarNotificacion('Error al reordenar comando: ' + data.message, 'error', 3000);
+                }
+            } catch (error) {
+                console.error('Error al reordenar comando:', error);
+                mostrarNotificacion('Error de conexión al reordenar comando', 'error', 3000);
+            }
         }
 
         // ===== FUNCIONES AUXILIARES =====
@@ -1193,52 +3439,626 @@
 
         function recargarOLTs() {
             cargarOLTs();
-            mostrarNotificacion('OLTs recargadas desde la base de datos', 'info', 1500);
+            mostrarNotificacion('OLTs recargadas desde la base de datos', 'info', 1500, 'Datos Actualizados');
         }
 
-        // ===== SISTEMA DE NOTIFICACIONES =====
-        function mostrarNotificacion(texto, tipo = 'info', duracion = 3000) {
-            const colores = {
-                'success': '#28a745',
-                'error': '#dc3545',
-                'warning': '#ffc107',
-                'info': '#17a2b8'
+        // ===== SISTEMA DE NOTIFICACIONES MEJORADO =====
+        function mostrarNotificacion(texto, tipo = 'info', duracion = 3000, titulo = null) {
+            const container = document.getElementById('notificationContainer');
+            
+            const iconos = {
+                'success': '✅',
+                'error': '❌',
+                'warning': '⚠️',
+                'info': 'ℹ️'
             };
 
-            let notificacion = document.getElementById('notificacion-sistema');
-            if (!notificacion) {
-                notificacion = document.createElement('div');
-                notificacion.id = 'notificacion-sistema';
-                document.body.appendChild(notificacion);
-            }
+            const titulos = {
+                'success': titulo || 'Éxito',
+                'error': titulo || 'Error',
+                'warning': titulo || 'Advertencia',
+                'info': titulo || 'Información'
+            };
 
-            notificacion.style.cssText = `
-                position: fixed;
-                top: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: ${colores[tipo] || colores.info};
-                color: white;
-                padding: 15px 30px;
-                border-radius: 8px;
-                font-size: 16px;
-                z-index: 10000;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                opacity: 0;
-                transition: opacity 0.3s ease;
+            const notification = document.createElement('div');
+            notification.className = `notification ${tipo}`;
+            
+            notification.innerHTML = `
+                <div class="notification-icon">${iconos[tipo] || iconos.info}</div>
+                <div class="notification-content">
+                    <div class="notification-title">${titulos[tipo]}</div>
+                    <div class="notification-message">${texto}</div>
+                </div>
+                <button class="notification-close" onclick="cerrarNotificacion(this)">×</button>
+                <div class="notification-progress" style="animation-duration: ${duracion}ms;"></div>
             `;
 
-            notificacion.textContent = texto;
-            notificacion.style.opacity = '1';
+            container.appendChild(notification);
 
+            // Auto-eliminar después del tiempo especificado
             setTimeout(() => {
-                notificacion.style.opacity = '0';
-                setTimeout(() => {
-                    if (notificacion.parentNode) {
-                        notificacion.parentNode.removeChild(notificacion);
-                    }
-                }, 300);
+                if (notification.parentNode) {
+                    notification.style.animation = 'notificationSlideOut 0.3s ease forwards';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }
             }, duracion);
+        }
+
+        function cerrarNotificacion(btn) {
+            const notification = btn.closest('.notification');
+            notification.style.animation = 'notificationSlideOut 0.3s ease forwards';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }
+
+        // Añadir animación de salida
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes notificationSlideOut {
+                to {
+                    opacity: 0;
+                    transform: translateX(400px);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // ===== SISTEMA DE MODALES PERSONALIZADOS =====
+        function mostrarPrompt(titulo, mensaje, placeholder = '', valorInicial = '') {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('promptModal');
+                const modalIcon = document.getElementById('promptIcon');
+                const modalTitle = document.getElementById('promptTitle');
+                const modalMessage = document.getElementById('promptMessage');
+                const input = document.getElementById('promptInput');
+                const btnOk = document.getElementById('promptOk');
+                const btnCancel = document.getElementById('promptCancel');
+
+                modalIcon.textContent = '📝';
+                modalTitle.textContent = titulo;
+                modalMessage.textContent = mensaje;
+                input.placeholder = placeholder;
+                input.value = valorInicial;
+
+                // Limpiar eventos anteriores
+                const newBtnOk = btnOk.cloneNode(true);
+                const newBtnCancel = btnCancel.cloneNode(true);
+                btnOk.parentNode.replaceChild(newBtnOk, btnOk);
+                btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
+
+                // Configurar nuevos eventos
+                newBtnOk.onclick = () => {
+                    const valor = input.value.trim();
+                    modal.style.display = 'none';
+                    resolve(valor);
+                };
+
+                newBtnCancel.onclick = () => {
+                    modal.style.display = 'none';
+                    resolve(null);
+                };
+
+                // Enter para aceptar, ESC para cancelar
+                const handleKeydown = (e) => {
+                    if (e.key === 'Enter') {
+                        const valor = input.value.trim();
+                        modal.style.display = 'none';
+                        resolve(valor);
+                        document.removeEventListener('keydown', handleKeydown);
+                    } else if (e.key === 'Escape') {
+                        modal.style.display = 'none';
+                        resolve(null);
+                        document.removeEventListener('keydown', handleKeydown);
+                    }
+                };
+                document.addEventListener('keydown', handleKeydown);
+
+                // Mostrar modal y enfocar input
+                modal.style.display = 'flex';
+                setTimeout(() => input.focus(), 100);
+            });
+        }
+
+        function mostrarTextarea(titulo, mensaje, placeholder = '', valorInicial = '') {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('textareaModal');
+                const modalIcon = document.getElementById('textareaIcon');
+                const modalTitle = document.getElementById('textareaTitle');
+                const modalMessage = document.getElementById('textareaMessage');
+                const textarea = document.getElementById('textareaInput');
+                const btnOk = document.getElementById('textareaOk');
+                const btnCancel = document.getElementById('textareaCancel');
+
+                modalIcon.textContent = '📄';
+                modalTitle.textContent = titulo;
+                modalMessage.textContent = mensaje;
+                textarea.placeholder = placeholder;
+                textarea.value = valorInicial;
+
+                // Limpiar eventos anteriores
+                const newBtnOk = btnOk.cloneNode(true);
+                const newBtnCancel = btnCancel.cloneNode(true);
+                btnOk.parentNode.replaceChild(newBtnOk, btnOk);
+                btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
+
+                // Configurar nuevos eventos
+                newBtnOk.onclick = () => {
+                    const valor = textarea.value.trim();
+                    modal.style.display = 'none';
+                    resolve(valor);
+                };
+
+                newBtnCancel.onclick = () => {
+                    modal.style.display = 'none';
+                    resolve(null);
+                };
+
+                // Ctrl+Enter para aceptar, ESC para cancelar
+                const handleKeydown = (e) => {
+                    if (e.key === 'Enter' && e.ctrlKey) {
+                        const valor = textarea.value.trim();
+                        modal.style.display = 'none';
+                        resolve(valor);
+                        document.removeEventListener('keydown', handleKeydown);
+                    } else if (e.key === 'Escape') {
+                        modal.style.display = 'none';
+                        resolve(null);
+                        document.removeEventListener('keydown', handleKeydown);
+                    }
+                };
+                document.addEventListener('keydown', handleKeydown);
+
+                // Mostrar modal y enfocar textarea
+                modal.style.display = 'flex';
+                setTimeout(() => textarea.focus(), 100);
+            });
+        }
+
+        function mostrarAlert(titulo, mensaje, icono = 'ℹ️') {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('alertModal');
+                const modalIcon = document.getElementById('alertIcon');
+                const modalTitle = document.getElementById('alertTitle');
+                const modalMessage = document.getElementById('alertMessage');
+                const btnOk = document.getElementById('alertOk');
+
+                modalIcon.textContent = icono;
+                modalTitle.textContent = titulo;
+                modalMessage.innerHTML = mensaje.replace(/\n/g, '<br>');
+
+                // Limpiar eventos anteriores
+                const newBtnOk = btnOk.cloneNode(true);
+                btnOk.parentNode.replaceChild(newBtnOk, btnOk);
+
+                // Configurar nuevo evento
+                newBtnOk.onclick = () => {
+                    modal.style.display = 'none';
+                    resolve();
+                };
+
+                // Enter o ESC para cerrar
+                const handleKeydown = (e) => {
+                    if (e.key === 'Enter' || e.key === 'Escape') {
+                        modal.style.display = 'none';
+                        resolve();
+                        document.removeEventListener('keydown', handleKeydown);
+                    }
+                };
+                document.addEventListener('keydown', handleKeydown);
+
+                // Mostrar modal
+                modal.style.display = 'flex';
+            });
+        }
+
+        // ===== SISTEMA DE CONFIRMACIÓN MEJORADO =====
+        function mostrarConfirmacion(titulo, mensaje, onConfirm, onCancel = null, iconoTipo = 'confirm') {
+            const modal = document.getElementById('confirmModal');
+            const modalIcon = document.getElementById('confirmIcon');
+            const modalTitle = document.getElementById('confirmTitle');
+            const modalMessage = document.getElementById('confirmMessage');
+            const btnYes = document.getElementById('confirmYes');
+            const btnNo = document.getElementById('confirmNo');
+
+            const iconos = {
+                'confirm': '⚠️',
+                'delete': '🗑️',
+                'warning': '⚠️',
+                'question': '❓'
+            };
+
+            modalIcon.textContent = iconos[iconoTipo] || iconos.confirm;
+            modalTitle.textContent = titulo;
+            modalMessage.textContent = mensaje;
+
+            // Limpiar eventos anteriores
+            const newBtnYes = btnYes.cloneNode(true);
+            const newBtnNo = btnNo.cloneNode(true);
+            btnYes.parentNode.replaceChild(newBtnYes, btnYes);
+            btnNo.parentNode.replaceChild(newBtnNo, btnNo);
+
+            // Configurar nuevos eventos
+            newBtnYes.onclick = () => {
+                modal.style.display = 'none';
+                if (onConfirm) onConfirm();
+            };
+
+            newBtnNo.onclick = () => {
+                modal.style.display = 'none';
+                if (onCancel) onCancel();
+            };
+
+            // Cerrar con ESC
+            const handleEsc = (e) => {
+                if (e.key === 'Escape') {
+                    modal.style.display = 'none';
+                    if (onCancel) onCancel();
+                    document.removeEventListener('keydown', handleEsc);
+                }
+            };
+            document.addEventListener('keydown', handleEsc);
+
+            // Mostrar modal
+            modal.style.display = 'flex';
+        }
+
+        // ===== FUNCIONES ADICIONALES =====
+        async function editarNombre() {
+            const selector = document.getElementById('selector-olt');
+            const oltId = selector.value;
+            
+            if (!oltId) {
+                mostrarNotificacion('Selecciona una OLT para editar', 'warning', 2000);
+                return;
+            }
+
+            const olt = olts.find(o => o.id === oltId);
+            if (!olt) return;
+
+            const nuevoNombre = await mostrarPrompt(
+                'Editar Nombre de OLT',
+                'Ingrese el nuevo nombre para la OLT:',
+                'Nombre de la OLT',
+                olt.nombre
+            );
+            
+            if (!nuevoNombre || nuevoNombre === olt.nombre) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/olts/${oltId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        nombre: nuevoNombre,
+                        shelf: olt.shelf,
+                        slot: olt.slot,
+                        port: olt.port,
+                        onu_id: olt.onu_id,
+                        userId: usuarioActual.id
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarNotificacion(`Nombre cambiado a "${nuevoNombre}"`, 'success', 2500, 'OLT Actualizada');
+                    await cargarOLTs();
+                    await cargarOLT(oltId);
+                } else {
+                    mostrarNotificacion('Error al cambiar nombre', 'error', 3000);
+                }
+            } catch (error) {
+                console.error('Error al editar nombre:', error);
+                mostrarNotificacion('Error de conexión', 'error', 3000);
+            }
+        }
+
+        async function duplicarOLT() {
+            const selector = document.getElementById('selector-olt');
+            const oltId = selector.value;
+            
+            if (!oltId) {
+                mostrarNotificacion('Selecciona una OLT para duplicar', 'warning', 2000);
+                return;
+            }
+
+            const olt = olts.find(o => o.id === oltId);
+            if (!olt) return;
+
+            const nuevoNombre = await mostrarPrompt(
+                'Duplicar OLT',
+                'Ingrese el nombre para la OLT duplicada:',
+                'Nombre de la nueva OLT',
+                `${olt.nombre} - Copia`
+            );
+            
+            if (!nuevoNombre) return;
+
+            try {
+                // Crear nueva OLT
+                const response = await fetch(`${API_BASE}/olts`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        nombre: nuevoNombre,
+                        shelf: olt.shelf,
+                        slot: olt.slot,
+                        port: olt.port,
+                        onu_id: olt.onu_id,
+                        userId: usuarioActual.id
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Obtener comandos de la OLT original
+                    const oltResponse = await fetch(`${API_BASE}/olts/${oltId}`);
+                    const oltData = await oltResponse.json();
+                    
+                    if (oltData.success && oltData.olt.comandos) {
+                        // Duplicar comandos
+                        for (const cmd of oltData.olt.comandos) {
+                            await fetch(`${API_BASE}/comandos`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    olt_id: data.olt_id,
+                                    nombre: cmd.nombre,
+                                    descripcion: cmd.descripcion,
+                                    comandos: cmd.comandos,
+                                    categoria: cmd.categoria,
+                                    userId: usuarioActual.id
+                                })
+                            });
+                        }
+                    }
+                    
+                    mostrarNotificacion(`OLT duplicada como "${nuevoNombre}"`, 'success', 3000, 'OLT Duplicada');
+                    await cargarOLTs();
+                } else {
+                    mostrarNotificacion('Error al duplicar OLT', 'error', 3000);
+                }
+            } catch (error) {
+                console.error('Error al duplicar OLT:', error);
+                mostrarNotificacion('Error de conexión', 'error', 3000);
+            }
+        }
+
+        async function estadisticasDB() {
+            try {
+                const response = await fetch(`${API_BASE}/logs?limit=10`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const totalOlts = olts.length;
+                    let totalComandos = 0;
+                    
+                    for (const olt of olts) {
+                        const oltResp = await fetch(`${API_BASE}/olts/${olt.id}`);
+                        const oltData = await oltResp.json();
+                        if (oltData.success) {
+                            totalComandos += oltData.olt.comandos.length;
+                        }
+                    }
+                    
+                    const ultimaActividad = data.logs.length > 0 ? 
+                        new Date(data.logs[0].fecha).toLocaleString() : 'N/A';
+                    
+                    const estadisticas = `📊 ESTADÍSTICAS DE LA BASE DE DATOS
+
+🏢 OLTs Total: ${totalOlts}
+📋 Comandos Total: ${totalComandos}
+👤 Usuario Actual: ${usuarioActual.nombre_completo || usuarioActual.username}
+🕒 Última Actividad: ${ultimaActividad}
+📝 Logs Recientes: ${data.logs.length}
+
+💾 Base de Datos: SQLite
+🌐 Sistema: OLT Antel v2.0`;
+
+                    await mostrarAlert('Estadísticas del Sistema', estadisticas, '📊');
+                } else {
+                    mostrarNotificacion('Error al obtener estadísticas', 'error', 3000);
+                }
+            } catch (error) {
+                console.error('Error al obtener estadísticas:', error);
+                mostrarNotificacion('Error de conexión', 'error', 3000);
+            }
+        }
+
+        function exportarBD() {
+            mostrarConfirmacion(
+                'Exportar Base de Datos',
+                'Esta funcionalidad exportará todos los datos en formato JSON. ¿Continuar?',
+                async () => {
+                    try {
+                        // Recopilar todos los datos
+                        const datosExportacion = {
+                            fecha_exportacion: new Date().toISOString(),
+                            usuario: usuarioActual.username,
+                            olts: [],
+                            comandos: []
+                        };
+
+                        // Obtener todas las OLTs y sus comandos
+                        for (const olt of olts) {
+                            const oltResp = await fetch(`${API_BASE}/olts/${olt.id}`);
+                            const oltData = await oltResp.json();
+                            if (oltData.success) {
+                                datosExportacion.olts.push({
+                                    nombre: oltData.olt.nombre,
+                                    shelf: oltData.olt.shelf,
+                                    slot: oltData.olt.slot,
+                                    port: oltData.olt.port,
+                                    onu_id: oltData.olt.onu_id,
+                                    comandos: oltData.olt.comandos
+                                });
+                            }
+                        }
+
+                        // Crear archivo de descarga
+                        const blob = new Blob([JSON.stringify(datosExportacion, null, 2)], 
+                            { type: 'application/json' });
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `olt_antel_backup_${new Date().toISOString().split('T')[0]}.json`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+
+                        mostrarNotificacion('Base de datos exportada correctamente', 'success', 3000, 'Exportación Completa');
+                    } catch (error) {
+                        console.error('Error al exportar:', error);
+                        mostrarNotificacion('Error al exportar base de datos', 'error', 3000);
+                    }
+                },
+                null,
+                'question'
+            );
+        }
+
+        // ===== INICIALIZACIÓN DEL SISTEMA =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar sesión
+            if (verificarSesion()) {
+                cargarOLTs();
+                cargarEstadisticas();
+            }
+
+            // Configurar navegación entre pestañas
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Remover clase active de todas las pestañas
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                    
+                    // Activar pestaña y contenido seleccionado
+                    this.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                    
+                    // Inicializar funcionalidades específicas según la pestaña
+                    if (tabId === 'ims') {
+                        inicializarIMS();
+                    } else if (tabId === 'acs') {
+                        inicializarACS();
+                    }
+                });
+            });
+
+            // Configurar búsqueda de comandos
+            const searchInput = document.getElementById('busqueda-comandos');
+            if (searchInput) {
+                let timeoutId;
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(timeoutId);
+                    timeoutId = setTimeout(() => {
+                        buscarComandosDB(this.value);
+                    }, 300);
+                });
+            }
+
+            // Configurar event listeners para el sistema
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            console.log('🚀 Sistema OLT Antel v2.0 con IMS iniciado correctamente');
+        }
+
+        // ===== AGREGAR COMANDO =====
+        async function agregarComando() {
+            const selector = document.getElementById('selector-olt');
+            const oltId = selector.value;
+            
+            if (!oltId) {
+                mostrarNotificacion('Selecciona una OLT antes de agregar un comando', 'warning', 3000);
+                return;
+            }
+
+            // Solicitar nombre del comando
+            const nombre = await mostrarPrompt(
+                'Nuevo Comando',
+                'Ingrese el nombre del comando:',
+                'Ej: Configurar Bridge VOIP',
+                ''
+            );
+            if (!nombre) {
+                mostrarNotificacion('El nombre del comando es obligatorio', 'warning', 2000);
+                return;
+            }
+
+            // Solicitar descripción (opcional)
+            const descripcion = await mostrarPrompt(
+                'Descripción del Comando',
+                'Ingrese una descripción para el comando (opcional):',
+                'Ej: Configuración de bridge para servicios VOIP',
+                ''
+            );
+            
+            // Solicitar comandos
+            const comandosTexto = await mostrarTextarea(
+                'Comandos',
+                'Ingrese los comandos (uno por línea):',
+                'Ej:\nshow running-config interface gpon-olt_{shelf}/{slot}/{port}\nshow onu running config gpon-onu_{shelf}/{slot}/{port}:{onuId}',
+                ''
+            );
+            
+            if (!comandosTexto) {
+                mostrarNotificacion('Los comandos son obligatorios', 'warning', 2000);
+                return;
+            }
+
+            const comandosArray = comandosTexto.split('\n').filter(cmd => cmd.trim() !== '');
+
+            try {
+                const response = await fetch(`${API_BASE}/comandos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        nombre: nombre,
+                        descripcion: descripcion || '',
+                        comandos: comandosArray,
+                        olt_id: oltId,
+                        userId: usuarioActual.id
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarNotificacion(`Comando "${nombre}" agregado correctamente`, 'success', 3000, 'Comando Creado');
+                    
+                    // Recargar la OLT actual para mostrar el nuevo comando
+                    await cargarOLT(oltId);
+                    await cargarEstadisticas(); // Actualizar estadísticas
+                } else {
+                    mostrarNotificacion('Error al agregar comando: ' + data.message, 'error', 4000);
+                }
+            } catch (error) {
+                console.error('Error al agregar comando:', error);
+                mostrarNotificacion('Error de conexión al agregar comando', 'error', 4000);
+            }
         }
 
         // ===== GESTIÓN DE PESTAÑAS =====
@@ -1258,6 +4078,9 @@
                 cargarOLTs();
                 cargarEstadisticas();
             }
+            
+            // Inicializar funcionalidades específicas
+            inicializarACS();
         });
     </script>
 </body>
