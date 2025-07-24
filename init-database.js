@@ -63,6 +63,30 @@ db.serialize(() => {
         FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
     )`);
 
+    // Tabla de modelos ONT para ACS
+    db.run(`CREATE TABLE IF NOT EXISTS modelos_ont (
+        id TEXT PRIMARY KEY,
+        fabricante TEXT NOT NULL,
+        modelo TEXT NOT NULL,
+        version TEXT,
+        tipo TEXT NOT NULL,
+        descripcion TEXT,
+        fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+        usuario_id INTEGER,
+        FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
+    )`);
+
+    // Tabla de comandos específicos de modelos ONT
+    db.run(`CREATE TABLE IF NOT EXISTS comandos_ont (
+        id TEXT PRIMARY KEY,
+        modelo_id TEXT NOT NULL,
+        comando TEXT NOT NULL,
+        descripcion TEXT,
+        orden INTEGER DEFAULT 0,
+        fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (modelo_id) REFERENCES modelos_ont (id) ON DELETE CASCADE
+    )`);
+
     // Insertar usuario por defecto
     const bcrypt = require('bcrypt');
     const defaultPassword = bcrypt.hashSync('vinil28', 10);

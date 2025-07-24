@@ -1,25 +1,33 @@
 {
   "name": "sistema-olt-antel",
-  "version": "1.0.0",
-  "description": "Sistema de gestión OLT ZTE C600 con base de datos",
+  "version": "2.0.0",
+  "description": "Sistema de gestión OLT Antel con base de datos completa - Usuarios, OLTs, Comandos, IMS, ACS",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
     "init-db": "node init-database.js",
-    "import-comandos": "node import-comandos.js"
+    "import-comandos": "node import-comandos.js",
+    "migrate-users": "node scripts/migrate-users.js",
+    "migrate-all": "node scripts/migrate-all.js",
+    "reset-db": "node scripts/reset-database.js"
   },
   "dependencies": {
     "express": "^4.18.2",
     "sqlite3": "^5.1.6",
     "cors": "^2.8.5",
     "body-parser": "^1.20.2",
-    "bcrypt": "^5.1.1"
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "express-rate-limit": "^6.7.0",
+    "helmet": "^7.0.0",
+    "morgan": "^1.10.0",
+    "dotenv": "^16.3.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
   },
-  "keywords": ["olt", "zte", "c600", "antel", "telecom"],
-  "author": "Tu Nombre",
+  "keywords": ["olt", "antel", "telecom", "network", "management", "ims", "acs", "usuarios"],
+  "author": "Sistema OLT Antel v2.0",
   "license": "MIT"
 }

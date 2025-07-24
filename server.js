@@ -65,8 +65,311 @@ app.post('/api/login', (req, res) => {
                 id: user.id,
                 username: user.username,
                 nombre_completo: user.nombre_completo,
+                email: user.email,
                 rol: user.rol
             }
+        });
+    });
+});
+
+// ===== RUTAS DE USUARIOS =====
+
+// Obtener todos los usuarios
+app.get('/api/usuarios', (req, res) => {
+    db.all(`SELECT id, username, nombre_completo, email, rol, descripcion, activo, fecha_creacion, ultimo_acceso 
+            FROM usuarios ORDER BY rol, username`, (err, usuarios) => {
+        if (err) {
+            console.error('Error al obtener usuarios:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+        res.json({ success: true, usuarios });
+    });
+});
+
+// Obtener un usuario específico
+app.get('/api/usuarios/:id', (req, res) => {
+    const userId = req.params.id;
+    
+    db.get(`SELECT id, username, nombre_completo, email, rol, descripcion, activo, fecha_creacion, ultimo_acceso 
+            FROM usuarios WHERE id = ?`, [userId], (err, usuario) => {
+        if (err) {
+            console.error('Error al obtener usuario:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+        
+        if (!usuario) {
+            return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+        }
+
+        res.json({ success: true, usuario });
+    });
+});
+
+// Crear nuevo usuario
+app.post('/api/usuarios', (req, res) => {
+    const { username, password, nombre_completo, email, rol, descripcion, activo, creadorId } = req.body;
+    
+    if (!username || !password) {
+        return res.status(400).json({ success: false, message: 'Username y password son obligatorios' });
+    }
+
+    // Verificar si el username ya existe
+    db.get(`SELECT id FROM usuarios WHERE username = ?`, [username], (err, existingUser) => {
+        if (err) {
+            console.error('Error al verificar usuario:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+
+        if (existingUser) {
+            return res.status(400).json({ success: false, message: 'El nombre de usuario ya existe' });
+        }
+
+        // Crear el usuario
+        const hashedPassword = bcrypt.hashSync(password, 10);
+        
+        db.run(`INSERT INTO usuarios (username, password_hash, nombre_completo, email, rol, descripcion, activo) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [username, hashedPassword, nombre_completo, email, rol || 'usuario', descripcion, activo !== false],
+            function(err) {
+                if (err) {
+                    console.error('Error al crear usuario:', err);
+                    return res.status(500).json({ success: false, message: 'Error del servidor' });
+                }
+
+                logActivity(creadorId, 'crear_usuario', `Usuario: ${username}, Rol: ${rol}`, req.ip);
+                
+                res.json({
+                    success: true,
+                    message: 'Usuario creado correctamente',
+                    usuario: { id: this.lastID, username, nombre_completo, email, rol }
+                });
+            }
+        );
+    });
+});
+
+// Actualizar usuario
+app.put('/api/usuarios/:id', (req, res) => {
+    const userId = req.params.id;
+    const { username, nombre_completo, email, rol, descripcion, activo, editorId } = req.body;
+
+    if (!username) {
+        return res.status(400).json({ success: false, message: 'Username es obligatorio' });
+    }
+
+    // Verificar si el username ya existe en otro usuario
+    db.get(`SELECT id FROM usuarios WHERE username = ? AND id != ?`, [username, userId], (err, existingUser) => {
+        if (err) {
+            console.error('Error al verificar usuario:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+
+        if (existingUser) {
+            return res.status(400).json({ success: false, message: 'El nombre de usuario ya existe' });
+        }
+
+        db.run(`UPDATE usuarios SET 
+                username = ?, nombre_completo = ?, email = ?, rol = ?, descripcion = ?, activo = ?
+                WHERE id = ?`,
+            [username, nombre_completo, email, rol, descripcion, activo, userId],
+            function(err) {
+                if (err) {
+                    console.error('Error al actualizar usuario:', err);
+                    return res.status(500).json({ success: false, message: 'Error del servidor' });
+                }
+
+                if (this.changes === 0) {
+                    return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+                }
+
+                logActivity(editorId, 'actualizar_usuario', `Usuario: ${username}`, req.ip);
+                
+                res.json({ success: true, message: 'Usuario actualizado correctamente' });
+            }
+        );
+    });
+});
+
+// Eliminar usuario
+app.delete('/api/usuarios/:id', (req, res) => {
+    const userId = req.params.id;
+    const { eliminadorId } = req.body;
+
+    // Verificar que no sea el usuario alito
+    db.get(`SELECT username FROM usuarios WHERE id = ?`, [userId], (err, usuario) => {
+        if (err) {
+            console.error('Error al obtener usuario:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+
+        if (!usuario) {
+            return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+        }
+
+        if (usuario.username === 'alito') {
+            return res.status(403).json({ success: false, message: 'No se puede eliminar el usuario alito' });
+        }
+
+        db.run(`DELETE FROM usuarios WHERE id = ?`, [userId], function(err) {
+            if (err) {
+                console.error('Error al eliminar usuario:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+
+            if (this.changes === 0) {
+                return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+            }
+
+            logActivity(eliminadorId, 'eliminar_usuario', `Usuario: ${usuario.username}`, req.ip);
+            
+            res.json({ success: true, message: 'Usuario eliminado correctamente' });
+        });
+    });
+});
+
+// Cambiar contraseña
+app.post('/api/usuarios/cambiar-password', (req, res) => {
+    const { userId, passwordActual, passwordNueva } = req.body;
+
+    if (!userId || !passwordActual || !passwordNueva) {
+        return res.status(400).json({ success: false, message: 'Todos los campos son obligatorios' });
+    }
+
+    if (passwordNueva.length < 4) {
+        return res.status(400).json({ success: false, message: 'La nueva contraseña debe tener al menos 4 caracteres' });
+    }
+
+    // Verificar contraseña actual
+    db.get(`SELECT password_hash, username FROM usuarios WHERE id = ?`, [userId], (err, usuario) => {
+        if (err) {
+            console.error('Error al obtener usuario:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+
+        if (!usuario) {
+            return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+        }
+
+        if (!bcrypt.compareSync(passwordActual, usuario.password_hash)) {
+            return res.status(400).json({ success: false, message: 'La contraseña actual es incorrecta' });
+        }
+
+        // Actualizar contraseña
+        const hashedNewPassword = bcrypt.hashSync(passwordNueva, 10);
+        
+        db.run(`UPDATE usuarios SET password_hash = ? WHERE id = ?`, [hashedNewPassword, userId], function(err) {
+            if (err) {
+                console.error('Error al cambiar contraseña:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+
+            logActivity(userId, 'cambiar_password', `Usuario: ${usuario.username}`, req.ip);
+            
+            res.json({ success: true, message: 'Contraseña cambiada correctamente' });
+        });
+    });
+});
+
+// ===== RUTAS DE COMANDOS IMS =====
+
+// Obtener todos los comandos IMS
+app.get('/api/comandos-ims', (req, res) => {
+    db.all(`SELECT * FROM comandos_ims WHERE activo = 1 ORDER BY categoria, nombre`, (err, comandos) => {
+        if (err) {
+            console.error('Error al obtener comandos IMS:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+        res.json({ success: true, comandos });
+    });
+});
+
+// Crear nuevo comando IMS
+app.post('/api/comandos-ims', (req, res) => {
+    const { nombre, descripcion, template, categoria, creadorId } = req.body;
+    
+    if (!nombre || !template) {
+        return res.status(400).json({ success: false, message: 'Nombre y template son obligatorios' });
+    }
+
+    db.run(`INSERT INTO comandos_ims (nombre, descripcion, template, categoria, usuario_creador) 
+            VALUES (?, ?, ?, ?, ?)`,
+        [nombre, descripcion, template, categoria || 'general', creadorId],
+        function(err) {
+            if (err) {
+                console.error('Error al crear comando IMS:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+
+            logActivity(creadorId, 'crear_comando_ims', `Comando: ${nombre}`, req.ip);
+            
+            res.json({
+                success: true,
+                message: 'Comando IMS creado correctamente',
+                comando: { id: this.lastID, nombre, descripcion, template, categoria }
+            });
+        }
+    );
+});
+
+// Actualizar comando IMS
+app.put('/api/comandos-ims/:id', (req, res) => {
+    const comandoId = req.params.id;
+    const { nombre, descripcion, template, categoria, editorId } = req.body;
+
+    if (!nombre || !template) {
+        return res.status(400).json({ success: false, message: 'Nombre y template son obligatorios' });
+    }
+
+    db.run(`UPDATE comandos_ims SET 
+            nombre = ?, descripcion = ?, template = ?, categoria = ?
+            WHERE id = ?`,
+        [nombre, descripcion, template, categoria, comandoId],
+        function(err) {
+            if (err) {
+                console.error('Error al actualizar comando IMS:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+
+            if (this.changes === 0) {
+                return res.status(404).json({ success: false, message: 'Comando IMS no encontrado' });
+            }
+
+            logActivity(editorId, 'actualizar_comando_ims', `Comando: ${nombre}`, req.ip);
+            
+            res.json({ success: true, message: 'Comando IMS actualizado correctamente' });
+        }
+    );
+});
+
+// Eliminar comando IMS
+app.delete('/api/comandos-ims/:id', (req, res) => {
+    const comandoId = req.params.id;
+    const { eliminadorId } = req.body;
+
+    // Obtener info del comando para el log
+    db.get(`SELECT nombre FROM comandos_ims WHERE id = ?`, [comandoId], (err, comando) => {
+        if (err) {
+            console.error('Error al obtener comando IMS:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+
+        if (!comando) {
+            return res.status(404).json({ success: false, message: 'Comando IMS no encontrado' });
+        }
+
+        db.run(`DELETE FROM comandos_ims WHERE id = ?`, [comandoId], function(err) {
+            if (err) {
+                console.error('Error al eliminar comando IMS:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+
+            if (this.changes === 0) {
+                return res.status(404).json({ success: false, message: 'Comando IMS no encontrado' });
+            }
+
+            logActivity(eliminadorId, 'eliminar_comando_ims', `Comando: ${comando.nombre}`, req.ip);
+            
+            res.json({ success: true, message: 'Comando IMS eliminado correctamente' });
         });
     });
 });
@@ -512,6 +815,160 @@ app.get('/api/logs', (req, res) => {
             return res.status(500).json({ success: false, message: 'Error del servidor' });
         }
         res.json({ success: true, logs: rows });
+    });
+});
+
+// ===== RUTAS DE MODELOS ONT (ACS) =====
+
+// Obtener todos los modelos ONT
+app.get('/api/modelos-ont', (req, res) => {
+    db.all(`SELECT * FROM modelos_ont ORDER BY fabricante, modelo`, (err, modelos) => {
+        if (err) {
+            console.error('Error al obtener modelos ONT:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+
+        // Obtener comandos para cada modelo
+        const modelosConComandos = [];
+        let processed = 0;
+
+        if (modelos.length === 0) {
+            return res.json({ success: true, modelos: [] });
+        }
+
+        modelos.forEach(modelo => {
+            db.all(`SELECT * FROM comandos_ont WHERE modelo_id = ? ORDER BY orden`, [modelo.id], (err, comandos) => {
+                if (!err) {
+                    modelo.comandos = comandos || [];
+                }
+                modelosConComandos.push(modelo);
+                processed++;
+
+                if (processed === modelos.length) {
+                    res.json({ success: true, modelos: modelosConComandos });
+                }
+            });
+        });
+    });
+});
+
+// Crear nuevo modelo ONT
+app.post('/api/modelos-ont', (req, res) => {
+    const { id, fabricante, modelo, version, tipo, descripcion, comandos, usuarioId } = req.body;
+    
+    db.run(`INSERT INTO modelos_ont (id, fabricante, modelo, version, tipo, descripcion, usuario_id) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [id, fabricante, modelo, version || '', tipo, descripcion || '', usuarioId || 1],
+        function(err) {
+            if (err) {
+                console.error('Error al crear modelo ONT:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+
+            // Agregar comandos específicos si los hay
+            if (comandos && comandos.length > 0) {
+                let processed = 0;
+                comandos.forEach((cmd, index) => {
+                    db.run(`INSERT INTO comandos_ont (id, modelo_id, comando, descripcion, orden) 
+                            VALUES (?, ?, ?, ?, ?)`,
+                        [cmd.id, id, cmd.comando, cmd.descripcion || '', cmd.orden || index],
+                        () => {
+                            processed++;
+                            if (processed === comandos.length) {
+                                logActivity(usuarioId, 'crear_modelo_ont', `Modelo: ${fabricante} ${modelo}`, req.ip);
+                                res.json({ success: true, modeloId: id, message: 'Modelo ONT creado correctamente' });
+                            }
+                        }
+                    );
+                });
+            } else {
+                logActivity(usuarioId, 'crear_modelo_ont', `Modelo: ${fabricante} ${modelo}`, req.ip);
+                res.json({ success: true, modeloId: id, message: 'Modelo ONT creado correctamente' });
+            }
+        }
+    );
+});
+
+// Eliminar modelo ONT
+app.delete('/api/modelos-ont/:id', (req, res) => {
+    const modeloId = req.params.id;
+    const { usuarioId } = req.body;
+    
+    // Primero obtener info del modelo para el log
+    db.get(`SELECT fabricante, modelo FROM modelos_ont WHERE id = ?`, [modeloId], (err, modelo) => {
+        if (err) {
+            console.error('Error al obtener modelo ONT:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+
+        if (!modelo) {
+            return res.status(404).json({ success: false, message: 'Modelo ONT no encontrado' });
+        }
+
+        // Eliminar modelo (los comandos se eliminan automáticamente por CASCADE)
+        db.run(`DELETE FROM modelos_ont WHERE id = ?`, [modeloId], function(err) {
+            if (err) {
+                console.error('Error al eliminar modelo ONT:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+
+            if (this.changes === 0) {
+                return res.status(404).json({ success: false, message: 'Modelo ONT no encontrado' });
+            }
+
+            logActivity(usuarioId, 'eliminar_modelo_ont', `Modelo: ${modelo.fabricante} ${modelo.modelo}`, req.ip);
+            res.json({ success: true, message: 'Modelo ONT eliminado correctamente' });
+        });
+    });
+});
+
+// Agregar comando a modelo ONT existente
+app.post('/api/modelos-ont/:id/comandos', (req, res) => {
+    const modeloId = req.params.id;
+    const { comandoId, comando, descripcion, usuarioId } = req.body;
+    
+    // Obtener el próximo orden
+    db.get(`SELECT MAX(orden) as maxOrden FROM comandos_ont WHERE modelo_id = ?`, [modeloId], (err, result) => {
+        if (err) {
+            console.error('Error al obtener orden:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+
+        const nuevoOrden = (result.maxOrden || 0) + 1;
+
+        db.run(`INSERT INTO comandos_ont (id, modelo_id, comando, descripcion, orden) 
+                VALUES (?, ?, ?, ?, ?)`,
+            [comandoId, modeloId, comando, descripcion || '', nuevoOrden],
+            function(err) {
+                if (err) {
+                    console.error('Error al agregar comando:', err);
+                    return res.status(500).json({ success: false, message: 'Error del servidor' });
+                }
+
+                logActivity(usuarioId, 'agregar_comando_ont', `Comando: ${comando}`, req.ip);
+                res.json({ success: true, comandoId: comandoId, message: 'Comando agregado correctamente' });
+            }
+        );
+    });
+});
+
+// Eliminar comando específico de modelo ONT
+app.delete('/api/modelos-ont/:modeloId/comandos/:comandoId', (req, res) => {
+    const { modeloId, comandoId } = req.params;
+    const { usuarioId } = req.body;
+    
+    db.run(`DELETE FROM comandos_ont WHERE id = ? AND modelo_id = ?`, [comandoId, modeloId], function(err) {
+        if (err) {
+            console.error('Error al eliminar comando:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+
+        if (this.changes === 0) {
+            return res.status(404).json({ success: false, message: 'Comando no encontrado' });
+        }
+
+        logActivity(usuarioId, 'eliminar_comando_ont', `Comando ID: ${comandoId}`, req.ip);
+        res.json({ success: true, message: 'Comando eliminado correctamente' });
     });
 });
 
