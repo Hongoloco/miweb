@@ -76,7 +76,7 @@ app.post('/api/login', (req, res) => {
 
 // Obtener todos los usuarios
 app.get('/api/usuarios', (req, res) => {
-    db.all(`SELECT id, username, nombre_completo, email, rol, descripcion, activo, fecha_creacion, ultimo_acceso 
+    db.all(`SELECT id, username, nombre_completo, email, rol, activo, fecha_creacion, ultimo_acceso 
             FROM usuarios ORDER BY rol, username`, (err, usuarios) => {
         if (err) {
             console.error('Error al obtener usuarios:', err);
@@ -90,7 +90,7 @@ app.get('/api/usuarios', (req, res) => {
 app.get('/api/usuarios/:id', (req, res) => {
     const userId = req.params.id;
     
-    db.get(`SELECT id, username, nombre_completo, email, rol, descripcion, activo, fecha_creacion, ultimo_acceso 
+    db.get(`SELECT id, username, nombre_completo, email, rol, activo, fecha_creacion, ultimo_acceso 
             FROM usuarios WHERE id = ?`, [userId], (err, usuario) => {
         if (err) {
             console.error('Error al obtener usuario:', err);
@@ -127,9 +127,9 @@ app.post('/api/usuarios', (req, res) => {
         // Crear el usuario
         const hashedPassword = bcrypt.hashSync(password, 10);
         
-        db.run(`INSERT INTO usuarios (username, password_hash, nombre_completo, email, rol, descripcion, activo) 
-                VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [username, hashedPassword, nombre_completo, email, rol || 'usuario', descripcion, activo !== false],
+        db.run(`INSERT INTO usuarios (username, password_hash, nombre_completo, email, rol, activo) 
+                VALUES (?, ?, ?, ?, ?, ?)`,
+            [username, hashedPassword, nombre_completo, email, rol || 'usuario', activo !== false],
             function(err) {
                 if (err) {
                     console.error('Error al crear usuario:', err);
@@ -169,9 +169,9 @@ app.put('/api/usuarios/:id', (req, res) => {
         }
 
         db.run(`UPDATE usuarios SET 
-                username = ?, nombre_completo = ?, email = ?, rol = ?, descripcion = ?, activo = ?
+                username = ?, nombre_completo = ?, email = ?, rol = ?, activo = ?
                 WHERE id = ?`,
-            [username, nombre_completo, email, rol, descripcion, activo, userId],
+            [username, nombre_completo, email, rol, activo, userId],
             function(err) {
                 if (err) {
                     console.error('Error al actualizar usuario:', err);
@@ -499,6 +499,26 @@ app.delete('/api/olts/:id', (req, res) => {
 });
 
 // ===== RUTAS DE COMANDOS =====
+
+// Obtener comandos por OLT ID
+app.get('/api/comandos/:olt_id', (req, res) => {
+    const oltId = req.params.olt_id;
+    
+    db.all(`SELECT * FROM comandos WHERE olt_id = ? AND activo = 1 ORDER BY orden, nombre`, [oltId], (err, comandos) => {
+        if (err) {
+            console.error('Error al obtener comandos:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+        
+        // Parsear los comandos JSON
+        const comandosFormateados = comandos.map(cmd => ({
+            ...cmd,
+            comandos: JSON.parse(cmd.comandos_json)
+        }));
+        
+        res.json({ success: true, comandos: comandosFormateados });
+    });
+});
 
 // Crear nuevo comando
 app.post('/api/comandos', (req, res) => {
