@@ -2212,8 +2212,14 @@
                     mostrarNotificacion('🎉 ¡Bienvenido al Sistema!', 'success', 3000, 'Acceso Concedido');
                     
                     // Cargar datos
-                    await cargarOLTs();
-                    await cargarEstadisticas();
+                    console.log('🔄 Iniciando carga de datos después del login...');
+                    try {
+                        await cargarOLTs();
+                        await cargarEstadisticas();
+                        console.log('✅ Datos cargados exitosamente');
+                    } catch (error) {
+                        console.error('💥 Error al cargar datos después del login:', error);
+                    }
                     
                 } else {
                     // Login fallido
@@ -3348,21 +3354,31 @@ Fecha Creación: ${modelo.fechaCreacion}
 
         // ===== GESTIÓN DE OLTs CON BD =====
         async function cargarOLTs() {
+            console.log('🔄 Iniciando carga de OLTs...');
+            
             try {
+                console.log('📡 Haciendo petición a:', `${API_BASE}/olts`);
+                
                 const response = await fetch(`${API_BASE}/olts`);
+                console.log('📨 Respuesta recibida:', response.status, response.ok);
+                
                 const data = await response.json();
+                console.log('📊 Datos recibidos:', data);
                 
                 if (data.success) {
                     olts = data.olts;
+                    console.log('✅ OLTs cargadas:', olts.length);
+                    
                     actualizarSelectorOLT();
                     if (olts.length > 0) {
                         await cargarOLT(olts[0].id);
                     }
                 } else {
+                    console.error('❌ Error en respuesta:', data);
                     mostrarNotificacion('Error al cargar OLTs', 'error', 4000);
                 }
             } catch (error) {
-                console.error('Error al cargar OLTs:', error);
+                console.error('💥 Error en cargarOLTs:', error);
                 mostrarNotificacion('Error de conexión al cargar OLTs', 'error', 4000);
             }
         }
@@ -4995,13 +5011,28 @@ Fecha Creación: ${modelo.fechaCreacion}
 
         // ===== INICIALIZACIÓN =====
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 DOM Cargado - Iniciando sistema...');
+            
+            // Debug: Verificar que las funciones existen
+            console.log('📋 Funciones disponibles:', {
+                verificarSesion: typeof verificarSesion,
+                cargarOLTs: typeof cargarOLTs,
+                cargarEstadisticas: typeof cargarEstadisticas,
+                mostrarNotificacion: typeof mostrarNotificacion
+            });
+            
             if (verificarSesion()) {
+                console.log('✅ Sesión válida encontrada, cargando datos...');
                 cargarOLTs();
                 cargarEstadisticas();
+            } else {
+                console.log('❌ No hay sesión válida');
             }
             
             // Inicializar funcionalidades específicas
-            inicializarACS();
+            if (typeof inicializarACS === 'function') {
+                inicializarACS();
+            }
         });
     </script>
 </body>
