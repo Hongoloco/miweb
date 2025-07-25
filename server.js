@@ -270,6 +270,179 @@ app.post('/api/usuarios/cambiar-password', (req, res) => {
     });
 });
 
+// ===== RUTAS DE ROLES =====
+
+// Obtener todos los roles
+app.get('/api/roles', (req, res) => {
+    db.all(`SELECT * FROM roles WHERE activo = 1 ORDER BY nombre`, (err, roles) => {
+        if (err) {
+            console.error('Error al obtener roles:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+        
+        // Parsear permisos JSON
+        const rolesConPermisos = roles.map(rol => ({
+            ...rol,
+            permisos: JSON.parse(rol.permisos || '{}')
+        }));
+        
+        res.json({ success: true, roles: rolesConPermisos });
+    });
+});
+
+// Obtener un rol específico
+app.get('/api/roles/:id', (req, res) => {
+    const rolId = req.params.id;
+    
+    db.get(`SELECT * FROM roles WHERE id = ? AND activo = 1`, [rolId], (err, rol) => {
+        if (err) {
+            console.error('Error al obtener rol:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+        
+        if (!rol) {
+            return res.status(404).json({ success: false, message: 'Rol no encontrado' });
+        }
+        
+        res.json({ 
+            success: true, 
+            rol: {
+                ...rol,
+                permisos: JSON.parse(rol.permisos || '{}')
+            }
+        });
+    });
+});
+
+// Crear nuevo rol
+app.post('/api/roles', (req, res) => {
+    const { nombre, descripcion, permisos, creadorId } = req.body;
+    
+    if (!nombre) {
+        return res.status(400).json({ success: false, message: 'El nombre del rol es obligatorio' });
+    }
+    
+    const permisosJson = JSON.stringify(permisos || {});
+    
+    db.run(`INSERT INTO roles (nombre, descripcion, permisos) VALUES (?, ?, ?)`,
+        [nombre, descripcion || '', permisosJson],
+        function(err) {
+            if (err) {
+                if (err.code === 'SQLITE_CONSTRAINT') {
+                    return res.status(400).json({ success: false, message: 'Ya existe un rol con ese nombre' });
+                }
+                console.error('Error al crear rol:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+            
+            logActivity(creadorId, 'crear_rol', `Rol: ${nombre}`, req.ip);
+            
+            res.json({
+                success: true,
+                message: 'Rol creado correctamente',
+                rol: { id: this.lastID, nombre, descripcion, permisos }
+            });
+        }
+    );
+});
+
+// Actualizar rol
+app.put('/api/roles/:id', (req, res) => {
+    const rolId = req.params.id;
+    const { nombre, descripcion, permisos, editorId } = req.body;
+    
+    if (!nombre) {
+        return res.status(400).json({ success: false, message: 'El nombre del rol es obligatorio' });
+    }
+    
+    const permisosJson = JSON.stringify(permisos || {});
+    
+    db.run(`UPDATE roles SET nombre = ?, descripcion = ?, permisos = ? WHERE id = ?`,
+        [nombre, descripcion || '', permisosJson, rolId],
+        function(err) {
+            if (err) {
+                if (err.code === 'SQLITE_CONSTRAINT') {
+                    return res.status(400).json({ success: false, message: 'Ya existe un rol con ese nombre' });
+                }
+                console.error('Error al actualizar rol:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+            
+            if (this.changes === 0) {
+                return res.status(404).json({ success: false, message: 'Rol no encontrado' });
+            }
+            
+            logActivity(editorId, 'actualizar_rol', `Rol: ${nombre}`, req.ip);
+            
+            res.json({ success: true, message: 'Rol actualizado correctamente' });
+        }
+    );
+});
+
+// Eliminar rol (desactivar)
+app.delete('/api/roles/:id', (req, res) => {
+    const rolId = req.params.id;
+    const { eliminadorId } = req.body;
+    
+    // Verificar que no haya usuarios usando este rol
+    db.get(`SELECT COUNT(*) as count FROM usuarios WHERE rol = (SELECT nombre FROM roles WHERE id = ?)`, 
+        [rolId], (err, result) => {
+        if (err) {
+            console.error('Error al verificar usuarios del rol:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+        
+        if (result.count > 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: `No se puede eliminar el rol porque ${result.count} usuario(s) lo están usando` 
+            });
+        }
+        
+        // Desactivar el rol
+        db.run(`UPDATE roles SET activo = 0 WHERE id = ?`, [rolId], function(err) {
+            if (err) {
+                console.error('Error al eliminar rol:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+            
+            if (this.changes === 0) {
+                return res.status(404).json({ success: false, message: 'Rol no encontrado' });
+            }
+            
+            logActivity(eliminadorId, 'eliminar_rol', `Rol ID: ${rolId}`, req.ip);
+            
+            res.json({ success: true, message: 'Rol eliminado correctamente' });
+        });
+    });
+});
+
+// Obtener permisos de un usuario específico
+app.get('/api/usuarios/:id/permisos', (req, res) => {
+    const userId = req.params.id;
+    
+    db.get(`SELECT u.rol, r.permisos FROM usuarios u 
+            LEFT JOIN roles r ON u.rol = r.nombre 
+            WHERE u.id = ? AND u.activo = 1`, [userId], (err, usuario) => {
+        if (err) {
+            console.error('Error al obtener permisos del usuario:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+        
+        if (!usuario) {
+            return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+        }
+        
+        const permisos = JSON.parse(usuario.permisos || '{}');
+        
+        res.json({ 
+            success: true, 
+            rol: usuario.rol,
+            permisos: permisos
+        });
+    });
+});
+
 // ===== RUTAS DE COMANDOS IMS =====
 
 // Obtener todos los comandos IMS
@@ -476,6 +649,57 @@ app.put('/api/olts/:id', (req, res) => {
             res.json({ success: true, message: 'OLT actualizada correctamente' });
         }
     );
+});
+
+// Endpoint específico para actualizar solo parámetros de conexión
+app.patch('/api/olts/:id/parametros', (req, res) => {
+    const oltId = req.params.id;
+    const { shelf, slot, port, onu_id } = req.body;
+
+    // Construir query dinámicamente solo con los campos proporcionados
+    const fieldsToUpdate = [];
+    const values = [];
+    
+    if (shelf !== undefined) {
+        fieldsToUpdate.push('shelf = ?');
+        values.push(shelf);
+    }
+    if (slot !== undefined) {
+        fieldsToUpdate.push('slot = ?');
+        values.push(slot);
+    }
+    if (port !== undefined) {
+        fieldsToUpdate.push('port = ?');
+        values.push(port);
+    }
+    if (onu_id !== undefined) {
+        fieldsToUpdate.push('onu_id = ?');
+        values.push(onu_id);
+    }
+
+    if (fieldsToUpdate.length === 0) {
+        return res.status(400).json({ success: false, message: 'No hay parámetros para actualizar' });
+    }
+
+    fieldsToUpdate.push('fecha_modificacion = CURRENT_TIMESTAMP');
+    values.push(oltId);
+
+    const query = `UPDATE olts SET ${fieldsToUpdate.join(', ')} WHERE id = ?`;
+
+    db.run(query, values, function(err) {
+        if (err) {
+            console.error('Error al actualizar parámetros de OLT:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+
+        if (this.changes === 0) {
+            return res.status(404).json({ success: false, message: 'OLT no encontrada' });
+        }
+
+        logActivity(req.body.userId, 'actualizar_parametros_olt', `Parámetros OLT ID: ${oltId}`, req.ip);
+        
+        res.json({ success: true, message: 'Parámetros de conexión actualizados automáticamente' });
+    });
 });
 
 // Eliminar OLT
