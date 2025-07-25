@@ -443,6 +443,249 @@ app.get('/api/usuarios/:id/permisos', (req, res) => {
     });
 });
 
+// ===== RUTAS DE TAREAS =====
+
+// Obtener todas las tareas
+app.get('/api/tareas', (req, res) => {
+    const { estado, categoria, usuario_id } = req.query;
+    
+    let query = `SELECT t.*, c.color as categoria_color, c.icono as categoria_icono,
+                 u.username as creador_username 
+                 FROM tareas t 
+                 LEFT JOIN categorias_tareas c ON t.categoria = c.nombre
+                 LEFT JOIN usuarios u ON t.usuario_id = u.id
+                 WHERE t.activa = 1`;
+    let params = [];
+    
+    if (estado) {
+        query += ` AND t.estado = ?`;
+        params.push(estado);
+    }
+    
+    if (categoria) {
+        query += ` AND t.categoria = ?`;
+        params.push(categoria);
+    }
+    
+    if (usuario_id) {
+        query += ` AND t.usuario_id = ?`;
+        params.push(usuario_id);
+    }
+    
+    query += ` ORDER BY 
+        CASE t.prioridad 
+            WHEN 'urgente' THEN 1 
+            WHEN 'alta' THEN 2 
+            WHEN 'media' THEN 3 
+            WHEN 'baja' THEN 4 
+        END,
+        t.fecha_creacion DESC`;
+    
+    db.all(query, params, (err, tareas) => {
+        if (err) {
+            console.error('Error al obtener tareas:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+        res.json({ success: true, tareas });
+    });
+});
+
+// Obtener estadísticas de tareas
+app.get('/api/tareas/estadisticas', (req, res) => {
+    const { usuario_id } = req.query;
+    
+    let whereClause = 'WHERE t.activa = 1';
+    let params = [];
+    
+    if (usuario_id) {
+        whereClause += ' AND t.usuario_id = ?';
+        params.push(usuario_id);
+    }
+    
+    db.get(`SELECT 
+        COUNT(*) as total,
+        SUM(CASE WHEN estado = 'pendiente' THEN 1 ELSE 0 END) as pendientes,
+        SUM(CASE WHEN estado = 'activa' THEN 1 ELSE 0 END) as activas,
+        SUM(CASE WHEN estado = 'finalizada' THEN 1 ELSE 0 END) as finalizadas,
+        SUM(CASE WHEN prioridad = 'urgente' THEN 1 ELSE 0 END) as urgentes,
+        AVG(progreso) as progreso_promedio
+        FROM tareas t ${whereClause}`, params, (err, stats) => {
+        if (err) {
+            console.error('Error al obtener estadísticas:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+        
+        res.json({ success: true, estadisticas: stats });
+    });
+});
+
+// Obtener una tarea específica con sus notas
+app.get('/api/tareas/:id', (req, res) => {
+    const tareaId = req.params.id;
+    
+    // Obtener tarea
+    db.get(`SELECT t.*, c.color as categoria_color, c.icono as categoria_icono,
+            u.username as creador_username 
+            FROM tareas t 
+            LEFT JOIN categorias_tareas c ON t.categoria = c.nombre
+            LEFT JOIN usuarios u ON t.usuario_id = u.id
+            WHERE t.id = ? AND t.activa = 1`, [tareaId], (err, tarea) => {
+        if (err) {
+            console.error('Error al obtener tarea:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+        
+        if (!tarea) {
+            return res.status(404).json({ success: false, message: 'Tarea no encontrada' });
+        }
+        
+        // Obtener notas de la tarea
+        db.all(`SELECT n.*, u.username 
+                FROM tareas_notas n 
+                LEFT JOIN usuarios u ON n.usuario_id = u.id
+                WHERE n.tarea_id = ? 
+                ORDER BY n.fecha_creacion DESC`, [tareaId], (err, notas) => {
+            if (err) {
+                console.error('Error al obtener notas:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+            
+            res.json({ 
+                success: true, 
+                tarea: { ...tarea, notas }
+            });
+        });
+    });
+});
+
+// Crear nueva tarea
+app.post('/api/tareas', (req, res) => {
+    const { titulo, descripcion, estado, prioridad, categoria, fecha_vencimiento, 
+            tiempo_estimado, etiquetas, usuario_id } = req.body;
+    
+    if (!titulo) {
+        return res.status(400).json({ success: false, message: 'El título es obligatorio' });
+    }
+    
+    const etiquetasJson = etiquetas ? JSON.stringify(etiquetas) : null;
+    
+    db.run(`INSERT INTO tareas (titulo, descripcion, estado, prioridad, categoria, 
+            fecha_vencimiento, tiempo_estimado, etiquetas, usuario_id) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [titulo, descripcion || '', estado || 'pendiente', prioridad || 'media', 
+         categoria || 'General', fecha_vencimiento, tiempo_estimado, etiquetasJson, usuario_id],
+        function(err) {
+            if (err) {
+                console.error('Error al crear tarea:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+            
+            logActivity(usuario_id, 'crear_tarea', `Tarea: ${titulo}`, req.ip);
+            
+            res.json({
+                success: true,
+                message: 'Tarea creada correctamente',
+                tarea: { id: this.lastID, titulo, descripcion, estado, prioridad, categoria }
+            });
+        }
+    );
+});
+
+// Actualizar tarea
+app.put('/api/tareas/:id', (req, res) => {
+    const tareaId = req.params.id;
+    const { titulo, descripcion, estado, prioridad, categoria, fecha_vencimiento, 
+            tiempo_estimado, tiempo_real, progreso, etiquetas, editor_id } = req.body;
+    
+    if (!titulo) {
+        return res.status(400).json({ success: false, message: 'El título es obligatorio' });
+    }
+    
+    const etiquetasJson = etiquetas ? JSON.stringify(etiquetas) : null;
+    const fechaFinalizacion = estado === 'finalizada' ? new Date().toISOString() : null;
+    
+    db.run(`UPDATE tareas SET titulo = ?, descripcion = ?, estado = ?, prioridad = ?, 
+            categoria = ?, fecha_vencimiento = ?, tiempo_estimado = ?, tiempo_real = ?, 
+            progreso = ?, etiquetas = ?, fecha_finalizacion = ?
+            WHERE id = ? AND activa = 1`,
+        [titulo, descripcion || '', estado || 'pendiente', prioridad || 'media', 
+         categoria || 'General', fecha_vencimiento, tiempo_estimado, tiempo_real, 
+         progreso || 0, etiquetasJson, fechaFinalizacion, tareaId],
+        function(err) {
+            if (err) {
+                console.error('Error al actualizar tarea:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+            
+            if (this.changes === 0) {
+                return res.status(404).json({ success: false, message: 'Tarea no encontrada' });
+            }
+            
+            logActivity(editor_id, 'actualizar_tarea', `Tarea: ${titulo}`, req.ip);
+            
+            res.json({ success: true, message: 'Tarea actualizada correctamente' });
+        }
+    );
+});
+
+// Eliminar tarea (marcar como inactiva)
+app.delete('/api/tareas/:id', (req, res) => {
+    const tareaId = req.params.id;
+    const { eliminador_id } = req.body;
+    
+    db.run(`UPDATE tareas SET activa = 0 WHERE id = ?`, [tareaId], function(err) {
+        if (err) {
+            console.error('Error al eliminar tarea:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+        
+        if (this.changes === 0) {
+            return res.status(404).json({ success: false, message: 'Tarea no encontrada' });
+        }
+        
+        logActivity(eliminador_id, 'eliminar_tarea', `Tarea ID: ${tareaId}`, req.ip);
+        
+        res.json({ success: true, message: 'Tarea eliminada correctamente' });
+    });
+});
+
+// Agregar nota a tarea
+app.post('/api/tareas/:id/notas', (req, res) => {
+    const tareaId = req.params.id;
+    const { nota, tipo, usuario_id } = req.body;
+    
+    if (!nota) {
+        return res.status(400).json({ success: false, message: 'La nota es obligatoria' });
+    }
+    
+    db.run(`INSERT INTO tareas_notas (tarea_id, nota, tipo, usuario_id) VALUES (?, ?, ?, ?)`,
+        [tareaId, nota, tipo || 'comentario', usuario_id],
+        function(err) {
+            if (err) {
+                console.error('Error al agregar nota:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+            
+            res.json({
+                success: true,
+                message: 'Nota agregada correctamente',
+                nota: { id: this.lastID, tarea_id: tareaId, nota, tipo: tipo || 'comentario' }
+            });
+        }
+    );
+});
+
+// Obtener categorías de tareas
+app.get('/api/categorias-tareas', (req, res) => {
+    db.all(`SELECT * FROM categorias_tareas WHERE activa = 1 ORDER BY nombre`, (err, categorias) => {
+        if (err) {
+            console.error('Error al obtener categorías:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+        res.json({ success: true, categorias });
+    });
+});
+
 // ===== RUTAS DE COMANDOS IMS =====
 
 // Obtener todos los comandos IMS
