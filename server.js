@@ -1353,41 +1353,102 @@ app.get('/api/modelos-ont', (req, res) => {
     });
 });
 
-// Crear nuevo modelo ONT
+// Crear nuevo modelo ONT (versión mejorada con validación)
 app.post('/api/modelos-ont', (req, res) => {
     const { id, fabricante, modelo, version, tipo, descripcion, comandos, usuarioId } = req.body;
     
-    db.run(`INSERT INTO modelos_ont (id, fabricante, modelo, version, tipo, descripcion, usuario_id) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [id, fabricante, modelo, version || '', tipo, descripcion || '', usuarioId || 1],
-        function(err) {
-            if (err) {
-                console.error('Error al crear modelo ONT:', err);
-                return res.status(500).json({ success: false, message: 'Error del servidor' });
-            }
-
-            // Agregar comandos específicos si los hay
-            if (comandos && comandos.length > 0) {
-                let processed = 0;
-                comandos.forEach((cmd, index) => {
-                    db.run(`INSERT INTO comandos_ont (id, modelo_id, comando, descripcion, orden) 
-                            VALUES (?, ?, ?, ?, ?)`,
-                        [cmd.id, id, cmd.comando, cmd.descripcion || '', cmd.orden || index],
-                        () => {
-                            processed++;
-                            if (processed === comandos.length) {
-                                logActivity(usuarioId, 'crear_modelo_ont', `Modelo: ${fabricante} ${modelo}`, req.ip);
-                                res.json({ success: true, modeloId: id, message: 'Modelo ONT creado correctamente' });
-                            }
-                        }
-                    );
-                });
-            } else {
-                logActivity(usuarioId, 'crear_modelo_ont', `Modelo: ${fabricante} ${modelo}`, req.ip);
-                res.json({ success: true, modeloId: id, message: 'Modelo ONT creado correctamente' });
-            }
+    console.log('=== CREANDO MODELO ONT ===');
+    console.log('Datos recibidos:', { id, fabricante, modelo, version, tipo, descripcion, comandos: comandos?.length, usuarioId });
+    
+    // Validaciones básicas
+    if (!id || !fabricante || !modelo || !tipo) {
+        console.error('Datos incompletos:', { id: !!id, fabricante: !!fabricante, modelo: !!modelo, tipo: !!tipo });
+        return res.status(400).json({ 
+            success: false, 
+            message: 'Datos incompletos. Se requiere ID, fabricante, modelo y tipo.' 
+        });
+    }
+    
+    // Verificar que el ID no exista ya
+    db.get(`SELECT id FROM modelos_ont WHERE id = ?`, [id], (err, existingModel) => {
+        if (err) {
+            console.error('Error al verificar ID existente:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor al validar' });
         }
-    );
+        
+        if (existingModel) {
+            console.error('ID duplicado encontrado:', id);
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Ya existe un modelo con ese ID. Intente nuevamente.' 
+            });
+        }
+        
+        // Insertar modelo principal
+        console.log('Insertando modelo en BD...');
+        db.run(`INSERT INTO modelos_ont (id, fabricante, modelo, version, tipo, descripcion, usuario_id) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [id, fabricante, modelo, version || '', tipo, descripcion || '', usuarioId || 1],
+            function(err) {
+                if (err) {
+                    console.error('Error al insertar modelo ONT:', err);
+                    if (err.code === 'SQLITE_CONSTRAINT') {
+                        return res.status(400).json({ 
+                            success: false, 
+                            message: 'Error de integridad: posible ID duplicado o datos inválidos' 
+                        });
+                    }
+                    return res.status(500).json({ success: false, message: 'Error del servidor al insertar modelo' });
+                }
+
+                console.log('Modelo insertado exitosamente. Changes:', this.changes);
+
+                // Agregar comandos específicos si los hay
+                if (comandos && comandos.length > 0) {
+                    console.log(`Insertando ${comandos.length} comandos específicos...`);
+                    let processed = 0;
+                    let errors = 0;
+                    
+                    comandos.forEach((cmd, index) => {
+                        const comandoId = cmd.id || `${id}-cmd-${index}-${Date.now()}`;
+                        
+                        db.run(`INSERT INTO comandos_ont (id, modelo_id, comando, descripcion, orden) 
+                                VALUES (?, ?, ?, ?, ?)`,
+                            [comandoId, id, cmd.comando, cmd.descripcion || '', cmd.orden || index],
+                            function(cmdErr) {
+                                processed++;
+                                if (cmdErr) {
+                                    console.error(`Error al insertar comando ${index}:`, cmdErr);
+                                    errors++;
+                                }
+                                
+                                if (processed === comandos.length) {
+                                    console.log(`Comandos procesados: ${processed}, errores: ${errors}`);
+                                    logActivity(usuarioId, 'crear_modelo_ont', `Modelo: ${fabricante} ${modelo} con ${comandos.length - errors} comandos`, req.ip);
+                                    
+                                    res.json({ 
+                                        success: true, 
+                                        modeloId: id, 
+                                        message: `Modelo ONT creado correctamente${errors > 0 ? ` (${errors} comandos fallaron)` : ''}`,
+                                        comandosCreados: comandos.length - errors
+                                    });
+                                }
+                            }
+                        );
+                    });
+                } else {
+                    console.log('Modelo creado sin comandos específicos');
+                    logActivity(usuarioId, 'crear_modelo_ont', `Modelo: ${fabricante} ${modelo}`, req.ip);
+                    res.json({ 
+                        success: true, 
+                        modeloId: id, 
+                        message: 'Modelo ONT creado correctamente',
+                        comandosCreados: 0
+                    });
+                }
+            }
+        );
+    });
 });
 
 // Eliminar modelo ONT
