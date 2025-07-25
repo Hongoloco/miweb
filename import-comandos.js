@@ -11,7 +11,7 @@ const path = require('path');
 
 // Rutas de archivos
 const DB_PATH = path.join(__dirname, 'olt_system.db');
-const JSON_PATH = path.join(__dirname, 'ZTE C600-2025-07-22.json');
+const JSON_PATH = path.join(__dirname, 'docs', 'ZTE C600-2025-07-22.json');
 
 // Función principal
 async function importarComandos() {

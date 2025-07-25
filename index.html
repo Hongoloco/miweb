@@ -2421,7 +2421,7 @@
                             <div style="font-size: 14px; color: #666;">OLTs Configuradas</div>
                         </div>
                         <div class="metric-card" style="background: linear-gradient(145deg, #e8f5e8 0%, #c8e6c9 100%); padding: 20px; border-radius: 12px; text-align: center;">
-                            <div style="font-size: 32px; font-weight: bold; color: #2e7d32;" id="total-tareas">-</div>
+                            <div style="font-size: 32px; font-weight: bold; color: #2e7d32;" id="dashboard-total-tareas">-</div>
                             <div style="font-size: 14px; color: #666;">Tareas Activas</div>
                         </div>
                         <div class="metric-card" style="background: linear-gradient(145deg, #fff3e0 0%, #ffcc02 30%); padding: 20px; border-radius: 12px; text-align: center;">
@@ -3532,6 +3532,54 @@
         let usuarioActual = null;
         let olts = [];
         let oltActual = 0;
+
+        // ===== FUNCIÓN BÁSICA PARA CAMBIAR PESTAÑAS =====
+        function showTab(tabName) {
+            // Remover clase active de todas las pestañas y contenidos
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Activar la pestaña seleccionada
+            const activeTab = document.querySelector(`[data-tab="${tabName}"]`);
+            const activeContent = document.getElementById(tabName);
+            
+            if (activeTab) activeTab.classList.add('active');
+            if (activeContent) activeContent.classList.add('active');
+            
+            // Inicializar contenido específico de cada pestaña
+            if (tabName === 'dashboard') {
+                setTimeout(() => {
+                    if (typeof cargarEstadisticas === 'function') cargarEstadisticas().catch(console.warn);
+                }, 100);
+            } else if (tabName === 'olt') {
+                setTimeout(() => {
+                    if (typeof cargarOLTs === 'function') cargarOLTs().catch(console.warn);
+                }, 100);
+            } else if (tabName === 'tareas') {
+                setTimeout(() => {
+                    if (typeof inicializarTareas === 'function') inicializarTareas().catch(console.warn);
+                }, 100);
+            }
+        }
+
+        // Agregar eventos click a las pestañas
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    if (tabName) {
+                        showTab(tabName);
+                    }
+                });
+            });
+            
+            // Mostrar dashboard por defecto
+            showTab('dashboard');
+        });
 
         // ===== SISTEMA DE AUTENTICACIÓN OPTIMIZADO =====
         async function login(event) {
@@ -5722,6 +5770,16 @@ Fecha Creación: ${modelo.fechaCreacion}
                     }
                     
                     document.getElementById('total-comandos').textContent = totalComandos;
+                }
+                
+                // Cargar estadísticas de tareas para el dashboard
+                const tareasResponse = await fetch('/api/tareas/estadisticas');
+                const tareasData = await tareasResponse.json();
+                
+                if (tareasData.success) {
+                    const stats = tareasData.estadisticas;
+                    document.getElementById('dashboard-total-tareas').textContent = stats.activas || 0;
+                    console.log('Estadísticas de dashboard cargadas');
                 }
             } catch (error) {
                 console.error('Error al cargar estadísticas:', error);
@@ -8143,7 +8201,8 @@ Fecha Creación: ${modelo.fechaCreacion}
             }
             
             // Agregar usuario actual
-            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const userJson = sessionStorage.getItem('user');
+            const currentUser = userJson ? JSON.parse(userJson) : { id: 1 };
             if (tareaEnEdicion) {
                 tareaData.editor_id = currentUser.id;
             } else {
@@ -8168,6 +8227,7 @@ Fecha Creación: ${modelo.fechaCreacion}
                     mostrarNotificacion(data.message, 'success');
                     cerrarModalTarea();
                     cargarTareas();
+                    cargarEstadisticasTareas(); // Actualizar estadísticas
                 } else {
                     mostrarNotificacion('Error: ' + data.message, 'error');
                 }
@@ -8339,7 +8399,9 @@ Fecha Creación: ${modelo.fechaCreacion}
                 return;
             }
             
-            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            // Obtener usuario actual del sessionStorage
+            const userJson = sessionStorage.getItem('user');
+            const currentUser = userJson ? JSON.parse(userJson) : { id: 1 };
             
             try {
                 const response = await fetch(`/api/tareas/${tareaEnEdicion}/notas`, {
@@ -8373,38 +8435,48 @@ Fecha Creación: ${modelo.fechaCreacion}
         
         // Eliminar tarea
         async function eliminarTarea(tareaId) {
-            const confirmar = await mostrarConfirm(
-                '🗑️ Eliminar Tarea',
-                '¿Está seguro de que desea eliminar esta tarea? Esta acción no se puede deshacer.'
-            );
-            
-            if (confirmar) {
-                const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-                
-                try {
-                    const response = await fetch(`/api/tareas/${tareaId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            eliminador_id: currentUser.id
-                        })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        mostrarNotificacion('Tarea eliminada correctamente', 'success');
-                        cargarTareas();
-                    } else {
-                        mostrarNotificacion('Error al eliminar tarea: ' + data.message, 'error');
+            return new Promise((resolve) => {
+                mostrarConfirmacion(
+                    '🗑️ Eliminar Tarea',
+                    '¿Está seguro de que desea eliminar esta tarea? Esta acción no se puede deshacer.',
+                    async () => {
+                        // Obtener usuario actual del sessionStorage
+                        const userJson = sessionStorage.getItem('user');
+                        const currentUser = userJson ? JSON.parse(userJson) : { id: 1 };
+                        
+                        try {
+                            const response = await fetch(`/api/tareas/${tareaId}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    eliminador_id: currentUser.id
+                                })
+                            });
+                            
+                            const data = await response.json();
+                            
+                            if (data.success) {
+                                mostrarNotificacion('Tarea eliminada correctamente', 'success');
+                                cargarTareas(); // Recargar lista de tareas
+                                cargarEstadisticasTareas(); // Actualizar estadísticas
+                                resolve(true);
+                            } else {
+                                mostrarNotificacion('Error al eliminar tarea: ' + data.message, 'error');
+                                resolve(false);
+                            }
+                        } catch (error) {
+                            console.error('Error al eliminar tarea:', error);
+                            mostrarNotificacion('Error de conexión al eliminar tarea', 'error');
+                            resolve(false);
+                        }
+                    },
+                    () => {
+                        resolve(false);
                     }
-                } catch (error) {
-                    console.error('Error al eliminar tarea:', error);
-                    mostrarNotificacion('Error de conexión al eliminar tarea', 'error');
-                }
-            }
+                );
+            });
         }
         
         // Filtrar tareas
@@ -8486,7 +8558,8 @@ Fecha Creación: ${modelo.fechaCreacion}
                 // Cargar datos en paralelo
                 await Promise.all([
                     cargarCategorias(),
-                    cargarTareas()
+                    cargarTareas(),
+                    cargarEstadisticasTareas()
                 ]);
                 
                 console.log('✅ Sistema de tareas inicializado correctamente');
@@ -8497,28 +8570,32 @@ Fecha Creación: ${modelo.fechaCreacion}
         }
         
         // Agregar inicialización de tareas al cambio de pestañas
-        const originalShowTab = window.showTab;
         window.showTab = function(tabName) {
-            if (originalShowTab) {
-                originalShowTab(tabName);
-            } else {
-                // Implementación básica si no existe showTab
-                document.querySelectorAll('.tab').forEach(tab => {
-                    tab.classList.remove('active');
-                });
-                document.querySelectorAll('.tab-content').forEach(content => {
-                    content.classList.remove('active');
-                });
-                
-                const activeTab = document.querySelector(`[data-tab="${tabName}"]`);
-                const activeContent = document.getElementById(tabName);
-                
-                if (activeTab) activeTab.classList.add('active');
-                if (activeContent) activeContent.classList.add('active');
-            }
+            // Remover clase active de todas las pestañas y contenidos
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
             
-            // Inicializar tareas cuando se accede a la pestaña
-            if (tabName === 'tareas') {
+            // Activar la pestaña seleccionada
+            const activeTab = document.querySelector(`[data-tab="${tabName}"]`);
+            const activeContent = document.getElementById(tabName);
+            
+            if (activeTab) activeTab.classList.add('active');
+            if (activeContent) activeContent.classList.add('active');
+            
+            // Inicializar contenido específico de cada pestaña
+            if (tabName === 'dashboard') {
+                setTimeout(() => {
+                    if (typeof cargarEstadisticas === 'function') cargarEstadisticas().catch(console.warn);
+                }, 100);
+            } else if (tabName === 'olt') {
+                setTimeout(() => {
+                    if (typeof cargarOLTs === 'function') cargarOLTs().catch(console.warn);
+                }, 100);
+            } else if (tabName === 'tareas') {
                 console.log('🔄 Cargando pestaña de tareas...');
                 setTimeout(() => {
                     inicializarTareas();

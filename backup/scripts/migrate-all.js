@@ -2,7 +2,7 @@ const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcrypt');
 const path = require('path');
 
-const dbPath = path.join(__dirname, '..', 'olt_system.db');
+const dbPath = path.join(__dirname, '../../olt_system.db');
 
 console.log('🔄 Iniciando migración de datos desde localStorage a base de datos...');
 
