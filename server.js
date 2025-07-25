@@ -8,11 +8,25 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Variables para SSE y notificaciones
+let sseClients = new Set();
+let notificationSubscriptions = new Set();
+
 // Middlewares
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
+
+// Servir archivos estáticos adicionales
+app.use('/dashboard-charts.js', express.static(path.join(__dirname, 'dashboard-charts.js')));
+app.use('/notification-system.js', express.static(path.join(__dirname, 'notification-system.js')));
+app.use('/reports-analytics.js', express.static(path.join(__dirname, 'reports-analytics.js')));
+app.use('/sw-notifications.js', express.static(path.join(__dirname, 'sw-notifications.js')));
+app.use('/theme-system.js', express.static(path.join(__dirname, 'theme-system.js')));
+app.use('/automation-system.js', express.static(path.join(__dirname, 'automation-system.js')));
+app.use('/sw.js', express.static(path.join(__dirname, 'sw.js')));
+app.use('/manifest.json', express.static(path.join(__dirname, 'manifest.json')));
 
 // Servir el archivo HTML principal
 app.get('/', (req, res) => {
@@ -1468,10 +1482,330 @@ app.use((err, req, res, next) => {
 
 // ===== INICIO DEL SERVIDOR =====
 
+// ===== RUTAS PARA NOTIFICACIONES SSE =====
+
+// Stream de notificaciones en tiempo real
+app.get('/api/notifications/stream', (req, res) => {
+    // Configurar headers para SSE
+    res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Cache-Control'
+    });
+
+    // Agregar cliente a la lista
+    const client = {
+        id: Date.now(),
+        response: res,
+        userId: req.query.userId || 'anonymous'
+    };
+    
+    sseClients.add(client);
+    console.log(`📡 Cliente SSE conectado: ${client.id} (Total: ${sseClients.size})`);
+
+    // Enviar mensaje de conexión
+    res.write(`data: ${JSON.stringify({
+        type: 'connection',
+        message: 'Conectado al stream de notificaciones',
+        timestamp: new Date().toISOString()
+    })}\n\n`);
+
+    // Limpiar al desconectar
+    req.on('close', () => {
+        sseClients.delete(client);
+        console.log(`📡 Cliente SSE desconectado: ${client.id} (Total: ${sseClients.size})`);
+    });
+});
+
+// Suscribirse a notificaciones push
+app.post('/api/notifications/subscribe', (req, res) => {
+    try {
+        const subscription = req.body;
+        notificationSubscriptions.add(subscription);
+        
+        console.log('📱 Nueva suscripción push registrada');
+        res.json({ success: true, message: 'Suscripción registrada' });
+    } catch (error) {
+        console.error('Error registrando suscripción push:', error);
+        res.status(500).json({ success: false, message: 'Error registrando suscripción' });
+    }
+});
+
+// Obtener notificaciones pendientes
+app.get('/api/notifications/pending', (req, res) => {
+    // Aquí se pueden obtener notificaciones pendientes de la BD
+    res.json({ 
+        success: true, 
+        notifications: [] // Por ahora vacío
+    });
+});
+
+// Enviar notificación a todos los clientes conectados
+function broadcastNotification(notification) {
+    const message = `data: ${JSON.stringify(notification)}\n\n`;
+    
+    sseClients.forEach(client => {
+        try {
+            client.response.write(message);
+        } catch (error) {
+            console.error('Error enviando notificación SSE:', error);
+            sseClients.delete(client);
+        }
+    });
+    
+    console.log(`📢 Notificación enviada a ${sseClients.size} clientes`);
+}
+
+// ===== RUTAS PARA ANALYTICS Y REPORTES =====
+
+// Obtener métricas del sistema
+app.get('/api/analytics/metrics', async (req, res) => {
+    try {
+        const period = req.query.period || '7d';
+        
+        // Obtener estadísticas básicas
+        const tasksStats = await new Promise((resolve, reject) => {
+            db.get(`
+                SELECT 
+                    COUNT(*) as total,
+                    SUM(CASE WHEN estado = 'pendiente' THEN 1 ELSE 0 END) as pendientes,
+                    SUM(CASE WHEN estado = 'en_progreso' THEN 1 ELSE 0 END) as en_progreso,
+                    SUM(CASE WHEN estado = 'finalizada' THEN 1 ELSE 0 END) as finalizadas
+                FROM tareas
+            `, (err, row) => {
+                if (err) reject(err);
+                else resolve(row);
+            });
+        });
+
+        const userStats = await new Promise((resolve, reject) => {
+            db.get(`
+                SELECT 
+                    COUNT(*) as total,
+                    SUM(CASE WHEN activo = 1 THEN 1 ELSE 0 END) as activos
+                FROM usuarios
+            `, (err, row) => {
+                if (err) reject(err);
+                else resolve(row);
+            });
+        });
+
+        const oltStats = await new Promise((resolve, reject) => {
+            db.get(`
+                SELECT COUNT(*) as total FROM olts
+            `, (err, row) => {
+                if (err) reject(err);
+                else resolve(row);
+            });
+        });
+
+        res.json({
+            success: true,
+            metrics: {
+                tasks: tasksStats,
+                users: userStats,
+                olts: oltStats,
+                system: {
+                    uptime: process.uptime(),
+                    memory_usage: process.memoryUsage(),
+                    generated_at: new Date().toISOString()
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error obteniendo métricas:', error);
+        res.status(500).json({ success: false, message: 'Error obteniendo métricas' });
+    }
+});
+
+// Generar reporte específico
+app.post('/api/reports/generate', async (req, res) => {
+    try {
+        const { type, filters, format } = req.body;
+        
+        console.log(`� Generando reporte: ${type} en formato ${format}`);
+        
+        let reportData;
+        
+        switch (type) {
+            case 'tasks':
+                reportData = await generateTaskReport(filters);
+                break;
+            case 'users':
+                reportData = await generateUserReport(filters);
+                break;
+            case 'olts':
+                reportData = await generateOLTReport(filters);
+                break;
+            default:
+                throw new Error('Tipo de reporte no soportado');
+        }
+        
+        res.json({
+            success: true,
+            report: reportData,
+            generated_at: new Date().toISOString()
+        });
+        
+    } catch (error) {
+        console.error('Error generando reporte:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Funciones auxiliares para reportes
+async function generateTaskReport(filters = {}) {
+    return new Promise((resolve, reject) => {
+        let query = 'SELECT * FROM tareas WHERE 1=1';
+        const params = [];
+        
+        if (filters.estado) {
+            query += ' AND estado = ?';
+            params.push(filters.estado);
+        }
+        
+        if (filters.prioridad) {
+            query += ' AND prioridad = ?';
+            params.push(filters.prioridad);
+        }
+        
+        db.all(query, params, (err, rows) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve({
+                    title: 'Reporte de Tareas',
+                    data: rows,
+                    summary: {
+                        total: rows.length,
+                        by_status: groupBy(rows, 'estado'),
+                        by_priority: groupBy(rows, 'prioridad')
+                    }
+                });
+            }
+        });
+    });
+}
+
+async function generateUserReport(filters = {}) {
+    return new Promise((resolve, reject) => {
+        let query = 'SELECT id, username, rol, email, activo, created_at FROM usuarios WHERE 1=1';
+        const params = [];
+        
+        if (filters.rol) {
+            query += ' AND rol = ?';
+            params.push(filters.rol);
+        }
+        
+        db.all(query, params, (err, rows) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve({
+                    title: 'Reporte de Usuarios',
+                    data: rows,
+                    summary: {
+                        total: rows.length,
+                        active: rows.filter(u => u.activo).length,
+                        by_role: groupBy(rows, 'rol')
+                    }
+                });
+            }
+        });
+    });
+}
+
+async function generateOLTReport(filters = {}) {
+    return new Promise((resolve, reject) => {
+        let query = 'SELECT * FROM olts WHERE 1=1';
+        const params = [];
+        
+        if (filters.estado) {
+            query += ' AND estado = ?';
+            params.push(filters.estado);
+        }
+        
+        db.all(query, params, (err, rows) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve({
+                    title: 'Reporte de OLTs',
+                    data: rows,
+                    summary: {
+                        total: rows.length,
+                        by_status: groupBy(rows, 'estado')
+                    }
+                });
+            }
+        });
+    });
+}
+
+// Función auxiliar para agrupar datos
+function groupBy(array, key) {
+    return array.reduce((groups, item) => {
+        const value = item[key] || 'Sin especificar';
+        groups[value] = (groups[value] || 0) + 1;
+        return groups;
+    }, {});
+}
+
+// ===== RUTAS PARA CATEGORÍAS DE TAREAS =====
+
+// Obtener categorías de tareas disponibles
+app.get('/api/categorias-tareas', (req, res) => {
+    db.all('SELECT * FROM task_categories ORDER BY nombre', (err, rows) => {
+        if (err) {
+            console.error('Error obteniendo categorías:', err);
+            res.status(500).json({ success: false, message: 'Error obteniendo categorías' });
+        } else {
+            res.json({ success: true, categorias: rows });
+        }
+    });
+});
+
+// ===== INTERCEPTORES PARA NOTIFICACIONES AUTOMÁTICAS =====
+
+// Interceptar creación de tareas para enviar notificación
+const originalTaskCreate = app.post;
+
+// Middleware para notificaciones automáticas en tareas
+app.use('/api/tareas', (req, res, next) => {
+    if (req.method === 'POST') {
+        // Interceptar respuesta para enviar notificación
+        const originalSend = res.send;
+        res.send = function(data) {
+            try {
+                const response = JSON.parse(data);
+                if (response.success && response.tarea) {
+                    // Enviar notificación de nueva tarea
+                    broadcastNotification({
+                        type: 'task-update',
+                        data: {
+                            titulo: response.tarea.titulo,
+                            accion: 'creada',
+                            id: response.tarea.id
+                        }
+                    });
+                }
+            } catch (e) {
+                // Ignorar errores de parsing
+            }
+            originalSend.call(this, data);
+        };
+    }
+    next();
+});
+
 app.listen(PORT, () => {
-    console.log('🚀 Servidor iniciado en puerto', PORT);
+    console.log('�🚀 Servidor iniciado en puerto', PORT);
     console.log('🌐 Acceder a: http://localhost:' + PORT);
     console.log('📊 Base de datos: ' + dbPath);
+    console.log('📡 SSE habilitado para notificaciones en tiempo real');
+    console.log('📊 Analytics y reportes habilitados');
 });
 
 // Manejo de cierre del servidor

@@ -3,11 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desarrollo de Servicios Residenciales - Antel</title>
+    <title>Sistema OLT Antel v2.0 - Gestión Avanzada</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#007bff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="OLT Antel">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    
+    <!-- Meta tags para SEO -->
+    <meta name="description" content="Sistema avanzado de gestión de OLTs con dashboard, notificaciones, reportes y PWA">
+    <meta name="keywords" content="OLT, Antel, gestión, comandos, telecomunicaciones">
+    
     <style>
         :root {
-            --azul-antel: #0056b3;
-            --amarillo-antel: #ffc107;
+            /* Colores base del sistema de temas */
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --text-muted: #adb5bd;
+            
+            --border-color: #dee2e6;
+            --border-light: #e9ecef;
+            --border-dark: #adb5bd;
+            
+            --shadow-sm: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+            --shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+            --shadow-lg: 0 1rem 3rem rgba(0,0,0,0.175);
+            
+            /* Propiedades personalizables */
+            --base-font-size: 14px;
+            --border-radius: 6px;
+            --spacing-multiplier: 1em;
+            --animation-duration: 0.3s;
+            --sidebar-width: 280px;
+            
+            /* Colores legacy para compatibilidad */
+            --azul-antel: var(--primary-color);
+            --amarillo-antel: var(--warning-color);
             --sombra: rgba(0, 86, 179, 0.1);
         }
 
@@ -2356,6 +2403,42 @@
 
             <!-- Contenido Inicio -->
             <div class="tab-content active" id="inicio">
+                <!-- Dashboard Avanzado con Gráficos -->
+                <div class="config-section">
+                    <h2 class="section-title">📊 Dashboard del Sistema</h2>
+                    <p style="color: #666; margin-bottom: 25px;">
+                        Visualización en tiempo real del estado del sistema y métricas de rendimiento.
+                    </p>
+                    
+                    <!-- Métricas Principales -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                        <div class="metric-card" style="background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%); padding: 20px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; color: var(--primary-color);" id="total-comandos">-</div>
+                            <div style="font-size: 14px; color: #666;">Comandos Totales</div>
+                        </div>
+                        <div class="metric-card" style="background: linear-gradient(145deg, #f3e5f5 0%, #e1bee7 100%); padding: 20px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; color: #7b1fa2;" id="total-olts">-</div>
+                            <div style="font-size: 14px; color: #666;">OLTs Configuradas</div>
+                        </div>
+                        <div class="metric-card" style="background: linear-gradient(145deg, #e8f5e8 0%, #c8e6c9 100%); padding: 20px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; color: #2e7d32;" id="total-tareas">-</div>
+                            <div style="font-size: 14px; color: #666;">Tareas Activas</div>
+                        </div>
+                        <div class="metric-card" style="background: linear-gradient(145deg, #fff3e0 0%, #ffcc02 30%); padding: 20px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; color: #ef6c00;" id="total-usuarios">-</div>
+                            <div style="font-size: 14px; color: #666;">Usuarios Activos</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Gráficos del Dashboard -->
+                    <div class="charts-grid">
+                        <div id="tasks-chart"></div>
+                        <div id="olt-status-chart"></div>
+                        <div id="user-activity-chart"></div>
+                        <div id="performance-chart"></div>
+                    </div>
+                </div>
+
                 <div class="config-section">
                     <h2 class="section-title">🎯 Desarrollo de Servicios Residenciales</h2>
                     <p style="font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 20px;">
@@ -2365,22 +2448,6 @@
                         Diseñada para optimizar los procesos de soporte técnico, configuración de equipos y resolución 
                         de incidencias en servicios de fibra óptica, telefonía IP y acceso inalámbrico fijo (FWA).
                     </p>
-                    
-                    <!-- Estadísticas del Sistema -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 30px;">
-                        <div style="background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%); padding: 20px; border-radius: 12px; text-align: center;">
-                            <div style="font-size: 28px; font-weight: bold; color: var(--azul-antel);" id="total-comandos">-</div>
-                            <div style="font-size: 14px; color: #666;">Comandos Totales</div>
-                        </div>
-                        <div style="background: linear-gradient(145deg, #f3e5f5 0%, #e1bee7 100%); padding: 20px; border-radius: 12px; text-align: center;">
-                            <div style="font-size: 28px; font-weight: bold; color: #7b1fa2;" id="total-olts">-</div>
-                            <div style="font-size: 14px; color: #666;">OLTs Configuradas</div>
-                        </div>
-                        <div style="background: linear-gradient(145deg, #e8f5e8 0%, #c8e6c9 100%); padding: 20px; border-radius: 12px; text-align: center;">
-                            <div style="font-size: 28px; font-weight: bold; color: #2e7d32;">SQLite</div>
-                            <div style="font-size: 14px; color: #666;">Base de Datos</div>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Enlaces Útiles de Antel -->
@@ -8561,6 +8628,175 @@ Fecha Creación: ${modelo.fechaCreacion}
         };
 
         console.log('🎯 Parche aplicado. La gestión de roles ahora funcionará correctamente.');
+    </script>
+    
+    <!-- Nuevos sistemas v2.0 -->
+    <script src="/dashboard-charts.js"></script>
+    <script src="/notification-system.js"></script>
+    <script src="/reports-analytics.js"></script>
+    <script src="/theme-system.js"></script>
+    <script src="/automation-system.js"></script>
+    
+    <!-- Registro de Service Worker para PWA -->
+    <script>
+        // Registrar Service Worker para PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('📱 PWA Service Worker registrado:', registration);
+                        
+                        // Configurar actualizaciones
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // Nueva versión disponible
+                                    if (window.showInfo) {
+                                        window.showInfo(
+                                            'Actualización Disponible',
+                                            'Una nueva versión está disponible. Recargue la página para actualizar.',
+                                            {
+                                                actions: [{
+                                                    label: 'Actualizar',
+                                                    callback: () => window.location.reload()
+                                                }]
+                                            }
+                                        );
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('❌ Error registrando Service Worker:', error);
+                    });
+            });
+        }
+        
+        // Inicialización avanzada del sistema
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Iniciando Sistema OLT Antel v2.0...');
+            
+            // Inicializar dashboard con gráficos
+            setTimeout(() => {
+                if (window.dashboardCharts) {
+                    window.dashboardCharts.initializeDashboard();
+                    window.dashboardCharts.startAutoRefresh(5); // Cada 5 minutos
+                }
+            }, 1000);
+            
+            // Configurar notificaciones
+            if (window.notificationSystem) {
+                // Escuchar eventos del sistema
+                window.addEventListener('themeChanged', (event) => {
+                    window.notificationSystem.info(
+                        'Tema Actualizado',
+                        `Se ha aplicado el tema: ${event.detail.themeName}`
+                    );
+                });
+            }
+            
+            // Configurar analytics
+            if (window.reportsAndAnalytics) {
+                // Track page load
+                window.reportsAndAnalytics.trackPageView(window.location.pathname);
+            }
+            
+            // Detectar instalación de PWA
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                
+                if (window.showInfo) {
+                    window.showInfo(
+                        'Instalar Aplicación',
+                        '¿Desea instalar la aplicación en su dispositivo para acceso rápido?',
+                        {
+                            actions: [
+                                {
+                                    label: 'Instalar',
+                                    callback: () => {
+                                        e.prompt();
+                                        e.userChoice.then((choiceResult) => {
+                                            if (choiceResult.outcome === 'accepted') {
+                                                console.log('📱 PWA instalada');
+                                            }
+                                        });
+                                    }
+                                },
+                                {
+                                    label: 'Más tarde',
+                                    type: 'secondary',
+                                    callback: () => console.log('Instalación aplazada')
+                                }
+                            ]
+                        }
+                    );
+                }
+            });
+            
+            // Detectar cuando la app está instalada
+            window.addEventListener('appinstalled', (evt) => {
+                console.log('📱 PWA instalada exitosamente');
+                if (window.showSuccess) {
+                    window.showSuccess(
+                        'Aplicación Instalada',
+                        'La aplicación se ha instalado correctamente en su dispositivo'
+                    );
+                }
+            });
+            
+            // Configurar trabajo offline
+            if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
+                // Registrar background sync
+                navigator.serviceWorker.ready.then((registration) => {
+                    return registration.sync.register('background-sync-notifications');
+                }).catch((error) => {
+                    console.log('Background sync no disponible:', error);
+                });
+            }
+            
+            console.log('✅ Sistema OLT Antel v2.0 iniciado correctamente');
+        });
+        
+        // Función para mostrar información sobre las nuevas características
+        function mostrarCaracteristicasV2() {
+            if (window.showInfo) {
+                window.showInfo(
+                    '🚀 Sistema OLT Antel v2.0',
+                    `Nuevas características disponibles:
+                    
+• 📊 Dashboard con gráficos en tiempo real
+• 🔔 Notificaciones push y en tiempo real  
+• 📱 Progressive Web App (PWA)
+• 📈 Sistema de reportes y analytics
+• 🎨 Temas personalizables
+• ⚡ Mejor rendimiento y cache inteligente
+• 🔄 Sincronización en background
+• 📄 Exportación avanzada de reportes
+
+¡Explore todas las nuevas funcionalidades!`,
+                    {
+                        actions: [{
+                            label: 'Explorar',
+                            callback: () => {
+                                if (window.themeSystem) {
+                                    window.themeSystem.toggleThemeSelector();
+                                }
+                            }
+                        }]
+                    }
+                );
+            }
+        }
+        
+        // Auto-mostrar características después de la carga inicial
+        setTimeout(() => {
+            if (localStorage.getItem('v2-features-shown') !== 'true') {
+                mostrarCaracteristicasV2();
+                localStorage.setItem('v2-features-shown', 'true');
+            }
+        }, 3000);
     </script>
 </body>
 </html>

@@ -1,0 +1,130 @@
+{
+    "name": "Sistema OLT Antel v2.0",
+    "short_name": "OLT Antel",
+    "description": "Sistema de gestión de OLTs y comandos para Antel",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#007bff",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "lang": "es",
+    "categories": ["productivity", "utilities", "business"],
+    "icons": [
+        {
+            "src": "/icons/icon-72x72.png",
+            "sizes": "72x72",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/icon-96x96.png",
+            "sizes": "96x96",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/icon-128x128.png",
+            "sizes": "128x128",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/icon-144x144.png",
+            "sizes": "144x144",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/icon-152x152.png",
+            "sizes": "152x152",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/icon-384x384.png",
+            "sizes": "384x384",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Ver Tareas",
+            "short_name": "Tareas",
+            "description": "Acceder directamente a la gestión de tareas",
+            "url": "/?tab=tareas",
+            "icons": [
+                {
+                    "src": "/icons/shortcut-tasks.png",
+                    "sizes": "96x96"
+                }
+            ]
+        },
+        {
+            "name": "Gestión OLTs",
+            "short_name": "OLTs",
+            "description": "Acceder a la gestión de equipos OLT",
+            "url": "/?tab=olt",
+            "icons": [
+                {
+                    "src": "/icons/shortcut-olts.png",
+                    "sizes": "96x96"
+                }
+            ]
+        },
+        {
+            "name": "Usuarios",
+            "short_name": "Usuarios",
+            "description": "Gestión de usuarios del sistema",
+            "url": "/?tab=usuarios",
+            "icons": [
+                {
+                    "src": "/icons/shortcut-users.png",
+                    "sizes": "96x96"
+                }
+            ]
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/screenshots/desktop-screenshot.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "platform": "wide",
+            "label": "Vista principal del sistema en escritorio"
+        },
+        {
+            "src": "/screenshots/mobile-screenshot.png",
+            "sizes": "375x667",
+            "type": "image/png",
+            "platform": "narrow",
+            "label": "Vista móvil del sistema"
+        }
+    ],
+    "features": [
+        "Cross Platform",
+        "fast",
+        "simple"
+    ],
+    "prefer_related_applications": false,
+    "related_applications": [],
+    "protocol_handlers": [
+        {
+            "protocol": "web+olt",
+            "url": "/?handler=%s"
+        }
+    ]
+}
