@@ -31,4 +31,4 @@ echo "📍 Acceder en: http://localhost:3000"
 echo "⌨️ Presiona Ctrl+C para detener"
 echo ""
 
-node server.js
+exec node server.js
