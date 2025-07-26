@@ -1,91 +1,21 @@
 {
-  "name": "sistema-olt-antel",
+  "name": "sistema-olt-antel-workspace",
   "version": "2.0.0",
-  "description": "Sistema de gestión OLT Antel con base de datos completa - Usuarios, OLTs, Comandos, IMS, ACS",
-  "main": "electron-main.js",
+  "description": "Sistema OLT Antel - Workspace con versiones Web y Portable organizadas",
+  "main": "web/server.js",
   "homepage": "./",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js",
-    "init-db": "node init-database.js",
-    "migrate-users": "node scripts/migrate-users.js",
-    "migrate-all": "node scripts/migrate-all.js",
-    "reset-db": "node scripts/reset-database.js",
-    "electron": "electron .",
-    "electron-dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
-    "build": "electron-builder",
-    "build-win": "electron-builder --win",
-    "build-portable": "electron-builder --win portable",
-    "dist": "npm run build",
-    "pack": "electron-builder --dir",
-    "postinstall": "electron-builder install-app-deps"
-  },
-  "build": {
-    "appId": "com.antel.sistema-olt",
-    "productName": "Sistema OLT Antel",
-    "directories": {
-      "output": "dist"
-    },
-    "files": [
-      "**/*",
-      "!dist/**/*",
-      "!node_modules/**/*",
-      "node_modules/express/**/*",
-      "node_modules/sqlite3/**/*",
-      "node_modules/cors/**/*",
-      "node_modules/body-parser/**/*",
-      "node_modules/bcrypt/**/*",
-      "node_modules/jsonwebtoken/**/*",
-      "node_modules/express-rate-limit/**/*",
-      "node_modules/helmet/**/*",
-      "node_modules/morgan/**/*",
-      "node_modules/dotenv/**/*"
-    ],
-    "win": {
-      "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        },
-        {
-          "target": "portable",
-          "arch": [
-            "x64"
-          ]
-        }
-      ]
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "Sistema OLT Antel"
-    },
-    "portable": {
-      "artifactName": "Sistema-OLT-Antel-${version}-portable.exe"
-    }
-  },
-  "dependencies": {
-    "express": "^4.18.2",
-    "sqlite3": "^5.1.6",
-    "cors": "^2.8.5",
-    "body-parser": "^1.20.2",
-    "bcrypt": "^5.1.1",
-    "jsonwebtoken": "^9.0.2",
-    "express-rate-limit": "^6.7.0",
-    "helmet": "^7.0.0",
-    "morgan": "^1.10.0",
-    "dotenv": "^16.3.1"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1",
-    "electron": "^27.0.0",
-    "electron-builder": "^24.6.4",
-    "concurrently": "^8.2.2",
-    "wait-on": "^7.0.1"
+    "start": "cd web && npm start",
+    "dev": "cd web && npm run dev",
+    "init-db": "cd web && npm run init-db",
+    "web": "cd web && npm start",
+    "web-dev": "cd web && npm run dev",
+    "portable": "cd portable && npm start",
+    "portable-dev": "cd portable && npm run electron-dev",
+    "build-portable": "cd portable && npm run build-portable",
+    "install-web": "cd web && npm install",
+    "install-portable": "cd portable && npm install",
+    "install-all": "npm run install-web && npm run install-portable"
   },
   "keywords": [
     "olt",
@@ -93,12 +23,14 @@
     "telecom",
     "network",
     "management",
-    "ims",
-    "acs",
-    "usuarios",
-    "electron",
-    "desktop"
+    "workspace",
+    "web",
+    "portable"
   ],
-  "author": "Sistema OLT Antel v2.0",
-  "license": "MIT"
+  "author": "Sistema OLT Antel v2.0 - Workspace",
+  "license": "MIT",
+  "workspaces": [
+    "web",
+    "portable"
+  ]
 }

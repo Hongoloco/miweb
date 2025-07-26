@@ -1,5 +1,7 @@
 # Dependencias de Node.js
 node_modules/
+web/node_modules/
+portable/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -8,6 +10,8 @@ yarn-error.log*
 *.db
 *.sqlite
 *.sqlite3
+web/*.db
+portable/*.db
 
 # Archivos de entorno
 .env
@@ -40,6 +44,15 @@ Thumbs.db
 
 # Directorio de coverage
 coverage/
+
+# Builds de Electron
+portable/dist/
+portable/build/
+portable/release/
+
+# Package-lock específicos (mantener solo el principal)
+web/package-lock.json
+portable/package-lock.json
 
 # Archivos de documentación temporal
 IMPORTACION-EXITOSA.md

@@ -1,0 +1,31 @@
+{
+  "name": "sistema-olt-antel-web",
+  "version": "2.0.0",
+  "description": "Sistema OLT Antel - Versión Web",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "init-db": "node init-database.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "olt",
+    "antel",
+    "telecomunicaciones",
+    "web"
+  ],
+  "author": "Desarrollo de Servicios Residenciales - Antel",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.6",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
