@@ -182,15 +182,15 @@ function startServer() {
     return new Promise((resolve, reject) => {
         console.log('🚀 Iniciando servidor Node.js...');
         
-        // Verificar si el archivo server.js existe
-        const serverPath = path.join(__dirname, 'server.js');
+        // Verificar si el archivo server-simple.js existe
+        const serverPath = path.join(__dirname, 'server-simple.js');
         if (!fs.existsSync(serverPath)) {
-            reject(new Error('Archivo server.js no encontrado'));
+            reject(new Error('Archivo server-simple.js no encontrado'));
             return;
         }
 
         // Iniciar el servidor
-        serverProcess = spawn('node', ['server.js'], {
+        serverProcess = spawn('node', ['server-simple.js'], {
             cwd: __dirname,
             stdio: ['pipe', 'pipe', 'pipe']
         });
@@ -202,7 +202,7 @@ function startServer() {
             console.log('Server:', output);
             
             // Detectar cuando el servidor esté listo
-            if (output.includes('Servidor iniciado en puerto') || output.includes('Server started')) {
+            if (output.includes('Servidor corriendo') || output.includes('Server started')) {
                 if (!serverReady) {
                     serverReady = true;
                     resolve();

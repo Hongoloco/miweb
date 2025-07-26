@@ -1,7 +1,7 @@
 # Sistema OLT Antel - Versión Web
 
 ## 🌐 Descripción
-Versión web del Sistema de Gestión OLT Antel. Una aplicación web completa para la gestión técnica de servicios de telecomunicaciones residenciales.
+Versión web completa del Sistema de Gestión OLT Antel. Una aplicación web completa para la gestión técnica de servicios de telecomunicaciones residenciales con base de datos SQLite.
 
 ## 🚀 Instalación y Ejecución
 
