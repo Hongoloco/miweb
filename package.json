@@ -2,14 +2,71 @@
   "name": "sistema-olt-antel",
   "version": "2.0.0",
   "description": "Sistema de gestión OLT Antel con base de datos completa - Usuarios, OLTs, Comandos, IMS, ACS",
-  "main": "server.js",
+  "main": "electron-main.js",
+  "homepage": "./",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
     "init-db": "node init-database.js",
     "migrate-users": "node scripts/migrate-users.js",
     "migrate-all": "node scripts/migrate-all.js",
-    "reset-db": "node scripts/reset-database.js"
+    "reset-db": "node scripts/reset-database.js",
+    "electron": "electron .",
+    "electron-dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
+    "build": "electron-builder",
+    "build-win": "electron-builder --win",
+    "build-portable": "electron-builder --win portable",
+    "dist": "npm run build",
+    "pack": "electron-builder --dir",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "build": {
+    "appId": "com.antel.sistema-olt",
+    "productName": "Sistema OLT Antel",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!dist/**/*",
+      "!node_modules/**/*",
+      "node_modules/express/**/*",
+      "node_modules/sqlite3/**/*",
+      "node_modules/cors/**/*",
+      "node_modules/body-parser/**/*",
+      "node_modules/bcrypt/**/*",
+      "node_modules/jsonwebtoken/**/*",
+      "node_modules/express-rate-limit/**/*",
+      "node_modules/helmet/**/*",
+      "node_modules/morgan/**/*",
+      "node_modules/dotenv/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Sistema OLT Antel"
+    },
+    "portable": {
+      "artifactName": "Sistema-OLT-Antel-${version}-portable.exe"
+    }
   },
   "dependencies": {
     "express": "^4.18.2",
@@ -24,9 +81,24 @@
     "dotenv": "^16.3.1"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "electron": "^27.0.0",
+    "electron-builder": "^24.6.4",
+    "concurrently": "^8.2.2",
+    "wait-on": "^7.0.1"
   },
-  "keywords": ["olt", "antel", "telecom", "network", "management", "ims", "acs", "usuarios"],
+  "keywords": [
+    "olt",
+    "antel",
+    "telecom",
+    "network",
+    "management",
+    "ims",
+    "acs",
+    "usuarios",
+    "electron",
+    "desktop"
+  ],
   "author": "Sistema OLT Antel v2.0",
   "license": "MIT"
 }
