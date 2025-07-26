@@ -526,7 +526,7 @@ app.get('/api/tareas/estadisticas', (req, res) => {
         SUM(CASE WHEN estado = 'activa' THEN 1 ELSE 0 END) as activas,
         SUM(CASE WHEN estado = 'finalizada' THEN 1 ELSE 0 END) as finalizadas,
         SUM(CASE WHEN prioridad = 'urgente' THEN 1 ELSE 0 END) as urgentes,
-        AVG(progreso) as progreso_promedio
+        0 as progreso_promedio
         FROM tareas t ${whereClause}`, params, (err, stats) => {
         if (err) {
             console.error('Error al obtener estadísticas:', err);
@@ -578,27 +578,23 @@ app.get('/api/tareas/:id', (req, res) => {
 
 // Crear nueva tarea
 app.post('/api/tareas', (req, res) => {
-    const { titulo, descripcion, estado, prioridad, categoria, fecha_vencimiento, 
-            tiempo_estimado, etiquetas, usuario_id } = req.body;
+    const { titulo, descripcion, estado, prioridad, categoria, usuario_id } = req.body;
     
     if (!titulo) {
         return res.status(400).json({ success: false, message: 'El título es obligatorio' });
     }
     
-    const etiquetasJson = etiquetas ? JSON.stringify(etiquetas) : null;
-    
-    db.run(`INSERT INTO tareas (titulo, descripcion, estado, prioridad, categoria, 
-            fecha_vencimiento, tiempo_estimado, etiquetas, usuario_id) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    db.run(`INSERT INTO tareas (titulo, descripcion, estado, prioridad, categoria, usuario_id) 
+            VALUES (?, ?, ?, ?, ?, ?)`,
         [titulo, descripcion || '', estado || 'pendiente', prioridad || 'media', 
-         categoria || 'General', fecha_vencimiento, tiempo_estimado, etiquetasJson, usuario_id],
+         categoria || 'General', usuario_id || 1],
         function(err) {
             if (err) {
                 console.error('Error al crear tarea:', err);
                 return res.status(500).json({ success: false, message: 'Error del servidor' });
             }
             
-            logActivity(usuario_id, 'crear_tarea', `Tarea: ${titulo}`, req.ip);
+            logActivity(usuario_id || 1, 'crear_tarea', `Tarea: ${titulo}`, req.ip);
             
             res.json({
                 success: true,
@@ -612,23 +608,17 @@ app.post('/api/tareas', (req, res) => {
 // Actualizar tarea
 app.put('/api/tareas/:id', (req, res) => {
     const tareaId = req.params.id;
-    const { titulo, descripcion, estado, prioridad, categoria, fecha_vencimiento, 
-            tiempo_estimado, tiempo_real, progreso, etiquetas, editor_id } = req.body;
+    const { titulo, descripcion, estado, prioridad, categoria, editor_id } = req.body;
     
     if (!titulo) {
         return res.status(400).json({ success: false, message: 'El título es obligatorio' });
     }
     
-    const etiquetasJson = etiquetas ? JSON.stringify(etiquetas) : null;
-    const fechaFinalizacion = estado === 'finalizada' ? new Date().toISOString() : null;
-    
     db.run(`UPDATE tareas SET titulo = ?, descripcion = ?, estado = ?, prioridad = ?, 
-            categoria = ?, fecha_vencimiento = ?, tiempo_estimado = ?, tiempo_real = ?, 
-            progreso = ?, etiquetas = ?, fecha_finalizacion = ?
+            categoria = ?, fecha_modificacion = CURRENT_TIMESTAMP
             WHERE id = ? AND activa = 1`,
         [titulo, descripcion || '', estado || 'pendiente', prioridad || 'media', 
-         categoria || 'General', fecha_vencimiento, tiempo_estimado, tiempo_real, 
-         progreso || 0, etiquetasJson, fechaFinalizacion, tareaId],
+         categoria || 'General', tareaId],
         function(err) {
             if (err) {
                 console.error('Error al actualizar tarea:', err);
@@ -639,7 +629,7 @@ app.put('/api/tareas/:id', (req, res) => {
                 return res.status(404).json({ success: false, message: 'Tarea no encontrada' });
             }
             
-            logActivity(editor_id, 'actualizar_tarea', `Tarea: ${titulo}`, req.ip);
+            logActivity(editor_id || 1, 'actualizar_tarea', `Tarea: ${titulo}`, req.ip);
             
             res.json({ success: true, message: 'Tarea actualizada correctamente' });
         }
@@ -708,7 +698,7 @@ app.get('/api/categorias-tareas', (req, res) => {
 
 // Obtener todos los comandos IMS
 app.get('/api/comandos-ims', (req, res) => {
-    db.all(`SELECT * FROM comandos_ims WHERE activo = 1 ORDER BY categoria, nombre`, (err, comandos) => {
+    db.all(`SELECT * FROM comandos_ims ORDER BY categoria, nombre`, (err, comandos) => {
         if (err) {
             console.error('Error al obtener comandos IMS:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });

@@ -234,7 +234,10 @@
             background: #f8f9fa;
             cursor: pointer;
             font-weight: 600;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
             transition: all 0.3s ease;
             border-right: 1px solid #dee2e6;
         }
@@ -405,6 +408,32 @@
             color: var(--azul-antel);
             margin: 20px 0 15px;
             font-weight: 700;
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 8px;
+            background: rgba(0, 123, 191, 0.1);
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 4px solid var(--azul-antel);
+        }
+        
+        .section-title span:first-child {
+            font-size: 1em;
+            line-height: 1;
+            display: inline-block;
+        }
+        
+        .section-title span:last-child {
+            flex: 1;
+        }
+        
+        /* Específico para títulos problemáticos */
+        .config-section .section-title {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
         }
 
         .command {
@@ -2391,61 +2420,50 @@
     <!-- ===== CONTENIDO PRINCIPAL ===== -->
     <div class="main-content" id="mainContent">
         <div class="container">
-            <h1>🌐 Desarrollo de Servicios Residenciales</h1>
+            <h1>🌐 Desarrollo de Servicios Residenciales - VERSIÓN ACTUALIZADA ✅</h1>
             <h2 style="text-align:center; color:var(--azul-antel); margin-bottom:20px; margin-top:0;">
                 Gestión Integral de Infraestructura de Red
             </h2>
             
             <div class="tabs">
-                <div class="tab active" data-tab="inicio">🏠 Inicio</div>
-                <div class="tab" data-tab="tareas">📋 Tareas</div>
-                <div class="tab" data-tab="olt">⚡ Comandos en OLT</div>
-                <div class="tab" data-tab="ims">📞 IMS Antel</div>
-                <div class="tab" data-tab="acs">🌍 ACS</div>
-                <div class="tab" data-tab="configuracion">⚙️ Configuración</div>
-                <div class="tab" data-tab="ayuda">❓ Ayuda</div>
+                <div class="tab active" data-tab="inicio">
+                    <span>🏠</span>
+                    <span>Inicio</span>
+                </div>
+                <div class="tab" data-tab="tareas">
+                    <span>📋</span>
+                    <span>Tareas</span>
+                </div>
+                <div class="tab" data-tab="olt">
+                    <span>⚡</span>
+                    <span>Comandos en OLT</span>
+                </div>
+                <div class="tab" data-tab="ims">
+                    <span>📞</span>
+                    <span>IMS Antel</span>
+                </div>
+                <div class="tab" data-tab="acs">
+                    <span>🌍</span>
+                    <span>ACS</span>
+                </div>
+                <div class="tab" data-tab="configuracion">
+                    <span>⚙️</span>
+                    <span>Configuración</span>
+                </div>
+                <div class="tab" data-tab="ayuda">
+                    <span>❓</span>
+                    <span>Ayuda</span>
+                </div>
             </div>
 
             <!-- Contenido Inicio -->
             <div class="tab-content active" id="inicio">
-                <!-- Dashboard Avanzado con Gráficos -->
+                <!-- 1. DESCRIPCIÓN DE LA WEB (ARRIBA) -->
                 <div class="config-section">
-                    <h2 class="section-title">📊 Dashboard del Sistema</h2>
-                    <p style="color: #666; margin-bottom: 25px;">
-                        Visualización en tiempo real del estado del sistema y métricas de rendimiento.
-                    </p>
-                    
-                    <!-- Métricas Principales -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
-                        <div class="metric-card" style="background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%); padding: 20px; border-radius: 12px; text-align: center;">
-                            <div style="font-size: 32px; font-weight: bold; color: var(--primary-color);" id="total-comandos">-</div>
-                            <div style="font-size: 14px; color: #666;">Comandos Totales</div>
-                        </div>
-                        <div class="metric-card" style="background: linear-gradient(145deg, #f3e5f5 0%, #e1bee7 100%); padding: 20px; border-radius: 12px; text-align: center;">
-                            <div style="font-size: 32px; font-weight: bold; color: #7b1fa2;" id="total-olts">-</div>
-                            <div style="font-size: 14px; color: #666;">OLTs Configuradas</div>
-                        </div>
-                        <div class="metric-card" style="background: linear-gradient(145deg, #e8f5e8 0%, #c8e6c9 100%); padding: 20px; border-radius: 12px; text-align: center;">
-                            <div style="font-size: 32px; font-weight: bold; color: #2e7d32;" id="dashboard-total-tareas">-</div>
-                            <div style="font-size: 14px; color: #666;">Tareas Activas</div>
-                        </div>
-                        <div class="metric-card" style="background: linear-gradient(145deg, #fff3e0 0%, #ffcc02 30%); padding: 20px; border-radius: 12px; text-align: center;">
-                            <div style="font-size: 32px; font-weight: bold; color: #ef6c00;" id="total-usuarios">-</div>
-                            <div style="font-size: 14px; color: #666;">Usuarios Activos</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Gráficos del Dashboard -->
-                    <div class="charts-grid">
-                        <div id="tasks-chart"></div>
-                        <div id="olt-status-chart"></div>
-                        <div id="user-activity-chart"></div>
-                        <div id="performance-chart"></div>
-                    </div>
-                </div>
-
-                <div class="config-section">
-                    <h2 class="section-title">🎯 Desarrollo de Servicios Residenciales</h2>
+                    <h2 class="section-title">
+                        <span>🎯</span>
+                        <span>Desarrollo de Servicios Residenciales</span>
+                    </h2>
                     <p style="font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 20px;">
                         Plataforma integral para la gestión técnica de servicios de telecomunicaciones residenciales. 
                         Centraliza las herramientas esenciales para el mantenimiento y configuración de equipos OLT (ZTE C600), 
@@ -2455,9 +2473,12 @@
                     </p>
                 </div>
 
-                <!-- Enlaces Útiles de Antel -->
+                <!-- 2. ENLACES ÚTILES DE ANTEL (EN EL MEDIO) -->
                 <div class="config-section">
-                    <h2 class="section-title">🔗 Enlaces Útiles de Antel</h2>
+                    <h2 class="section-title">
+                        <span>🔗</span>
+                        <span>Enlaces Útiles de Antel</span>
+                    </h2>
                     <p style="color: #666; margin-bottom: 20px;">
                         Accesos rápidos a los sistemas internos de Antel para gestión técnica y documentación.
                     </p>
@@ -2544,13 +2565,55 @@
                         </p>
                     </div>
                 </div>
+
+                <!-- 3. DASHBOARD DEL SISTEMA (ABAJO) -->
+                <div class="config-section">
+                    <h2 class="section-title">
+                        <span>📊</span>
+                        <span>Dashboard del Sistema</span>
+                    </h2>
+                    <p style="color: #666; margin-bottom: 25px;">
+                        Visualización en tiempo real del estado del sistema y métricas de rendimiento.
+                    </p>
+                    
+                    <!-- Métricas Principales -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                        <div class="metric-card" style="background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%); padding: 20px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; color: var(--primary-color);" id="total-comandos">-</div>
+                            <div style="font-size: 14px; color: #666;">Comandos Totales</div>
+                        </div>
+                        <div class="metric-card" style="background: linear-gradient(145deg, #f3e5f5 0%, #e1bee7 100%); padding: 20px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; color: #7b1fa2;" id="total-olts">-</div>
+                            <div style="font-size: 14px; color: #666;">OLTs Configuradas</div>
+                        </div>
+                        <div class="metric-card" style="background: linear-gradient(145deg, #e8f5e8 0%, #c8e6c9 100%); padding: 20px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; color: #2e7d32;" id="dashboard-total-tareas">-</div>
+                            <div style="font-size: 14px; color: #666;">Tareas Activas</div>
+                        </div>
+                        <div class="metric-card" style="background: linear-gradient(145deg, #fff3e0 0%, #ffcc02 30%); padding: 20px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; color: #ef6c00;" id="total-usuarios">-</div>
+                            <div style="font-size: 14px; color: #666;">Usuarios Activos</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Gráficos del Dashboard -->
+                    <div class="charts-grid">
+                        <div id="tasks-chart"></div>
+                        <div id="olt-status-chart"></div>
+                        <div id="user-activity-chart"></div>
+                        <div id="performance-chart"></div>
+                    </div>
+                </div>
             </div>
 
             <!-- Contenido Tareas -->
             <div class="tab-content" id="tareas">
                 <div class="config-section">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h2 class="section-title">📋 Gestión de Tareas</h2>
+                        <h2 class="section-title">
+                            <span>📋</span>
+                            <span>Gestión de Tareas</span>
+                        </h2>
                         <div style="display: flex; gap: 10px;">
                             <button class="btn btn-success" onclick="mostrarModalNuevaTarea()">
                                 ➕ Nueva Tarea
@@ -2627,36 +2690,35 @@
 
             <!-- Contenido OLT -->
             <div class="tab-content" id="olt">
-                <!-- Controles esenciales -->
-                <div class="search-container">
-                    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
-                        <button class="btn btn-primary" onclick="cargarOLTs()">🔄 Recargar OLTs</button>
-                    </div>
-                </div>
-
                 <!-- OLT ZTE C600 -->
                 <div class="olt-block">
                     <!-- Selector de OLT y controles -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-                        <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                            <div style="display: flex; align-items: center;">
-                                <label style="margin-right: 10px; font-weight: bold; color: var(--azul-antel);">🌐 OLT:</label>
-                                <select id="selector-olt" onchange="cambiarOLT(this.value)" style="padding: 8px 12px; border: 2px solid var(--azul-antel); border-radius: 6px; font-size: 14px; font-weight: bold;">
+                    <div style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 20px;">
+                        <!-- Selector de OLT centrado -->
+                        <div style="display: flex; justify-content: center; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 15px; background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%); padding: 15px 25px; border-radius: 12px; border: 2px solid var(--azul-antel); box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                <label style="font-weight: bold; color: var(--azul-antel); font-size: 16px;">🌐 OLT:</label>
+                                <select id="selector-olt" onchange="cambiarOLT(this.value)" style="padding: 12px 16px; border: 2px solid var(--azul-antel); border-radius: 8px; font-size: 16px; font-weight: bold; min-width: 250px; background: white; cursor: pointer;">
                                     <option value="">Cargando...</option>
                                 </select>
+                                <button class="btn btn-secondary" style="padding: 8px 14px; font-size: 13px; margin-left: 5px;" onclick="editarNombre()">
+                                    ✏️ Editar
+                                </button>
                             </div>
-                            <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="editarNombre()">
-                                ✏️ Editar
-                            </button>
                         </div>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                            <button class="btn btn-primary" onclick="agregarNuevaOLT()">
+                        
+                        <!-- Botones de control -->
+                        <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                            <button class="btn btn-info" onclick="cargarOLTs()" style="padding: 10px 16px; font-size: 14px; background: #17a2b8; border-color: #17a2b8;">
+                                🔄 Recargar OLTs
+                            </button>
+                            <button class="btn btn-primary" onclick="agregarNuevaOLT()" style="padding: 10px 16px; font-size: 14px;">
                                 ➕ Nueva OLT
                             </button>
-                            <button class="btn btn-secondary" onclick="duplicarOLT()">
+                            <button class="btn btn-secondary" onclick="duplicarOLT()" style="padding: 10px 16px; font-size: 14px;">
                                 📄 Duplicar
                             </button>
-                            <button class="btn btn-secondary" onclick="eliminarOLT()" style="background: #dc3545;">
+                            <button class="btn btn-secondary" onclick="eliminarOLT()" style="background: #dc3545; padding: 10px 16px; font-size: 14px;">
                                 🗑️ Eliminar
                             </button>
                         </div>
@@ -2682,7 +2744,10 @@
 
                     <!-- Configuración dinámica -->
                     <div class="config-section">
-                        <h4 class="section-title" style="margin-top: 0;">⚙️ Parámetros de Conexión</h4>
+                        <h4 class="section-title" style="margin-top: 0;">
+                            <span>⚙️</span>
+                            <span>Parámetros de Conexión</span>
+                        </h4>
                         <div class="input-group">
                             <label>Shelf:</label>
                             <input type="number" id="shelf" min="1" max="99" value="1" onchange="actualizarParametros()">
@@ -2703,7 +2768,10 @@
 
                     <!-- Comandos dinámicos -->
                     <div class="config-section">
-                        <h4 class="section-title">📋 Comandos Útiles</h4>
+                        <h4 class="section-title">
+                            <span>📋</span>
+                            <span>Comandos Útiles</span>
+                        </h4>
                         <div id="comandos-container" class="loading">
                             Cargando comandos de la base de datos...
                         </div>
@@ -2715,7 +2783,10 @@
             <div class="tab-content" id="ims">
                 <!-- Acceso al Sistema IMS -->
                 <div class="config-section">
-                    <h2 class="section-title">📞 Sistema IMS - Gestión de Abonados</h2>
+                    <h2 class="section-title">
+                        <span>📞</span>
+                        <span>Sistema IMS - Gestión de Abonados</span>
+                    </h2>
                     <p style="color: #666; margin-bottom: 20px;">
                         Gestión de abonados del sistema IP Multimedia Subsystem (IMS) de Antel
                     </p>
@@ -2740,7 +2811,10 @@
 
                 <!-- Comandos de Consulta -->
                 <div class="config-section">
-                    <h3 class="section-title">🔍 Comandos de Consulta (EXP USRINF)</h3>
+                    <h3 class="section-title">
+                        <span>🔍</span>
+                        <span>Comandos de Consulta (EXP USRINF)</span>
+                    </h3>
                     <p style="color: #666; margin-bottom: 15px;">
                         Comandos para consultar el estado de abonados. Ruta: <strong>Maintenance → MML command → NE → CSCF</strong>
                     </p>
@@ -2844,7 +2918,10 @@
 
                 <!-- Comandos de Desregistro -->
                 <div class="config-section">
-                    <h3 class="section-title">⚠️ Comandos de Desregistro (CNL URCNL)</h3>
+                    <h3 class="section-title">
+                        <span>⚠️</span>
+                        <span>Comandos de Desregistro (CNL URCNL)</span>
+                    </h3>
                     <p style="color: #666; margin-bottom: 15px;">
                         <strong>⚠️ Precaución:</strong> Estos comandos desconectan a los usuarios del servicio IMS
                     </p>
@@ -2927,7 +3004,10 @@
 
                 <!-- Crear Comando Personalizado -->
                 <div class="config-section">
-                    <h3 class="section-title">🛠️ Crear Comando Personalizado</h3>
+                    <h3 class="section-title">
+                        <span>🛠️</span>
+                        <span>Crear Comando Personalizado</span>
+                    </h3>
                     <p style="color: #666; margin-bottom: 15px;">
                         Genere comandos IMS personalizados con números de teléfono específicos
                     </p>
@@ -2958,7 +3038,10 @@
 
                 <!-- Información Técnica -->
                 <div class="config-section">
-                    <h3 class="section-title">📋 Información Técnica</h3>
+                    <h3 class="section-title">
+                        <span>📋</span>
+                        <span>Información Técnica</span>
+                    </h3>
                     <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid var(--azul-antel);">
                         <ul style="margin: 0; padding-left: 20px; color: #555; line-height: 1.6;">
                             <li><strong>ENTITYPE:</strong> SCSCF (Serving Call Session Control Function)</li>
@@ -2976,7 +3059,10 @@
             <div class="tab-content" id="acs">
                 <div class="config-section">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <h2 class="section-title">🌍 Sistema ACS - Auto Configuration Server</h2>
+                        <h2 class="section-title">
+                            <span>🌍</span>
+                            <span>Sistema ACS - Auto Configuration Server</span>
+                        </h2>
                         <button onclick="forzarRecargaACS()" style="background: #ff6b6b; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px;">
                             🔄 Forzar Recarga
                         </button>
@@ -3044,7 +3130,10 @@
             <div class="tab-content" id="configuracion">
                 <!-- Gestión de Usuarios (Solo para alito) -->
                 <div class="config-section" id="user-management-section" style="display: none;">
-                    <h2 class="section-title">👥 Gestión de Usuarios</h2>
+                    <h2 class="section-title">
+                        <span>👥</span>
+                        <span>Gestión de Usuarios</span>
+                    </h2>
                     <p style="color: #666; margin-bottom: 20px;">
                         Administración de usuarios del sistema. Solo usuarios con privilegios administrativos pueden acceder a esta sección.
                     </p>
@@ -3203,7 +3292,9 @@
                 </div>
 
                 <div class="config-section">
-                    <h2 class="section-title">⚙️ Configuración del Sistema</h2>
+                    <div style="font-size: 20px; color: var(--azul-antel); margin: 20px 0 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; background: rgba(0, 123, 191, 0.1); padding: 8px 12px; border-radius: 6px; border-left: 4px solid var(--azul-antel);">
+                        ⚙️ Configuración del Sistema
+                    </div>
                     <p>Panel de configuración avanzada con base de datos SQLite.</p>
                     
                     <div class="button-group">
@@ -3224,7 +3315,10 @@
             <!-- Contenido Ayuda -->
             <div class="tab-content" id="ayuda">
                 <div class="config-section">
-                    <h2 class="section-title">❓ Ayuda y Documentación v2.0</h2>
+                    <h2 class="section-title">
+                        <span>❓</span>
+                        <span>Ayuda y Documentación v2.0</span>
+                    </h2>
                     <div style="line-height: 1.8; color: #555;">
                         <h3 style="color: var(--azul-antel); margin-top: 0;">🎯 Novedades de la versión con BD:</h3>
                         <ul style="margin-left: 20px;">
@@ -3308,6 +3402,9 @@
             if (activeTab) activeTab.classList.add('active');
             if (activeContent) activeContent.classList.add('active');
             
+            // Guardar la pestaña activa para mantenerla al recargar
+            localStorage.setItem('activeTab', tabName);
+            
             // Inicializar contenido específico de cada pestaña
             if (tabName === 'dashboard') {
                 setTimeout(() => {
@@ -3365,8 +3462,17 @@
                 });
             });
             
-            // Mostrar dashboard por defecto
-            showTab('dashboard');
+            // Verificar si ya está autenticado para restaurar la pestaña activa
+            const isAuthenticated = sessionStorage.getItem('authenticated') === 'true';
+            
+            if (isAuthenticated) {
+                // Si está autenticado, restaurar la pestaña que estaba activa
+                const savedTab = localStorage.getItem('activeTab');
+                showTab(savedTab || 'inicio'); // Si no hay pestaña guardada, ir a inicio
+            } else {
+                // Si no está autenticado, mostrar inicio por defecto
+                showTab('inicio');
+            }
         });
 
         // ===== SISTEMA DE AUTENTICACIÓN OPTIMIZADO =====
@@ -3413,6 +3519,9 @@
                     // Guardar sesión
                     sessionStorage.setItem('authenticated', 'true');
                     sessionStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    // Siempre ir a la pestaña "inicio" al hacer login
+                    showTab('inicio');
                     
                     // Mostrar sección de gestión solo para admin
                     if (data.user.username === 'alito') {
@@ -3564,6 +3673,9 @@
                 () => {
                     // Limpiar todas las variables de sesión
                     sessionStorage.clear();
+                    
+                    // Limpiar también la pestaña activa guardada
+                    localStorage.removeItem('activeTab');
                     
                     // Limpiar también las notificaciones mostradas
                     notificacionesRecientes.clear();
@@ -4783,6 +4895,22 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                         }
                     });
                     
+                    // Agregar event listeners para actualizar el display en tiempo real
+                    console.log('🔗 Configurando event listeners para actualización de display...');
+                    fields.forEach(field => {
+                        const element = document.getElementById(field);
+                        if (element) {
+                            // Remover listeners anteriores si existen
+                            element.removeEventListener('input', window.actualizarDisplayParametros);
+                            element.removeEventListener('keyup', window.actualizarDisplayParametros);
+                            
+                            // Agregar nuevos listeners
+                            element.addEventListener('input', window.actualizarDisplayParametros);
+                            element.addEventListener('keyup', window.actualizarDisplayParametros);
+                            console.log(`✅ Event listeners agregados para ${field}`);
+                        }
+                    });
+                    
                     if (typeof actualizarDisplayOLT === 'function') {
                         actualizarDisplayOLT(olt);
                     }
@@ -5399,6 +5527,30 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
         }
 
         // ===== FUNCIONES AUXILIARES =====
+        
+        // Función para actualizar solo el display de parámetros (respuesta inmediata)
+        function actualizarDisplayParametros() {
+            console.log('🔄 actualizarDisplayParametros() llamada');
+            const shelf = document.getElementById('shelf').value || '1';
+            const slot = document.getElementById('slot').value || '1';
+            const port = document.getElementById('port').value || '1';
+            const onuId = document.getElementById('onuId').value || '1';
+            
+            console.log(`📊 Valores: ${shelf}/${slot}/${port}:${onuId}`);
+            
+            // Actualizar el display inmediatamente
+            const displayElement = document.getElementById('olt-params-display');
+            if (displayElement) {
+                displayElement.textContent = `${shelf}/${slot}/${port}:${onuId}`;
+                console.log('✅ Display actualizado correctamente');
+            } else {
+                console.error('❌ No se encontró el elemento olt-params-display');
+            }
+        }
+        
+        // Hacer la función global para asegurar accesibilidad
+        window.actualizarDisplayParametros = actualizarDisplayParametros;
+        
         async function actualizarParametros() {
             const oltId = document.getElementById('selector-olt').value;
             if (!oltId) return;
@@ -5437,7 +5589,12 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                     mostrarNotificacion('Parámetros guardados automáticamente', 'success', 1000);
                 } else {
                     console.warn('Error al guardar parámetros automáticamente');
+                    // Aún así actualizar la interfaz localmente
+                    actualizarComandosDinamicamente();
                 }
+                
+                // Siempre actualizar el display de parámetros
+                document.getElementById('olt-params-display').textContent = `${shelf}/${slot}/${port}:${onuId}`;
             } catch (error) {
                 console.error('Error guardando parámetros:', error);
             }
@@ -5530,6 +5687,9 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                     console.log(`🔄 Botón de copia actualizado para comando: ${comandoOriginal.nombre}`);
                 }
             });
+            
+            // Actualizar el display de parámetros en la interfaz
+            document.getElementById('olt-params-display').textContent = `${shelf}/${slot}/${port}:${onuId}`;
             
             console.log('✅ Actualización dinámica completada');
         }
@@ -7133,24 +7293,39 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                     const usuario = data.usuario;
                     console.log('📊 Datos usuario:', usuario);
                     
-                    // Llenar formulario
-                    document.getElementById('nuevo-username').value = usuario.username || '';
-                    document.getElementById('nuevo-password').value = ''; // Siempre vacío en edición
-                    document.getElementById('nuevo-rol').value = usuario.rol || 'usuario';
-                    document.getElementById('nuevo-email').value = usuario.email || '';
-                    document.getElementById('nuevo-descripcion').value = usuario.descripcion || '';
-                    document.getElementById('usuario-activo').checked = usuario.activo !== false;
+                    // Primero mostrar la sección de crear usuario
+                    selectUserAction('create');
                     
-                    usuarioEditando = id;
-                    const cancelBtn = document.getElementById('cancelar-edicion');
-                    if (cancelBtn) {
-                        cancelBtn.style.display = 'inline-block';
-                    }
-                    
-                    mostrarMensajeUsuario(`✏️ Editando usuario: ${usuario.username}`, 'info');
-                    
-                    // Scroll al formulario
-                    document.getElementById('nuevo-username').scrollIntoView({ behavior: 'smooth' });
+                    // Esperar un momento para que se renderice el formulario
+                    setTimeout(() => {
+                        // Llenar formulario
+                        document.getElementById('nuevo-username').value = usuario.username || '';
+                        document.getElementById('nuevo-password').value = ''; // Siempre vacío en edición
+                        document.getElementById('nuevo-rol').value = usuario.rol || 'usuario';
+                        document.getElementById('nuevo-email').value = usuario.email || '';
+                        document.getElementById('nuevo-descripcion').value = usuario.descripcion || '';
+                        document.getElementById('usuario-activo').checked = usuario.activo !== false;
+                        
+                        // Deshabilitar el campo de username en edición
+                        document.getElementById('nuevo-username').disabled = true;
+                        
+                        usuarioEditando = id;
+                        const cancelBtn = document.getElementById('cancelar-edicion');
+                        if (cancelBtn) {
+                            cancelBtn.style.display = 'inline-block';
+                        }
+                        
+                        // Cambiar el título para indicar que estamos editando
+                        const sectionTitle = document.getElementById('user-section-title');
+                        if (sectionTitle) {
+                            sectionTitle.textContent = `✏️ Editando Usuario: ${usuario.username}`;
+                        }
+                        
+                        mostrarMensajeUsuario(`✏️ Editando usuario: ${usuario.username}`, 'info');
+                        
+                        // Scroll al formulario
+                        document.getElementById('nuevo-username').scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
                     
                 } else {
                     throw new Error(data.message || 'Error al cargar usuario');
