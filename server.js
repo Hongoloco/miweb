@@ -28,8 +28,12 @@ app.use('/automation-system.js', express.static(path.join(__dirname, 'automation
 app.use('/sw.js', express.static(path.join(__dirname, 'sw.js')));
 app.use('/manifest.json', express.static(path.join(__dirname, 'manifest.json')));
 
-// Servir el archivo HTML principal
+// Servir el archivo HTML principal con headers anti-cache
 app.get('/', (req, res) => {
+    // Headers para evitar caché del index.html
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
@@ -1451,10 +1455,118 @@ app.post('/api/modelos-ont', (req, res) => {
     });
 });
 
+// Crear nuevo modelo ONT desde ACS (funcionalidad agregar modelo)
+app.post('/api/modelo-ont', (req, res) => {
+    const { fabricante, modelo, tipo, version, descripcion, comandos } = req.body;
+    
+    console.log('=== CREANDO NUEVO MODELO ACS ===');
+    console.log('Datos recibidos:', { fabricante, modelo, tipo, version, descripcion, comandos: comandos?.length });
+    
+    // Validaciones básicas
+    if (!fabricante || !modelo || !tipo) {
+        console.error('Datos incompletos:', { fabricante: !!fabricante, modelo: !!modelo, tipo: !!tipo });
+        return res.status(400).json({ 
+            success: false, 
+            error: 'Datos incompletos. Se requiere fabricante, modelo y tipo.' 
+        });
+    }
+    
+    // Generar ID único para el modelo
+    const modeloId = `${fabricante}-${modelo}-${Date.now()}`.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    
+    // Verificar que no exista un modelo con el mismo fabricante y modelo
+    db.get(`SELECT id FROM modelos_ont WHERE fabricante = ? AND modelo = ?`, [fabricante, modelo], (err, existingModel) => {
+        if (err) {
+            console.error('Error al verificar modelo existente:', err);
+            return res.status(500).json({ success: false, error: 'Error del servidor al validar' });
+        }
+        
+        if (existingModel) {
+            console.error('Modelo duplicado encontrado:', { fabricante, modelo });
+            return res.status(400).json({ 
+                success: false, 
+                error: `Ya existe un modelo ${fabricante} ${modelo}. Use un nombre diferente.` 
+            });
+        }
+        
+        // Insertar modelo principal
+        console.log('Insertando modelo en BD con ID:', modeloId);
+        db.run(`INSERT INTO modelos_ont (id, fabricante, modelo, version, tipo, descripcion, usuario_id) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [modeloId, fabricante, modelo, version || '', tipo, descripcion || '', 1], // Usuario admin por defecto
+            function(err) {
+                if (err) {
+                    console.error('Error al insertar modelo ONT:', err);
+                    return res.status(500).json({ success: false, error: 'Error del servidor al crear modelo' });
+                }
+
+                console.log('Modelo insertado exitosamente. ID:', modeloId);
+
+                // Agregar comandos si los hay
+                if (comandos && comandos.length > 0) {
+                    console.log(`Insertando ${comandos.length} comandos...`);
+                    
+                    let comandosInsertados = 0;
+                    let erroresComandos = 0;
+                    
+                    const insertarComando = (index) => {
+                        if (index >= comandos.length) {
+                            // Todos los comandos procesados
+                            console.log(`Comandos procesados: ${comandosInsertados} exitosos, ${erroresComandos} con errores`);
+                            return res.json({
+                                success: true,
+                                message: `Modelo ${fabricante} ${modelo} creado exitosamente`,
+                                modeloId: modeloId,
+                                comandosCreados: comandosInsertados
+                            });
+                        }
+                        
+                        const comando = comandos[index];
+                        if (comando.nombre && comando.comando) {
+                            // Determinar categoría (usar la del comando o 'tr069' por defecto)
+                            const categoria = comando.categoria || 'tr069';
+                            const tipoComando = comando.tipo || 'TR069';
+                            
+                            db.run(`INSERT INTO comandos_ont (modelo_id, nombre, comando, categoria, tipo) VALUES (?, ?, ?, ?, ?)`,
+                                [modeloId, comando.nombre, comando.comando, categoria, tipoComando],
+                                function(err) {
+                                    if (err) {
+                                        console.error(`Error al insertar comando TR-069 ${index + 1}:`, err);
+                                        erroresComandos++;
+                                    } else {
+                                        console.log(`Comando TR-069 ${index + 1} insertado exitosamente - Categoría: ${categoria}`);
+                                        comandosInsertados++;
+                                    }
+                                    insertarComando(index + 1);
+                                }
+                            );
+                        } else {
+                            console.log(`Comando ${index + 1} omitido por datos incompletos`);
+                            insertarComando(index + 1);
+                        }
+                    };
+                    
+                    insertarComando(0);
+                } else {
+                    console.log('No hay comandos para insertar');
+                    res.json({
+                        success: true,
+                        message: `Modelo ${fabricante} ${modelo} creado exitosamente`,
+                        modeloId: modeloId,
+                        comandosCreados: 0
+                    });
+                }
+            }
+        );
+    });
+});
+
 // Eliminar modelo ONT
 app.delete('/api/modelos-ont/:id', (req, res) => {
     const modeloId = req.params.id;
     const { usuarioId } = req.body;
+    
+    console.log('🐛 DEBUG - DELETE /api/modelos-ont/:id llamado con:', { modeloId, usuarioId });
     
     // Primero obtener info del modelo para el log
     db.get(`SELECT fabricante, modelo FROM modelos_ont WHERE id = ?`, [modeloId], (err, modelo) => {
@@ -1463,7 +1575,10 @@ app.delete('/api/modelos-ont/:id', (req, res) => {
             return res.status(500).json({ success: false, message: 'Error del servidor' });
         }
 
+        console.log('🔍 DEBUG - Modelo encontrado:', modelo);
+
         if (!modelo) {
+            console.log('❌ DEBUG - Modelo no encontrado para ID:', modeloId);
             return res.status(404).json({ success: false, message: 'Modelo ONT no encontrado' });
         }
 
@@ -1481,6 +1596,134 @@ app.delete('/api/modelos-ont/:id', (req, res) => {
             logActivity(usuarioId, 'eliminar_modelo_ont', `Modelo: ${modelo.fabricante} ${modelo.modelo}`, req.ip);
             res.json({ success: true, message: 'Modelo ONT eliminado correctamente' });
         });
+    });
+});
+
+// Obtener modelo ONT específico por ID
+app.get('/api/modelos-ont/:id', (req, res) => {
+    const modeloId = req.params.id;
+    
+    db.get(`SELECT * FROM modelos_ont WHERE id = ?`, [modeloId], (err, modelo) => {
+        if (err) {
+            console.error('Error al obtener modelo ONT:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+
+        if (!modelo) {
+            return res.status(404).json({ success: false, message: 'Modelo ONT no encontrado' });
+        }
+
+        // Obtener comandos asociados
+        db.all(`SELECT * FROM comandos_ont WHERE modelo_id = ? ORDER BY orden`, [modeloId], (err, comandos) => {
+            if (err) {
+                console.error('Error al obtener comandos:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+
+            modelo.comandos = comandos;
+            res.json({ success: true, modelo });
+        });
+    });
+});
+
+// Actualizar modelo ONT
+app.put('/api/modelos-ont/:id', (req, res) => {
+    const modeloId = req.params.id;
+    const { fabricante, modelo, tipo, version, descripcion, comandos, usuarioId } = req.body;
+    
+    // Validaciones
+    if (!fabricante || !modelo) {
+        return res.status(400).json({ 
+            success: false, 
+            error: 'Fabricante y modelo son obligatorios' 
+        });
+    }
+
+    // Iniciar transacción
+    db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+
+        // Actualizar información básica del modelo
+        db.run(`UPDATE modelos_ont 
+                SET fabricante = ?, modelo = ?, tipo = ?, version = ?, descripcion = ?, fecha_modificacion = CURRENT_TIMESTAMP
+                WHERE id = ?`, 
+            [fabricante, modelo, tipo, version, descripcion, modeloId], 
+            function(err) {
+                if (err) {
+                    console.error('Error al actualizar modelo:', err);
+                    db.run('ROLLBACK');
+                    return res.status(500).json({ success: false, error: 'Error del servidor' });
+                }
+
+                if (this.changes === 0) {
+                    db.run('ROLLBACK');
+                    return res.status(404).json({ success: false, error: 'Modelo no encontrado' });
+                }
+
+                // Eliminar comandos existentes
+                db.run(`DELETE FROM comandos_ont WHERE modelo_id = ?`, [modeloId], (err) => {
+                    if (err) {
+                        console.error('Error al eliminar comandos anteriores:', err);
+                        db.run('ROLLBACK');
+                        return res.status(500).json({ success: false, error: 'Error del servidor' });
+                    }
+
+                    // Insertar nuevos comandos si existen
+                    if (comandos && comandos.length > 0) {
+                        const stmt = db.prepare(`INSERT INTO comandos_ont (modelo_id, comando, descripcion, orden) VALUES (?, ?, ?, ?)`);
+                        
+                        let erroresComandos = false;
+                        
+                        comandos.forEach((cmd, index) => {
+                            stmt.run([modeloId, cmd.comando, cmd.descripcion, index + 1], (err) => {
+                                if (err) {
+                                    console.error('Error al insertar comando:', err);
+                                    erroresComandos = true;
+                                }
+                            });
+                        });
+
+                        stmt.finalize((err) => {
+                            if (err || erroresComandos) {
+                                console.error('Error al finalizar inserción de comandos:', err);
+                                db.run('ROLLBACK');
+                                return res.status(500).json({ success: false, error: 'Error al guardar comandos' });
+                            }
+
+                            // Confirmar transacción
+                            db.run('COMMIT', (err) => {
+                                if (err) {
+                                    console.error('Error al confirmar transacción:', err);
+                                    return res.status(500).json({ success: false, error: 'Error del servidor' });
+                                }
+
+                                logActivity(usuarioId, 'actualizar_modelo_ont', `Modelo: ${fabricante} ${modelo}`, req.ip);
+                                res.json({ 
+                                    success: true, 
+                                    message: 'Modelo ONT actualizado correctamente',
+                                    modeloId: modeloId 
+                                });
+                            });
+                        });
+                    } else {
+                        // Sin comandos, confirmar transacción
+                        db.run('COMMIT', (err) => {
+                            if (err) {
+                                console.error('Error al confirmar transacción:', err);
+                                return res.status(500).json({ success: false, error: 'Error del servidor' });
+                            }
+
+                            logActivity(usuarioId, 'actualizar_modelo_ont', `Modelo: ${fabricante} ${modelo}`, req.ip);
+                            res.json({ 
+                                success: true, 
+                                message: 'Modelo ONT actualizado correctamente',
+                                modeloId: modeloId 
+                            });
+                        });
+                    }
+                });
+            }
+        );
     });
 });
 

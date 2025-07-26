@@ -141,7 +141,7 @@ db.serialize(() => {
 
     // Insertar usuario por defecto
     const bcrypt = require('bcrypt');
-    const defaultPassword = bcrypt.hashSync('vinil28', 10);
+    const defaultPassword = bcrypt.hashSync('123', 10);
     
     db.run(`INSERT OR IGNORE INTO usuarios (username, password_hash, nombre_completo, rol) 
             VALUES ('alito', ?, 'Administrador Sistema', 'admin')`, [defaultPassword]);
@@ -530,7 +530,7 @@ db.serialize(() => {
     console.log('');
     console.log('🔐 Usuario por defecto:');
     console.log('   Username: alito');
-    console.log('   Password: vinil28');
+    console.log('   Password: 123');
 });
 
 db.close((err) => {

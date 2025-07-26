@@ -7,7 +7,6 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "init-db": "node init-database.js",
-    "import-comandos": "node import-comandos.js",
     "migrate-users": "node scripts/migrate-users.js",
     "migrate-all": "node scripts/migrate-all.js",
     "reset-db": "node scripts/reset-database.js"

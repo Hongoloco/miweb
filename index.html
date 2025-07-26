@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema OLT Antel v2.0 - Gestión Avanzada</title>
     
+    <!-- Meta tags anti-cache para desarrollo -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#007bff">
@@ -2969,315 +2974,67 @@
 
             <!-- Contenido ACS -->
             <div class="tab-content" id="acs">
-                <!-- Acceso al Sistema ACS -->
                 <div class="config-section">
-                    <h2 class="section-title">🔧 Sistema ACS - Gestión de ONTs</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h2 class="section-title">🌍 Sistema ACS - Auto Configuration Server</h2>
+                        <button onclick="forzarRecargaACS()" style="background: #ff6b6b; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px;">
+                            🔄 Forzar Recarga
+                        </button>
+                    </div>
                     <p style="color: #666; margin-bottom: 20px;">
-                        Auto Configuration Server para gestión de parámetros de equipos ONT de Antel
+                        Sistema para gestión y configuración automática de equipos ONT de Antel
                     </p>
 
-                    <!-- Enlaces de Acceso ACS -->
-                    <div style="background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%); padding: 20px; border-radius: 12px; margin-bottom: 25px;">
-                        <h3 style="color: var(--azul-antel); margin-top: 0;">🌐 Acceso a Sistemas ACS</h3>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 15px;">
-                            <div style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #e1e5e9;">
-                                <h4 style="color: #28a745; margin: 0 0 10px 0;">🟢 ACS Producción</h4>
-                                <p style="margin: 5px 0; font-size: 12px; color: #666;">Sistema en producción</p>
-                                <a href="http://acs.in.iantel.com.uy/live/manage" target="_blank" class="btn btn-primary" style="font-size: 14px; text-decoration: none; display: inline-block;">
+                    <!-- Acceso a Sistemas ACS -->
+                    <div class="olt-section">
+                        <h3>🔗 Acceso a Sistemas ACS</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                            <div class="comando-predefinido">
+                                <h4 style="color: #28a745;">🟢 ACS Producción</h4>
+                                <p>Sistema principal en producción</p>
+                                <a href="http://acs.in.iantel.com.uy/live/manage" target="_blank" class="btn btn-primary">
                                     🔗 Acceder a Producción
                                 </a>
                             </div>
-                            <div style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #e1e5e9;">
-                                <h4 style="color: #ffc107; margin: 0 0 10px 0;">🟡 ACS Stage</h4>
-                                <p style="margin: 5px 0; font-size: 12px; color: #666;">Ambiente de testing</p>
-                                <a href="http://10.69.100.14:9673/live/manage" target="_blank" class="btn btn-secondary" style="font-size: 14px; text-decoration: none; display: inline-block;">
+                            <div class="comando-predefinido">
+                                <h4 style="color: #ffc107;">🟡 ACS Stage</h4>
+                                <p>Ambiente de testing</p>
+                                <a href="http://10.69.100.14:9673/live/manage" target="_blank" class="btn btn-secondary">
                                     🔗 Acceder a Stage
                                 </a>
                             </div>
-                            <div style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #e1e5e9;">
-                                <h4 style="color: #17a2b8; margin: 0 0 10px 0;">🔵 ACS Maqueta</h4>
-                                <p style="margin: 5px 0; font-size: 12px; color: #666;">Ambiente de desarrollo</p>
-                                <a href="http://10.69.100.14:8673/live/manage" target="_blank" class="btn btn-info" style="font-size: 14px; text-decoration: none; display: inline-block;">
+                            <div class="comando-predefinido">
+                                <h4 style="color: #17a2b8;">🔵 ACS Maqueta</h4>
+                                <p>Ambiente de desarrollo</p>
+                                <a href="http://10.69.100.14:8673/live/manage" target="_blank" class="btn btn-info">
                                     🔗 Acceder a Maqueta
                                 </a>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Gestión de Modelos ONT -->
-                <div class="config-section">
-                    <h3 class="section-title">📱 Gestión de Modelos ONT</h3>
-                    <p style="color: #666; margin-bottom: 15px;">
-                        Administre los diferentes modelos de ONT configurables en el sistema ACS
-                    </p>
-                    
-                    <!-- Agregar Nuevo Modelo -->
-                    <details style="border: 1px solid #e1e5e9; border-radius: 8px; padding: 8px; margin-bottom: 15px;">
-                        <summary style="padding: 12px; background: linear-gradient(145deg, #d4edda 0%, #c3e6cb 100%); border-radius: 6px; cursor: pointer; font-weight: bold; color: var(--azul-antel);">
-                            Agregar Nuevo Modelo ONT
-                        </summary>
-                        <div style="padding: 15px;">
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
-                                <div>
-                                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Fabricante:</label>
-                                    <select id="ontFabricante" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                                        <option value="">Seleccionar fabricante</option>
-                                        <option value="ZTE">ZTE</option>
-                                        <option value="Huawei">Huawei</option>
-                                        <option value="Tozed">Tozed</option>
-                                        <option value="Nokia">Nokia</option>
-                                        <option value="Otros">Otros</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Modelo:</label>
-                                    <input type="text" id="ontModelo" placeholder="Ej: F670L" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                                </div>
-                                <div>
-                                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Versión Software:</label>
-                                    <input type="text" id="ontVersion" placeholder="Ej: V6.0.10P2N14" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                                </div>
-                                <div>
-                                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Tipo:</label>
-                                    <select id="ontTipo" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                                        <option value="GPON">GPON (Fibra Óptica)</option>
-                                        <option value="EPON">EPON (Fibra Óptica)</option>
-                                        <option value="XGS-PON">XGS-PON (10G PON)</option>
-                                        <option value="FWA-5G">🔥 FWA 5G (Fixed Wireless Access)</option>
-                                        <option value="FWA-4G">📶 FWA 4G (Fixed Wireless Access)</option>
-                                        <option value="NG-PON2">NG-PON2 (Next Gen PON)</option>
-                                        <option value="DOCSIS">DOCSIS (Cable)</option>
-                                        <option value="DSL">DSL (Línea de Abonado)</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div style="margin-bottom: 15px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Descripción:</label>
-                                <textarea id="ontDescripcion" placeholder="Descripción del modelo ONT..." rows="3" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
-                            </div>
-                            
-                            <!-- Comandos específicos del modelo -->
-                            <div style="margin-bottom: 15px;">
-                                <label style="display: block; margin-bottom: 8px; font-weight: bold;">⚡ Comandos Específicos del Modelo:</label>
-                                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
-                                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                                        <input type="text" id="nuevoComandoONT" placeholder="Comando ACS (ej: GetParameterValues: Device.WiFi.Radio.1.Enable)" 
-                                               style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                                        <input type="text" id="descripcionComandoONT" placeholder="Descripción del comando" 
-                                               style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                                        <button type="button" class="btn btn-secondary btn-small" onclick="agregarComandoAModelo()">➕</button>
-                                    </div>
-                                    <div id="comandosModeloONT" style="display: grid; gap: 8px;">
-                                        <!-- Los comandos del modelo se mostrarán aquí -->
-                                    </div>
-                                    <div style="margin-top: 10px; font-size: 12px; color: #666;">
-                                        💡 <strong>Comandos sugeridos para FWA 5G:</strong><br>
-                                        • GetParameterValues: Device.Cellular.Interface.1.Stats<br>
-                                        • GetParameterValues: Device.Cellular.Interface.1.SignalStrength<br>
-                                        • SetParameterValues: Device.Cellular.Interface.1.Enable=true<br>
-                                        • GetParameterValues: Device.Cellular.Interface.1.PLMNID
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="button-group">
-                                <button class="btn btn-primary" onclick="agregarModeloONT()">➕ Agregar Modelo</button>
-                                <button class="btn btn-secondary" onclick="limpiarFormularioONT()">🧹 Limpiar</button>
-                            </div>
+                    <!-- Gestión de Modelos ONT -->
+                    <div class="olt-section">
+                        <h3>📱 Modelos ONT Configurados</h3>
+                        <div style="margin-bottom: 15px;">
+                            <button class="btn btn-primary" onclick="cargarModelosACS()">🔄 Cargar Modelos</button>
+                            <button class="btn btn-success" onclick="agregarModeloACS()">➕ Agregar Modelo</button>
                         </div>
-                    </details>
-
-                    <!-- Lista de Modelos Existentes -->
-                    <details style="border: 1px solid #e1e5e9; border-radius: 8px; padding: 8px; margin-bottom: 15px;">
-                        <summary style="padding: 12px; background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 6px; cursor: pointer; font-weight: bold; color: var(--azul-antel);">
-                            📱 Modelos ONT Configurados
-                        </summary>
-                        <div style="padding: 15px;">
-                            <div id="listaModelosONT" style="display: grid; gap: 10px;">
-                                <!-- Los modelos se cargarán aquí dinámicamente -->
-                            </div>
-                    <div class="button-group" style="margin-top: 15px;">
-                        <button class="btn btn-info" onclick="cargarModelosONT()">🔄 Actualizar Lista</button>
-                        <button class="btn btn-secondary" onclick="exportarModelosONT()">📤 Exportar Modelos</button>
-                        <button class="btn btn-warning" onclick="debugUsuario()" style="background: #ff9800;">🔧 Debug Usuario</button>
-                    </div>
+                        <div id="listaModelosACS" style="margin-top: 15px;">
+                            <p style="color: #666; text-align: center; padding: 20px;">
+                                Haga clic en "🔄 Cargar Modelos" para ver los modelos ONT configurados
+                            </p>
                         </div>
-                    </details>
-                </div>
-
-                <!-- Comandos ACS -->
-                <div class="config-section">
-                    <h3 class="section-title">⚡ Comandos ACS</h3>
-                    <p style="color: #666; margin-bottom: 15px;">
-                        Los comandos ACS se gestionan específicamente para cada modelo ONT que agregue. 
-                        Cada modelo tendrá sus propios comandos personalizados según su fabricante y tecnología.
-                    </p>
-                    
-                    <!-- Información sobre comandos por modelo -->
-                    <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid var(--azul-antel); margin-bottom: 15px;">
-                        <h4 style="margin: 0 0 10px 0; color: var(--azul-antel);">💡 Gestión de Comandos por Modelo ONT</h4>
-                        <ul style="margin: 0; padding-left: 20px; color: #555; line-height: 1.6;">
-                            <li>Cada modelo ONT que agregue puede tener sus <strong>comandos específicos</strong></li>
-                            <li>Los comandos se almacenan <strong>junto con cada modelo</strong> individual</li>
-                            <li>Puede copiar comandos específicos o todos los comandos de un modelo</li>
-                            <li>Para <strong>🔥 FWA 5G</strong>: agregue comandos de interfaz celular específicos</li>
-                            <li>Para <strong>🌐 GPON/EPON</strong>: agregue comandos de fibra óptica específicos</li>
-                            <li>Marcas compatibles: <strong>ZTE, Huawei, Tozed, Nokia</strong> y otros</li>
-                        </ul>
                     </div>
 
-                    <!-- Crear Comando Personalizado ACS -->
-                    <details style="border: 1px solid #e1e5e9; border-radius: 8px; padding: 8px; margin-bottom: 15px;">
-                        <summary style="padding: 12px; background: linear-gradient(145deg, #fff3cd 0%, #ffeaa7 100%); border-radius: 6px; cursor: pointer; font-weight: bold; color: #d68910;">
-                            �️ Crear Comando Personalizado ACS
-                        </summary>
-                        <div style="padding: 15px;">
-                            <div style="display: grid; gap: 10px;">
-                                <div class="comando-individual" style="background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
-                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">GetParameterValues: Device.DeviceInfo.ModelName</div>
-                                    <div style="display: flex; gap: 8px;">
-                                        <button class="btn btn-primary btn-small" onclick="copiarComandoACS('GetParameterValues: Device.DeviceInfo.ModelName')">📋 Copiar</button>
-                                        <button class="btn btn-secondary btn-small" onclick="agregarComandoACS('GetParameterValues: Device.DeviceInfo.ModelName', 'Obtener modelo de ONT')">➕ Agregar</button>
-                                    </div>
-                                </div>
-                                <div class="comando-individual" style="background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
-                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">GetParameterValues: Device.DeviceInfo.SoftwareVersion</div>
-                                    <div style="display: flex; gap: 8px;">
-                                        <button class="btn btn-primary btn-small" onclick="copiarComandoACS('GetParameterValues: Device.DeviceInfo.SoftwareVersion')">📋 Copiar</button>
-                                        <button class="btn btn-secondary btn-small" onclick="agregarComandoACS('GetParameterValues: Device.DeviceInfo.SoftwareVersion', 'Obtener versión software')">➕ Agregar</button>
-                                    </div>
-                                </div>
-                                <div class="comando-individual" style="background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
-                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">SetParameterValues: Device.WiFi.Radio.1.Enable=true</div>
-                                    <div style="display: flex; gap: 8px;">
-                                        <button class="btn btn-primary btn-small" onclick="copiarComandoACS('SetParameterValues: Device.WiFi.Radio.1.Enable=true')">📋 Copiar</button>
-                                        <button class="btn btn-secondary btn-small" onclick="agregarComandoACS('SetParameterValues: Device.WiFi.Radio.1.Enable=true', 'Habilitar WiFi')">➕ Agregar</button>
-                                    </div>
-                                </div>
-                                <div class="comando-individual" style="background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
-                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">Reboot</div>
-                                    <div style="display: flex; gap: 8px;">
-                                        <button class="btn btn-primary btn-small" onclick="copiarComandoACS('Reboot')">📋 Copiar</button>
-                                        <button class="btn btn-warning btn-small" onclick="agregarComandoACS('Reboot', 'Reiniciar ONT')">⚠️ Agregar</button>
-                                    </div>
-                                </div>
-                                <div class="comando-individual" style="background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
-                                    <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">FactoryReset</div>
-                                    <div style="display: flex; gap: 8px;">
-                                        <button class="btn btn-primary btn-small" onclick="copiarComandoACS('FactoryReset')">📋 Copiar</button>
-                                        <button class="btn btn-danger btn-small" onclick="agregarComandoACS('FactoryReset', 'Reset de fábrica')">🚨 Agregar</button>
-                                    </div>
-                                </div>
-                                
-                                <!-- Comandos específicos para FWA 5G -->
-                                <div style="background: linear-gradient(145deg, #fff3cd 0%, #ffeaa7 100%); padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #f39c12;">
-                                    <h4 style="margin: 0 0 10px 0; color: #d68910;">🔥 Comandos FWA 5G (Fixed Wireless Access)</h4>
-                                    <div style="display: grid; gap: 10px;">
-                                        <div class="comando-individual" style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #ffeaa7;">
-                                            <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">GetParameterValues: Device.Cellular.Interface.1.Stats</div>
-                                            <div style="display: flex; gap: 8px;">
-                                                <button class="btn btn-primary btn-small" onclick="copiarComandoACS('GetParameterValues: Device.Cellular.Interface.1.Stats')">📋 Copiar</button>
-                                                <button class="btn btn-secondary btn-small" onclick="agregarComandoACS('GetParameterValues: Device.Cellular.Interface.1.Stats', 'Estadísticas celular FWA 5G')">➕ Agregar</button>
-                                            </div>
-                                        </div>
-                                        <div class="comando-individual" style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #ffeaa7;">
-                                            <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">GetParameterValues: Device.Cellular.Interface.1.SignalStrength</div>
-                                            <div style="display: flex; gap: 8px;">
-                                                <button class="btn btn-primary btn-small" onclick="copiarComandoACS('GetParameterValues: Device.Cellular.Interface.1.SignalStrength')">📋 Copiar</button>
-                                                <button class="btn btn-secondary btn-small" onclick="agregarComandoACS('GetParameterValues: Device.Cellular.Interface.1.SignalStrength', 'Intensidad señal 5G')">➕ Agregar</button>
-                                            </div>
-                                        </div>
-                                        <div class="comando-individual" style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #ffeaa7;">
-                                            <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">GetParameterValues: Device.Cellular.Interface.1.AccessPointName</div>
-                                            <div style="display: flex; gap: 8px;">
-                                                <button class="btn btn-primary btn-small" onclick="copiarComandoACS('GetParameterValues: Device.Cellular.Interface.1.AccessPointName')">📋 Copiar</button>
-                                                <button class="btn btn-secondary btn-small" onclick="agregarComandoACS('GetParameterValues: Device.Cellular.Interface.1.AccessPointName', 'APN configurado')">➕ Agregar</button>
-                                            </div>
-                                        </div>
-                                        <div class="comando-individual" style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #ffeaa7;">
-                                            <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">SetParameterValues: Device.Cellular.Interface.1.Enable=true</div>
-                                            <div style="display: flex; gap: 8px;">
-                                                <button class="btn btn-primary btn-small" onclick="copiarComandoACS('SetParameterValues: Device.Cellular.Interface.1.Enable=true')">📋 Copiar</button>
-                                                <button class="btn btn-secondary btn-small" onclick="agregarComandoACS('SetParameterValues: Device.Cellular.Interface.1.Enable=true', 'Habilitar interface celular')">➕ Agregar</button>
-                                            </div>
-                                        </div>
-                                        <div class="comando-individual" style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #ffeaa7;">
-                                            <div style="font-family: monospace; font-size: 12px; margin-bottom: 8px; word-break: break-all;">GetParameterValues: Device.Cellular.Interface.1.PLMNID</div>
-                                            <div style="display: flex; gap: 8px;">
-                                                <button class="btn btn-primary btn-small" onclick="copiarComandoACS('GetParameterValues: Device.Cellular.Interface.1.PLMNID')">📋 Copiar</button>
-                                                <button class="btn btn-secondary btn-small" onclick="agregarComandoACS('GetParameterValues: Device.Cellular.Interface.1.PLMNID', 'ID de red móvil')">➕ Agregar</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </details>
-
-                    <!-- Crear Comando Personalizado ACS -->
-                    <details style="border: 1px solid #e1e5e9; border-radius: 8px; padding: 8px; margin-bottom: 15px;">
-                        <summary style="padding: 12px; background: linear-gradient(145deg, #fff3cd 0%, #ffeaa7 100%); border-radius: 6px; cursor: pointer; font-weight: bold; color: #d68910;">
-                            🛠️ Crear Comando Personalizado ACS
-                        </summary>
-                        <div style="padding: 15px;">
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
-                                <div>
-                                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Tipo de Comando:</label>
-                                    <select id="acsComandoTipo" onchange="actualizarPlantillaACS()" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                                        <option value="">Seleccionar tipo</option>
-                                        <option value="GetParameterValues">GetParameterValues</option>
-                                        <option value="SetParameterValues">SetParameterValues</option>
-                                        <option value="AddObject">AddObject</option>
-                                        <option value="DeleteObject">DeleteObject</option>
-                                        <option value="Reboot">Reboot</option>
-                                        <option value="FactoryReset">FactoryReset</option>
-                                        <option value="Download">Download</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Parámetro/Objeto:</label>
-                                    <input type="text" id="acsParametro" placeholder="Ej: Device.WiFi.Radio.1.Enable" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                                </div>
-                                <div>
-                                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Valor (si aplica):</label>
-                                    <input type="text" id="acsValor" placeholder="Ej: true, false, etc." style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                                </div>
-                            </div>
-                            <div style="margin-bottom: 15px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Descripción:</label>
-                                <input type="text" id="acsDescripcion" placeholder="Descripción del comando..." style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                            </div>
-                            <div id="acsComandoGenerado" style="margin-top: 15px; display: none;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Comando Generado:</label>
-                                <textarea id="acsResultadoComando" class="command" rows="2" readonly></textarea>
-                            </div>
-                            <div class="button-group" style="margin-top: 15px;">
-                                <button class="btn btn-primary" onclick="generarComandoACS()">🔧 Generar Comando</button>
-                                <button class="btn btn-secondary" onclick="copiarComandoGeneradoACS()">📋 Copiar</button>
-                                <button class="btn btn-secondary" onclick="agregarComandoPersonalizadoACS()">➕ Agregar a BD</button>
-                                <button class="btn btn-secondary" onclick="limpiarFormularioComandoACS()">🧹 Limpiar</button>
-                            </div>
-                        </div>
-                    </details>
-                </div>
-
-                <!-- Información Técnica ACS -->
-                <div class="config-section">
-                    <h3 class="section-title">📋 Información Técnica ACS</h3>
+                    <!-- Información -->
                     <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid var(--azul-antel);">
+                        <h4 style="margin: 0 0 10px 0; color: var(--azul-antel);">💡 Información del Sistema ACS</h4>
                         <ul style="margin: 0; padding-left: 20px; color: #555; line-height: 1.6;">
-                            <li><strong>ACS:</strong> Auto Configuration Server para gestión remota de ONTs</li>
-                            <li><strong>TR-069:</strong> Protocolo técnico utilizado para gestión de dispositivos CPE</li>
-                            <li><strong>GetParameterValues:</strong> Comando para obtener valores de parámetros</li>
-                            <li><strong>SetParameterValues:</strong> Comando para establecer valores de parámetros</li>
-                            <li><strong>AddObject/DeleteObject:</strong> Comandos para crear/eliminar objetos</li>
-                            <li><strong>Reboot/FactoryReset:</strong> Comandos de reinicio y reset</li>
-                            <li><strong>🔥 FWA 5G:</strong> Fixed Wireless Access con tecnología 5G para acceso inalámbrico fijo</li>
-                            <li><strong>📶 FWA 4G:</strong> Fixed Wireless Access con tecnología 4G LTE</li>
-                            <li><strong>PLMNID:</strong> Public Land Mobile Network Identifier (ID de operador)</li>
-                            <li><strong>Cellular Interface:</strong> Parámetros específicos para conectividad celular</li>
-                            <li><strong>Producción:</strong> Sistema en vivo para clientes</li>
-                            <li><strong>Stage/Maqueta:</strong> Ambientes de testing y desarrollo</li>
+                            <li><strong>Producción:</strong> Solo para comandos validados y en operación</li>
+                            <li><strong>Stage:</strong> Para pruebas y validación de configuraciones</li>
+                            <li><strong>Maqueta:</strong> Para desarrollo y pruebas de nuevas funciones</li>
+                            <li><strong>Modelos ONT:</strong> Se cargan desde la base de datos del sistema</li>
                         </ul>
                     </div>
                 </div>
@@ -3564,6 +3321,36 @@
                 setTimeout(() => {
                     if (typeof inicializarTareas === 'function') inicializarTareas().catch(console.warn);
                 }, 100);
+            } else if (tabName === 'ims') {
+                setTimeout(() => {
+                    if (typeof inicializarIMS === 'function') inicializarIMS();
+                }, 100);
+            } else if (tabName === 'acs') {
+                setTimeout(() => {
+                    console.log('🔄 Activando pestaña ACS - Forzando recarga completa...');
+                    
+                    // Limpiar cualquier caché relacionado con ACS
+                    if (typeof localStorage !== 'undefined') {
+                        localStorage.removeItem('acsData');
+                        localStorage.removeItem('modelos_ont');
+                    }
+                    
+                    // Limpiar completamente el contenedor ACS
+                    const acsContainer = document.getElementById('listaModelosACS');
+                    if (acsContainer) {
+                        acsContainer.innerHTML = '<p style="color: #007bff; text-align: center; padding: 20px;">🔄 Inicializando ACS - Cargando modelos actualizados...</p>';
+                    }
+                    
+                    // Forzar recarga después de limpiar
+                    setTimeout(() => {
+                        if (typeof inicializarACS === 'function') {
+                            console.log('🚀 Ejecutando inicializarACS...');
+                            inicializarACS();
+                        } else {
+                            console.error('❌ Función inicializarACS no encontrada');
+                        }
+                    }, 200);
+                }, 100);
             }
         }
 
@@ -3673,6 +3460,21 @@
             }
 
             return false;
+        }
+
+        // Función para obtener el ID del usuario actual
+        function getCurrentUserId() {
+            const userJson = sessionStorage.getItem('user');
+            if (userJson) {
+                try {
+                    const user = JSON.parse(userJson);
+                    return user.id || 1;
+                } catch (error) {
+                    console.error('Error al obtener usuario actual:', error);
+                    return 1;
+                }
+            }
+            return 1; // ID por defecto
         }
 
         // Función simple para probar conectividad - con modales estandarizados
@@ -3867,14 +3669,15 @@ CNL URCNL: TYPE=IMPU,IMPU="tel:+59898465369";`;
             ];
             
             let agregados = 0;
-            comandos.forEach(comando => {
-                if (agregarComandoABaseDatos(comando, 'Consulta IMS - EXP USRINF')) {
+            let promesas = comandos.map(async (comando) => {
+                if (await agregarComandoIMS(comando, 'Consulta IMS - EXP USRINF', 'consulta')) {
                     agregados++;
                 }
             });
             
-            mostrarModal('Comandos Agregados', `✅ ${agregados} comandos de consulta IMS agregados a la base de datos.`, 'success');
-            cargarComandos();
+            Promise.all(promesas).then(() => {
+                mostrarModal('Comandos Agregados', `✅ ${agregados} comandos de consulta IMS agregados a la base de datos.`, 'success');
+            });
         }
 
         function agregarComandosDesregistroIMS() {
@@ -3889,14 +3692,40 @@ CNL URCNL: TYPE=IMPU,IMPU="tel:+59898465369";`;
             ];
             
             let agregados = 0;
-            comandos.forEach(comando => {
-                if (agregarComandoABaseDatos(comando, 'Desregistro IMS - CNL URCNL')) {
+            let promesas = comandos.map(async (comando) => {
+                if (await agregarComandoIMS(comando, 'Desregistro IMS - CNL URCNL', 'desregistro')) {
                     agregados++;
                 }
             });
             
-            mostrarModal('Comandos Agregados', `⚠️ ${agregados} comandos de desregistro IMS agregados a la base de datos.`, 'warning');
-            cargarComandos();
+            Promise.all(promesas).then(() => {
+                mostrarModal('Comandos Agregados', `⚠️ ${agregados} comandos de desregistro IMS agregados a la base de datos.`, 'warning');
+            });
+        }
+
+        // Función para agregar comando IMS a la base de datos
+        async function agregarComandoIMS(comando, descripcion, categoria = 'general') {
+            try {
+                const response = await fetch(`${API_BASE}/comandos-ims`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nombre: descripcion,
+                        descripcion: descripcion,
+                        template: comando,
+                        categoria: categoria,
+                        usuario_creador: getCurrentUserId()
+                    })
+                });
+                
+                const data = await response.json();
+                return data.success;
+            } catch (error) {
+                console.error('Error al agregar comando IMS:', error);
+                return false;
+            }
         }
 
         function generarComandoConsulta() {
@@ -3954,13 +3783,17 @@ CNL URCNL: TYPE=IMPU,IMPU="tel:+59898465369";`;
             }
 
             const descripcion = comando.includes('EXP USRINF') ? 'Consulta IMS personalizada' : 'Desregistro IMS personalizado';
+            const categoria = comando.includes('EXP USRINF') ? 'consulta' : 'desregistro';
             
-            if (agregarComandoABaseDatos(comando, descripcion)) {
-                mostrarModal('Comando Agregado', '✅ Comando personalizado agregado a la base de datos.', 'success');
-                cargarComandos();
-                document.getElementById('numeroPersonalizado').value = '';
-                document.getElementById('comandoGenerado').style.display = 'none';
-            }
+            agregarComandoIMS(comando, descripcion, categoria).then((success) => {
+                if (success) {
+                    mostrarModal('Comando Agregado', '✅ Comando personalizado agregado a la base de datos.', 'success');
+                    document.getElementById('numeroPersonalizado').value = '';
+                    document.getElementById('comandoGenerado').style.display = 'none';
+                } else {
+                    mostrarModal('Error', '❌ Error al agregar comando a la base de datos.', 'error');
+                }
+            });
         }
 
         // Nuevas funciones para comandos individuales
@@ -3976,10 +3809,15 @@ CNL URCNL: TYPE=IMPU,IMPU="tel:+59898465369";`;
         }
 
         function agregarComandoIndividual(comando, descripcion) {
-            if (agregarComandoABaseDatos(comando, descripcion)) {
-                mostrarModal('Comando Agregado', `✅ ${descripcion} agregado a la base de datos.`, 'success');
-                cargarComandos();
-            }
+            const categoria = comando.includes('EXP USRINF') ? 'consulta' : comando.includes('CNL URCNL') ? 'desregistro' : 'general';
+            
+            agregarComandoIMS(comando, descripcion, categoria).then((success) => {
+                if (success) {
+                    mostrarModal('Comando Agregado', `✅ ${descripcion} agregado a la base de datos.`, 'success');
+                } else {
+                    mostrarModal('Error', '❌ Error al agregar comando a la base de datos.', 'error');
+                }
+            });
         }
 
         // ===== FUNCIONES DE INICIALIZACIÓN =====
@@ -3990,1057 +3828,782 @@ CNL URCNL: TYPE=IMPU,IMPU="tel:+59898465369";`;
             console.log('Pestaña IMS inicializada');
         }
 
-        // Función para inicializar la pestaña ACS
-        function inicializarACS() {
-            try {
-                // Cargar modelos ONT existentes
-                cargarModelosONT();
-                console.log('Pestaña ACS inicializada - modelos ONT cargados');
-            } catch (error) {
-                console.error('Error al inicializar ACS:', error);
-                // En caso de error, inicializar array vacío
-                modelosONT = [];
-                cargarModelosONT();
-            }
-        }
-
         // ===== FUNCIONES ACS =====
-
-        // Variables globales para ACS
-        let modelosONT = [];
-        let comandosModeloTemporal = []; // Para comandos del modelo en edición
-
-        // Función para agregar comando al modelo temporal
-        function agregarComandoAModelo() {
-            const comando = document.getElementById('nuevoComandoONT').value.trim();
-            const descripcion = document.getElementById('descripcionComandoONT').value.trim();
-
-            if (!comando) {
-                mostrarModal('Error', '⚠️ Debe ingresar un comando ACS.', 'error');
+        
+        async function cargarModelosACS() {
+            console.log('🔄 Cargando modelos ACS - Versión Anti-Cache...');
+            const container = document.getElementById('listaModelosACS');
+            
+            if (!container) {
+                console.error('❌ Container listaModelosACS no encontrado');
                 return;
             }
-
-            const nuevoComando = {
-                id: Date.now().toString(),
-                comando: comando,
-                descripcion: descripcion || 'Sin descripción'
-            };
-
-            comandosModeloTemporal.push(nuevoComando);
-            actualizarVistaComandosModelo();
             
-            // Limpiar campos
-            document.getElementById('nuevoComandoONT').value = '';
-            document.getElementById('descripcionComandoONT').value = '';
-        }
-
-        // Función para actualizar la vista de comandos del modelo
-        function actualizarVistaComandosModelo() {
-            const container = document.getElementById('comandosModeloONT');
-            
-            if (comandosModeloTemporal.length === 0) {
-                container.innerHTML = '<p style="color: #666; font-style: italic; text-align: center; padding: 10px;">No hay comandos agregados</p>';
-                return;
-            }
-
-            container.innerHTML = comandosModeloTemporal.map(cmd => `
-                <div style="background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
-                    <div style="flex: 1;">
-                        <div style="font-family: monospace; font-size: 11px; color: #333; margin-bottom: 3px;">${cmd.comando}</div>
-                        <div style="font-size: 10px; color: #666;">${cmd.descripcion}</div>
-                    </div>
-                    <button type="button" class="btn btn-danger btn-small" onclick="eliminarComandoModelo('${cmd.id}')" style="padding: 4px 8px; font-size: 10px;">🗑️</button>
-                </div>
-            `).join('');
-        }
-
-        // Función para eliminar comando del modelo temporal
-        function eliminarComandoModelo(comandoId) {
-            comandosModeloTemporal = comandosModeloTemporal.filter(cmd => cmd.id !== comandoId);
-            actualizarVistaComandosModelo();
-        }
-
-        // Función para agregar modelo ONT (versión mejorada con validación completa)
-        async function agregarModeloONT() {
             try {
-                // Validar que el usuario esté logueado
-                if (!usuarioActual || !usuarioActual.id) {
-                    mostrarNotificacion('❌ Debe estar logueado para agregar modelos', 'error', 4000);
-                    return;
-                }
-
-                // Obtener y validar datos del formulario
-                const fabricante = document.getElementById('ontFabricante').value.trim();
-                const modelo = document.getElementById('ontModelo').value.trim();
-                const version = document.getElementById('ontVersion').value.trim();
-                const tipo = document.getElementById('ontTipo').value;
-                const descripcion = document.getElementById('ontDescripcion').value.trim();
-
-                // Validaciones obligatorias
-                if (!fabricante) {
-                    mostrarNotificacion('❌ Debe seleccionar un fabricante', 'error', 4000);
-                    document.getElementById('ontFabricante').focus();
-                    return;
-                }
-
-                if (!modelo) {
-                    mostrarNotificacion('❌ Debe ingresar el modelo', 'error', 4000);
-                    document.getElementById('ontModelo').focus();
-                    return;
-                }
-
-                if (!tipo) {
-                    mostrarNotificacion('❌ Debe seleccionar un tipo de ONT', 'error', 4000);
-                    document.getElementById('ontTipo').focus();
-                    return;
-                }
-
-                // Generar ID único usando timestamp y random para evitar duplicados
-                const modeloId = `${fabricante.toLowerCase()}-${modelo.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
-
-                console.log('Creando modelo ONT:', {
-                    id: modeloId,
-                    fabricante,
-                    modelo,
-                    version,
-                    tipo,
-                    descripcion,
-                    comandos: comandosModeloTemporal.length,
-                    usuarioId: usuarioActual.id
-                });
-
-                const nuevoModelo = {
-                    id: modeloId,
-                    fabricante: fabricante,
-                    modelo: modelo,
-                    version: version || '',
-                    tipo: tipo,
-                    descripcion: descripcion || '',
-                    comandos: [...comandosModeloTemporal], // Copiar comandos específicos
-                    usuarioId: usuarioActual.id
-                };
-
-                // Mostrar mensaje de procesamiento
-                mostrarNotificacion('⏳ Guardando modelo ONT...', 'info', 2000);
-
-                const response = await fetch(`${API_BASE}/modelos-ont`, {
-                    method: 'POST',
+                // Mostrar mensaje de carga más prominente
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 30px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 8px; margin: 20px;">
+                        <div style="font-size: 24px; margin-bottom: 10px;">🔄</div>
+                        <div style="color: #007bff; font-weight: bold;">Cargando modelos ONT...</div>
+                        <div style="color: #666; font-size: 12px; margin-top: 5px;">Versión actualizada - ${new Date().toLocaleTimeString()}</div>
+                    </div>
+                `;
+                
+                // Agregar timestamp y parámetros anti-cache múltiples
+                const timestamp = new Date().getTime();
+                const randomId = Math.random().toString(36).substring(7);
+                const url = `/api/modelos-ont?t=${timestamp}&r=${randomId}&nocache=true&v=2.0`;
+                
+                console.log('📡 Enviando petición a:', url);
+                
+                const response = await fetch(url, {
+                    method: 'GET',
                     headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(nuevoModelo)
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
                 });
-
-                console.log('Response status:', response.status);
+                
+                console.log('📡 Response status:', response.status);
+                console.log('📡 Response headers:', response.headers);
+                
                 const data = await response.json();
-                console.log('Response data:', data);
+                console.log('📊 Datos recibidos:', data);
                 
-                if (data.success) {
-                    // Limpiar formulario completamente
-                    limpiarFormularioONT();
+                if (data.success && data.modelos) {
+                    console.log(`✅ Modelos cargados exitosamente: ${data.modelos.length} modelos encontrados`);
+                    console.log('📋 Lista de modelos:', data.modelos.map(m => `${m.fabricante} ${m.modelo} (ID: ${m.id})`));
                     
-                    // Cerrar el formulario automáticamente
-                    const detalles = document.querySelector('details[open]');
-                    if (detalles && detalles.querySelector('summary').textContent.includes('Agregar Nuevo Modelo ONT')) {
-                        detalles.removeAttribute('open');
-                    }
-                    
-                    // Recargar modelos
-                    await cargarModelosONT();
-                    
-                    // Mostrar notificación de éxito mejorada
-                    const cantidadComandos = nuevoModelo.comandos.length;
-                    const tipoIcon = tipo === 'FWA-5G' ? '🔥' : tipo === 'FWA-4G' ? '📶' : '🌐';
-                    
-                    mostrarNotificacion(
-                        `✅ ${tipoIcon} Modelo ${fabricante} ${modelo} agregado exitosamente${cantidadComandos > 0 ? ` con ${cantidadComandos} comandos específicos` : ''}`, 
-                        'success', 
-                        4000, 
-                        'Modelo ONT Agregado'
-                    );
-                } else {
-                    console.error('Error del servidor:', data.message);
-                    mostrarNotificacion(`❌ Error al agregar modelo: ${data.message}`, 'error', 5000);
-                }
-            } catch (error) {
-                console.error('Error al agregar modelo ONT:', error);
-                mostrarNotificacion(`❌ Error de conexión: ${error.message}`, 'error', 5000);
-            }
-        }
-                    
-                    mostrarNotificacion(
-                        `Modelo ${fabricante} ${modelo} creado exitosamente con ${cantidadComandos} comandos específicos`, 
-                        'success', 
-                        4000, 
-                        `${tipoIcon} Modelo ONT Agregado`
-                    );
-                    
-                    // También mostrar modal para más detalles
-                    mostrarModal(
-                        'Modelo ONT Creado', 
-                        `✅ <strong>${fabricante} ${modelo}</strong> agregado correctamente\n\n${tipoIcon} <strong>Tipo:</strong> ${tipo}\n⚡ <strong>Comandos:</strong> ${cantidadComandos}\n📅 <strong>Versión:</strong> ${version || 'N/A'}\n\nEl modelo ya está disponible en la lista de modelos configurados.`, 
-                        'success'
-                    );
-                } else {
-                    mostrarModal('Error', 'Error al guardar modelo en la base de datos: ' + data.message, 'error');
-                }
-            } catch (error) {
-                console.error('Error al agregar modelo ONT:', error);
-                mostrarModal('Error', 'Error de conexión al agregar modelo', 'error');
-            }
-        }
-
-        // Función para limpiar formulario ONT
-        function limpiarFormularioONT() {
-            document.getElementById('ontFabricante').value = '';
-            document.getElementById('ontModelo').value = '';
-            document.getElementById('ontVersion').value = '';
-            document.getElementById('ontTipo').value = 'GPON';
-            document.getElementById('ontDescripcion').value = '';
-            
-            // Limpiar comandos temporales
-            comandosModeloTemporal = [];
-            actualizarVistaComandosModelo();
-            
-            // Limpiar campos de comandos
-            document.getElementById('nuevoComandoONT').value = '';
-            document.getElementById('descripcionComandoONT').value = '';
-        }
-
-        // Función helper para escapar IDs en el HTML
-        function escapeHtml(unsafe) {
-            return unsafe
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
-
-        // Función para cargar modelos ONT desde la base de datos
-        async function cargarModelosONT() {
-            try {
-                console.log('Cargando modelos ONT... Usuario actual:', usuarioActual);
-                
-                const response = await fetch(`${API_BASE}/modelos-ont`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    modelosONT = data.modelos;
-                    console.log('Modelos ONT cargados desde BD:', modelosONT.length, 'modelos encontrados');
-                    console.log('Modelos:', modelosONT);
-                    
-                    const container = document.getElementById('listaModelosONT');
-                    if (!container) {
-                        console.error('No se encontró el contenedor listaModelosONT');
+                    if (data.modelos.length === 0) {
+                        container.innerHTML = `
+                            <div style="text-align: center; padding: 30px; background: #fff3cd; border-radius: 8px; margin: 20px; border: 1px solid #ffeaa7;">
+                                <div style="font-size: 20px; margin-bottom: 10px;">📝</div>
+                                <div style="color: #856404; font-weight: bold;">No hay modelos ONT configurados</div>
+                                <div style="color: #856404; font-size: 12px; margin-top: 5px;">Actualizado: ${new Date().toLocaleTimeString()}</div>
+                            </div>
+                        `;
                         return;
                     }
                     
-                    if (modelosONT.length === 0) {
-                        container.innerHTML = '<p style="color: #666; font-style: italic; text-align: center; padding: 20px;">No hay modelos ONT configurados</p>';
-                        return;
-                    }
-
-                    container.innerHTML = modelosONT.map(modelo => {
-                const cantidadComandos = modelo.comandos ? modelo.comandos.length : 0;
-                const tipoIcon = modelo.tipo === 'FWA-5G' ? '🔥' : modelo.tipo === 'FWA-4G' ? '📶' : '🌐';
-                const modeloIdEscaped = escapeHtml(modelo.id);
-                
-                return `
-                <div class="comando-individual" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;" data-modelo-id="${modeloIdEscaped}">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
-                        <div style="flex: 1;">
-                            <h4 style="margin: 0 0 5px 0; color: var(--azul-antel);">${tipoIcon} ${escapeHtml(modelo.fabricante)} ${escapeHtml(modelo.modelo)}</h4>
-                            <p style="margin: 0; font-size: 12px; color: #666;">
-                                <strong>Tipo:</strong> ${escapeHtml(modelo.tipo)} | 
-                                <strong>Versión:</strong> ${escapeHtml(modelo.version || 'N/A')} | 
-                                <strong>Comandos:</strong> ${cantidadComandos} |
-                                <strong>Creado:</strong> ${escapeHtml(modelo.fecha_creacion)}
-                            </p>
-                            ${modelo.descripcion ? `<p style="margin: 5px 0 0 0; font-size: 12px; color: #555;">${escapeHtml(modelo.descripcion)}</p>` : ''}
+                    container.innerHTML = data.modelos.map((modelo, index) => `
+                        <div class="comando-predefinido" style="margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="flex: 1;">
+                                    <h4 style="margin: 0; color: var(--azul-antel);">
+                                        ${modelo.tipo === 'FWA-5G' ? '🔥' : modelo.tipo === 'FWA-4G' ? '📶' : '🌐'} 
+                                        ${modelo.fabricante} ${modelo.modelo}
+                                    </h4>
+                                    <p style="margin: 5px 0; color: #666; font-size: 12px;">
+                                        <strong>Tipo:</strong> ${modelo.tipo} | 
+                                        <strong>Versión:</strong> ${modelo.version || 'N/A'} | 
+                                        <strong>Comandos:</strong> ${modelo.comandos ? modelo.comandos.length : 0}
+                                    </p>
+                                    ${modelo.descripcion ? `<p style="margin: 5px 0; color: #555; font-size: 12px;">${modelo.descripcion}</p>` : ''}
+                                </div>
+                                <div style="display: flex; gap: 8px; margin-left: 15px;">
+                                    <button onclick="editarModeloACS('${modelo.id}')" 
+                                            style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px;"
+                                            title="Editar modelo y comandos">
+                                        ✏️ Editar
+                                    </button>
+                                    <button onclick="eliminarModeloACS('${modelo.id}', '${modelo.fabricante} ${modelo.modelo}')" 
+                                            style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px;"
+                                            title="Eliminar modelo">
+                                        🗑️ Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                            ${modelo.comandos && modelo.comandos.length > 0 ? `
+                                <details style="margin-top: 10px;">
+                                    <summary style="cursor: pointer; color: var(--azul-antel); font-weight: bold;">
+                                        ⚡ Ver Comandos (${modelo.comandos.length})
+                                    </summary>
+                                    <div style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
+                                        ${modelo.comandos.map(cmd => `
+                                            <div style="margin-bottom: 8px; padding: 8px; background: white; border-radius: 4px; border: 1px solid #e9ecef;">
+                                                <div style="font-family: monospace; font-size: 11px; color: #333; margin-bottom: 4px;">${cmd.comando}</div>
+                                                <div style="font-size: 10px; color: #666;">${cmd.descripcion}</div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </details>
+                            ` : ''}
                         </div>
-                        <button class="btn btn-danger btn-small btn-eliminar-modelo" data-modelo-id="${modeloIdEscaped}" style="margin-left: 10px;">🗑️</button>
-                    </div>
+                    `).join('') + `
+                    <div style="text-align: center; padding: 10px; color: #666; font-size: 11px; border-top: 1px solid #eee; margin-top: 20px;">
+                        🕒 Última actualización: ${new Date().toLocaleString()} | Versión: 2.0.1
+                    </div>`;
                     
-                    ${cantidadComandos > 0 ? `
-                    <details style="background: #fff; padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #ddd;">
-                        <summary style="cursor: pointer; font-weight: bold; color: var(--azul-antel); padding: 5px 0;">
-                            ⚡ Comandos Específicos (${cantidadComandos}) - Click para expandir
-                        </summary>
-                        <div style="display: grid; gap: 8px; max-height: 200px; overflow-y: auto; margin-top: 10px;">
-                            ${modelo.comandos.map(cmd => `
-                                <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; border: 1px solid #e9ecef; position: relative;" data-comando-id="${escapeHtml(cmd.id)}">
-                                    <div style="font-family: monospace; font-size: 11px; color: #333; margin-bottom: 4px; padding-right: 30px;">${escapeHtml(cmd.comando)}</div>
-                                    <div style="font-size: 10px; color: #666; margin-bottom: 6px;">${escapeHtml(cmd.descripcion)}</div>
-                                    <div style="display: flex; gap: 4px;">
-                                        <button class="btn btn-primary btn-small btn-copiar-comando" data-comando="${escapeHtml(cmd.comando)}" style="padding: 2px 6px; font-size: 9px;" title="Copiar comando">📋</button>
-                                        <button class="btn btn-secondary btn-small btn-editar-comando" data-modelo-id="${modeloIdEscaped}" data-comando-id="${escapeHtml(cmd.id)}" style="padding: 2px 6px; font-size: 9px;" title="Editar comando">✏️</button>
-                                        <button class="btn btn-danger btn-small btn-eliminar-comando" data-modelo-id="${modeloIdEscaped}" data-comando-id="${escapeHtml(cmd.id)}" style="padding: 2px 6px; font-size: 9px;" title="Eliminar comando">🗑️</button>
+                } else {
+                    console.error('❌ Error en respuesta del servidor:', data);
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 30px; background: #f8d7da; border-radius: 8px; margin: 20px; border: 1px solid #f5c6cb;">
+                            <div style="font-size: 20px; margin-bottom: 10px;">❌</div>
+                            <div style="color: #721c24; font-weight: bold;">Error al cargar modelos</div>
+                            <div style="color: #721c24; font-size: 12px; margin-top: 5px;">Verificado: ${new Date().toLocaleTimeString()}</div>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+                container.innerHTML = '<p style="color: #dc3545; text-align: center; padding: 20px;">❌ Error de conexión</p>';
+            }
+        }
+        
+        function agregarModeloACS() {
+            mostrarModalAgregarModelo();
+        }
+        
+        // Función para mostrar el modal de agregar modelo
+        function mostrarModalAgregarModelo() {
+            const modalHTML = `
+                <div id="modalAgregarModelo" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 30px; border-radius: 12px; max-width: 800px; width: 90%; max-height: 90%; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                            <h3 style="margin: 0; color: var(--azul-antel);">➕ Agregar Nuevo Modelo ONT</h3>
+                            <button onclick="cerrarModalAgregarModelo()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">×</button>
+                        </div>
+                        
+                        <form id="formAgregarModelo">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">* Fabricante:</label>
+                                    <select id="nuevoFabricante" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                        <option value="">Seleccione fabricante...</option>
+                                        <option value="ZTE">ZTE</option>
+                                        <option value="Huawei">Huawei</option>
+                                        <option value="Nokia">Nokia</option>
+                                        <option value="Alcatel">Alcatel</option>
+                                        <option value="Fiberhome">Fiberhome</option>
+                                        <option value="Technicolor">Technicolor</option>
+                                        <option value="Sercomm">Sercomm</option>
+                                        <option value="Otro">Otro</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">* Modelo:</label>
+                                    <input type="text" id="nuevoModelo" required placeholder="Ej: F670L, HG8245H, etc." 
+                                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">* Tipo:</label>
+                                    <select id="nuevoTipo" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                        <option value="">Seleccione tipo...</option>
+                                        <option value="ONT">ONT (Optical Network Terminal)</option>
+                                        <option value="GPON">GPON</option>
+                                        <option value="FWA-4G">FWA-4G (Fixed Wireless Access)</option>
+                                        <option value="FWA-5G">FWA-5G (Fixed Wireless Access)</option>
+                                        <option value="Router">Router</option>
+                                        <option value="Gateway">Gateway</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Versión:</label>
+                                    <input type="text" id="nuevoVersion" placeholder="Ej: v1.0.0, R22C00S125" 
+                                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                            </div>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Descripción:</label>
+                                <textarea id="nuevoDescripcion" rows="3" placeholder="Descripción del modelo y sus características principales..."
+                                          style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;"></textarea>
+                            </div>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <h4 style="margin: 0;">🌐 Comandos TR-069 / Axiros ACS</h4>
+                                    <div style="display: flex; gap: 8px;">
+                                        <select id="categoriaComandoNuevo" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+                                            <option value="provision">📋 Provisioning</option>
+                                            <option value="wifi">📶 WiFi Config</option>
+                                            <option value="wan">🌐 WAN Config</option>
+                                            <option value="voip">📞 VoIP Config</option>
+                                            <option value="firmware">⚙️ Firmware</option>
+                                            <option value="diagnostic">🔍 Diagnóstico</option>
+                                            <option value="reset">🔄 Reset/Reboot</option>
+                                            <option value="custom">✏️ Personalizado</option>
+                                        </select>
+                                        <button type="button" onclick="agregarComandoNuevoModelo()" style="background: var(--azul-antel); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+                                            ➕ Agregar
+                                        </button>
                                     </div>
                                 </div>
-                            `).join('')}
-                        </div>
-                    </details>
-                    ` : ''}
-                    
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button class="btn btn-primary btn-small btn-copiar-info" data-modelo-id="${modeloIdEscaped}">📋 Copiar Info</button>
-                        <button class="btn btn-secondary btn-small btn-editar-modelo" data-modelo-id="${modeloIdEscaped}">✏️ Editar</button>
-                        <button class="btn btn-warning btn-small btn-agregar-comando" data-modelo-id="${modeloIdEscaped}">➕ Agregar Comando</button>
-                        <button class="btn btn-info btn-small btn-generar-comandos" data-modelo-id="${modeloIdEscaped}">⚡ Todos los Comandos</button>
-                        ${cantidadComandos > 0 ? `<button class="btn btn-success btn-small btn-comandos-especificos" data-modelo-id="${modeloIdEscaped}">🎯 Comandos Específicos</button>` : ''}
+                                <div id="listaComandosNuevoModelo">
+                                    <!-- Los comandos se agregarán aquí dinámicamente -->
+                                </div>
+                                <div style="margin-top: 10px; padding: 10px; background: #e8f5e8; border-radius: 4px; font-size: 12px; color: #2e7d32;">
+                                    🌐 <strong>TR-069 ACS Axiros:</strong> Use comandos TR-069 estándar como SetParameterValues, GetParameterValues, Download, Reboot.
+                                    <br>📡 <strong>Parámetros TR-069:</strong> InternetGatewayDevice.DeviceInfo.*, WANDevice.1.WANConnectionDevice.1.*, LANDevice.1.WLANConfiguration.1.*
+                                    <br>� <strong>Variables ACS:</strong> {serialNumber}, {macAddress}, {deviceModel}, {pppoeUser}, {voipUser} para personalización automática.
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                                <button type="button" onclick="cerrarModalAgregarModelo()" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
+                                    Cancelar
+                                </button>
+                                <button type="submit" style="background: var(--azul-antel); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
+                                    💾 Crear Modelo
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             `;
-            }).join('');
-
-            // Configurar event listeners para todos los botones
-            configurarEventListenersModelos();
-
-                } else {
-                    console.error('Error al cargar modelos ONT:', data.message);
-                    const container = document.getElementById('listaModelosONT');
-                    if (container) {
-                        container.innerHTML = '<p style="color: #dc3545; font-style: italic; text-align: center; padding: 20px;">❌ Error al cargar modelos ONT</p>';
-                    }
-                }
-            } catch (error) {
-                console.error('Error al cargar modelos ONT:', error);
-                const container = document.getElementById('listaModelosONT');
-                if (container) {
-                    container.innerHTML = '<p style="color: #dc3545; font-style: italic; text-align: center; padding: 20px;">❌ Error de conexión al cargar modelos ONT</p>';
-                }
-            }
-        }
-
-        // Función para configurar event listeners de los modelos ONT
-        function configurarEventListenersModelos() {
-            const container = document.getElementById('listaModelosONT');
-            if (!container) return;
-
-            // Event delegation para todos los botones
-            container.addEventListener('click', async (e) => {
-                const button = e.target.closest('button');
-                if (!button) return;
-
-                const modeloId = button.dataset.modeloId;
-                const comandoId = button.dataset.comandoId;
-                const comando = button.dataset.comando;
-
-                console.log('Click en botón:', {
-                    clase: button.className,
-                    modeloId: modeloId,
-                    comandoId: comandoId,
-                    comando: comando,
-                    usuarioActual: usuarioActual
-                });
-
-                try {
-                    if (button.classList.contains('btn-eliminar-modelo')) {
-                        console.log('Ejecutando eliminarModeloONT con ID:', modeloId);
-                        await eliminarModeloONT(modeloId);
-                    } else if (button.classList.contains('btn-copiar-comando')) {
-                        copiarComandoIndividualONT(comando);
-                    } else if (button.classList.contains('btn-editar-comando')) {
-                        await editarComandoDeModelo(modeloId, comandoId);
-                    } else if (button.classList.contains('btn-eliminar-comando')) {
-                        await eliminarComandoDeModelo(modeloId, comandoId);
-                    } else if (button.classList.contains('btn-copiar-info')) {
-                        copiarModeloONT(modeloId);
-                    } else if (button.classList.contains('btn-editar-modelo')) {
-                        editarModeloONT(modeloId);
-                    } else if (button.classList.contains('btn-agregar-comando')) {
-                        await agregarComandoAModeloExistente(modeloId);
-                    } else if (button.classList.contains('btn-generar-comandos')) {
-                        generarComandosModeloONT(modeloId);
-                    } else if (button.classList.contains('btn-comandos-especificos')) {
-                        copiarComandosEspecificosModelo(modeloId);
-                    }
-                } catch (error) {
-                    console.error('Error en event listener:', error);
-                    mostrarNotificacion('❌ Error al ejecutar la acción: ' + error.message, 'error', 4000);
-                }
+            
+            // Insertar modal en el DOM
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Agregar evento al formulario
+            document.getElementById('formAgregarModelo').addEventListener('submit', (e) => {
+                e.preventDefault();
+                procesarNuevoModelo();
             });
+            
+            // Agregar el primer comando por defecto
+            agregarComandoNuevoModelo();
         }
-
-        // Función para eliminar modelo ONT (versión mejorada)
-        async function eliminarModeloONT(modeloId) {
-            try {
-                console.log('=== ELIMINANDO MODELO ONT ===');
-                console.log('ID del modelo:', modeloId);
-                console.log('Usuario actual:', usuarioActual);
-                console.log('Modelos disponibles:', modelosONT.map(m => ({ id: m.id, nombre: `${m.fabricante} ${m.modelo}` })));
-
-                const modelo = modelosONT.find(m => m.id === modeloId);
-                if (!modelo) {
-                    console.error('Modelo no encontrado en array local');
-                    mostrarNotificacion('❌ Modelo no encontrado', 'error', 3000);
-                    return;
-                }
-
-                // Verificar que el usuario esté logueado
-                if (!usuarioActual || !usuarioActual.id) {
-                    mostrarNotificacion('❌ Debe estar logueado para eliminar modelos', 'error', 4000);
-                    return;
-                }
-
-                console.log('Modelo encontrado:', modelo);
-
-                mostrarConfirmacion(
-                    'Eliminar Modelo ONT',
-                    `¿Está seguro que desea eliminar el modelo ${modelo.fabricante} ${modelo.modelo}?\n\nEsta acción eliminará también todos los comandos específicos del modelo y no se puede deshacer.`,
-                    async () => {
-                        try {
-                            console.log('Confirmación aceptada. Enviando petición DELETE...');
-                            console.log('URL:', `${API_BASE}/modelos-ont/${modeloId}`);
-                            console.log('Datos enviados:', { usuarioId: usuarioActual.id });
-                            
-                            mostrarNotificacion('⏳ Eliminando modelo...', 'info', 2000);
-
-                            const response = await fetch(`${API_BASE}/modelos-ont/${modeloId}`, {
-                                method: 'DELETE',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({ usuarioId: usuarioActual.id })
-                            });
-
-                            console.log('Response status:', response.status);
-                            console.log('Response headers:', [...response.headers.entries()]);
-                            
-                            const data = await response.json();
-                            console.log('Response data:', data);
-                            
-                            if (data.success) {
-                                console.log('Eliminación exitosa en servidor');
-                                
-                                // Eliminar del array local inmediatamente
-                                const indexAntes = modelosONT.length;
-                                modelosONT = modelosONT.filter(m => m.id !== modeloId);
-                                console.log(`Array local actualizado: ${indexAntes} -> ${modelosONT.length} modelos`);
-                                
-                                // Recargar lista desde servidor para confirmar
-                                await cargarModelosONT();
-                                
-                                mostrarNotificacion(
-                                    `✅ Modelo ${modelo.fabricante} ${modelo.modelo} eliminado correctamente`, 
-                                    'success', 
-                                    4000, 
-                                    'Modelo Eliminado'
-                                );
-                            } else {
-                                console.error('Error del servidor al eliminar:', data.message);
-                                mostrarNotificacion(`❌ Error al eliminar modelo: ${data.message}`, 'error', 5000);
-                            }
-                        } catch (error) {
-                            console.error('Error de red al eliminar modelo ONT:', error);
-                            mostrarNotificacion(`❌ Error de conexión: ${error.message}`, 'error', 5000);
-                        }
-                    },
-                    null,
-                    'delete'
-                );
-            } catch (error) {
-                console.error('Error general en eliminarModeloONT:', error);
-                mostrarNotificacion(`❌ Error inesperado: ${error.message}`, 'error', 5000);
+        
+        // Función para cerrar el modal de agregar modelo
+        function cerrarModalAgregarModelo() {
+            const modal = document.getElementById('modalAgregarModelo');
+            if (modal) {
+                modal.remove();
             }
         }
-
-        // Función de debug mejorada para verificar el estado del usuario y sistema
-        async function debugUsuario() {
-            console.log('=== DEBUG COMPLETO DEL SISTEMA ===');
-            console.log('1. Usuario actual:', usuarioActual);
-            console.log('2. localStorage user:', localStorage.getItem('user'));
-            console.log('3. sessionStorage user:', sessionStorage.getItem('user'));
-            console.log('4. API_BASE:', API_BASE);
-            console.log('5. Modelos ONT en memoria:', modelosONT);
+        
+        // Función para agregar un comando al nuevo modelo
+        function agregarComandoNuevoModelo() {
+            const listaComandos = document.getElementById('listaComandosNuevoModelo');
+            const categoriaSelect = document.getElementById('categoriaComandoNuevo');
+            const categoria = categoriaSelect ? categoriaSelect.value : 'custom';
+            const comandoId = 'comando_' + Date.now();
             
-            // Verificar conectividad con servidor
-            try {
-                console.log('6. Verificando conectividad con servidor...');
-                const response = await fetch(`${API_BASE}/modelos-ont`);
-                const data = await response.json();
-                console.log('7. Respuesta del servidor:', data);
-                
-                if (data.success) {
-                    console.log(`8. ✅ Servidor operativo - ${data.modelos.length} modelos en BD`);
-                    mostrarNotificacion(`ℹ️ Servidor OK - ${data.modelos.length} modelos en BD`, 'info', 3000);
-                } else {
-                    console.log('8. ❌ Error en servidor:', data.message);
-                    mostrarNotificacion(`❌ Error en servidor: ${data.message}`, 'error', 4000);
-                }
-            } catch (error) {
-                console.log('8. ❌ Error de conexión:', error);
-                mostrarNotificacion(`❌ Error de conexión: ${error.message}`, 'error', 4000);
-            }
-            
-            // Configurar usuario de prueba si no existe
-            if (!usuarioActual) {
-                console.log('9. Configurando usuario de prueba...');
-                usuarioActual = {
-                    id: 1,
-                    username: 'alito',
-                    nombre_completo: 'Usuario de Prueba',
-                    rol: 'admin'
-                };
-                localStorage.setItem('user', JSON.stringify(usuarioActual));
-                console.log('10. ✅ Usuario de prueba configurado:', usuarioActual);
-                mostrarNotificacion('✅ Usuario de prueba configurado', 'success', 3000);
-                
-                // Actualizar display del usuario
-                const userDisplay = document.getElementById('userDisplay');
-                if (userDisplay) {
-                    userDisplay.textContent = `👤 ${usuarioActual.nombre_completo || usuarioActual.username}`;
-                }
-            } else {
-                console.log('9. ✅ Usuario ya configurado');
-                mostrarNotificacion(`ℹ️ Usuario: ${usuarioActual.username} (ID: ${usuarioActual.id})`, 'info', 4000);
-            }
-            
-            // Recargar modelos después del debug
-            console.log('11. Recargando modelos ONT...');
-            await cargarModelosONT();
-            
-            console.log('=== FIN DEBUG ===');
-        }
-
-        // Función para copiar información del modelo ONT
-        function copiarModeloONT(modeloId) {
-            const modelo = modelosONT.find(m => m.id === modeloId);
-            if (!modelo) return;
-
-            const info = `MODELO ONT - ${modelo.fabricante} ${modelo.modelo}
-=====================================
-Fabricante: ${modelo.fabricante}
-Modelo: ${modelo.modelo}
-Tipo: ${modelo.tipo}
-Versión Software: ${modelo.version || 'N/A'}
-Descripción: ${modelo.descripcion || 'N/A'}
-Fecha Creación: ${modelo.fecha_creacion}
-=====================================`;
-
-            copiarTexto(info);
-            mostrarNotificacion('📋 Información del modelo copiada al portapapeles', 'success', 3000, 'Información Copiada');
-        }
-
-        // Función para editar modelo ONT
-        function editarModeloONT(modeloId) {
-            const modelo = modelosONT.find(m => m.id === modeloId);
-            if (!modelo) return;
-
-            // Llenar el formulario con los datos del modelo
-            document.getElementById('ontFabricante').value = modelo.fabricante;
-            document.getElementById('ontModelo').value = modelo.modelo;
-            document.getElementById('ontVersion').value = modelo.version;
-            document.getElementById('ontTipo').value = modelo.tipo;
-            document.getElementById('ontDescripcion').value = modelo.descripcion;
-
-            // Cargar comandos específicos del modelo
-            comandosModeloTemporal = modelo.comandos ? [...modelo.comandos] : [];
-            actualizarVistaComandosModelo();
-
-            // Eliminar el modelo actual para reemplazarlo
-            eliminarModeloONT(modeloId);
-            
-            mostrarModal('Modo Edición', 
-                `✏️ Modelo ${modelo.fabricante} ${modelo.modelo} cargado para edición con ${comandosModeloTemporal.length} comandos específicos.`, 
-                'info');
-        }
-
-        // Función para generar comandos específicos del modelo
-        function generarComandosModeloONT(modeloId) {
-            const modelo = modelosONT.find(m => m.id === modeloId);
-            if (!modelo) return;
-
-            let comandos = [
-                `GetParameterValues: Device.DeviceInfo.ModelName`,
-                `GetParameterValues: Device.DeviceInfo.SoftwareVersion`,
-                `SetParameterValues: Device.DeviceInfo.Description="${modelo.fabricante} ${modelo.modelo}"`,
-                `GetParameterValues: Device.Ethernet.Interface.1.Stats`
-            ];
-
-            // Agregar comandos específicos según el tipo
-            if (modelo.tipo === 'FWA-5G' || modelo.tipo === 'FWA-4G') {
-                comandos.push(
-                    `GetParameterValues: Device.Cellular.Interface.1.Stats`,
-                    `GetParameterValues: Device.Cellular.Interface.1.SignalStrength`,
-                    `GetParameterValues: Device.Cellular.Interface.1.PLMNID`
-                );
-            }
-
-            comandos.push(`Reboot`);
-
-            const comandosTexto = comandos.join('\n');
-            copiarTexto(comandosTexto);
-            
-            mostrarModal('Comandos Generados', 
-                `⚡ Comandos básicos para ${modelo.fabricante} ${modelo.modelo} copiados al portapapeles.`, 
-                'success');
-        }
-
-        // Función para copiar solo los comandos específicos del modelo
-        function copiarComandosEspecificosModelo(modeloId) {
-            const modelo = modelosONT.find(m => m.id === modeloId);
-            if (!modelo || !modelo.comandos || modelo.comandos.length === 0) {
-                mostrarNotificacion('⚠️ Este modelo no tiene comandos específicos configurados', 'warning', 4000, 'Sin Comandos');
-                return;
-            }
-
-            const comandosTexto = modelo.comandos.map(cmd => cmd.comando).join('\n');
-            copiarTexto(comandosTexto);
-            
-            mostrarNotificacion(
-                `🎯 ${modelo.comandos.length} comandos específicos de ${modelo.fabricante} ${modelo.modelo} copiados al portapapeles`, 
-                'success', 
-                4000, 
-                'Comandos Específicos Copiados'
-            );
-        }
-
-        // Función para exportar modelos ONT
-        function exportarModelosONT() {
-            if (modelosONT.length === 0) {
-                mostrarModal('Sin Datos', '⚠️ No hay modelos ONT para exportar.', 'warning');
-                return;
-            }
-
-            const dataStr = JSON.stringify(modelosONT, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `modelos-ont-antel-${new Date().toISOString().slice(0,10)}.json`;
-            link.click();
-
-            mostrarModal('Exportación Completa', 
-                `📤 ${modelosONT.length} modelos ONT exportados correctamente.`, 
-                'success');
-        }
-
-        // Función para copiar comando individual de ONT
-        function copiarComandoIndividualONT(comando) {
-            copiarTexto(comando);
-            mostrarNotificacion('📋 Comando ONT copiado al portapapeles', 'success', 3000, 'Comando ONT');
-        }
-
-        // Función para eliminar comando específico de un modelo guardado
-        async function eliminarComandoDeModelo(modeloId, comandoId) {
-            const modelo = modelosONT.find(m => m.id === modeloId);
-            if (!modelo) return;
-
-            const comandoIndex = modelo.comandos.findIndex(cmd => cmd.id === comandoId);
-            if (comandoIndex === -1) return;
-
-            const comandoNombre = modelo.comandos[comandoIndex].comando;
-
-            mostrarConfirmacion(
-                'Eliminar Comando',
-                `¿Está seguro que desea eliminar este comando del modelo ${modelo.fabricante} ${modelo.modelo}?\n\nComando: ${comandoNombre}\n\nEsta acción no se puede deshacer.`,
-                async () => {
-                    try {
-                        const response = await fetch(`${API_BASE}/modelos-ont/${modeloId}/comandos/${comandoId}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ usuarioId: usuarioActual.id })
-                        });
-
-                        const data = await response.json();
-                        
-                        if (data.success) {
-                            // Actualizar el array local
-                            modelo.comandos.splice(comandoIndex, 1);
-                            await cargarModelosONT();
-                            mostrarNotificacion(`Comando eliminado del modelo ${modelo.fabricante} ${modelo.modelo}`, 'success', 3000, 'Comando Eliminado');
-                        } else {
-                            mostrarNotificacion('Error al eliminar comando: ' + data.message, 'error', 4000);
-                        }
-                    } catch (error) {
-                        console.error('Error al eliminar comando:', error);
-                        mostrarNotificacion('Error de conexión al eliminar comando', 'error', 4000);
-                    }
+            // Plantillas TR-069 por categoría
+            const plantillasTR069 = {
+                provision: {
+                    nombre: 'Provisioning ACS Axiros',
+                    comando: `SetParameterValues:
+InternetGatewayDevice.DeviceInfo.ProvisioningCode=ANTEL_{serialNumber}
+InternetGatewayDevice.ManagementServer.URL=http://acs.antel.com.uy:7547/
+InternetGatewayDevice.ManagementServer.Username=cpe_{macAddress}
+InternetGatewayDevice.ManagementServer.Password=antel_cpe
+InternetGatewayDevice.ManagementServer.PeriodicInformEnable=1
+InternetGatewayDevice.ManagementServer.PeriodicInformInterval=3600`
                 },
-                null,
-                'delete'
-            );
-        }
+                wifi: {
+                    nombre: 'Configurar WiFi 2.4GHz + 5GHz',
+                    comando: `SetParameterValues:
+InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.Enable=1
+InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.SSID=ANTEL_WIFI_{serialNumber}
+InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.BeaconType=11i
+InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.IEEE11iEncryptionModes=AESEncryption
+InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.IEEE11iAuthenticationMode=PSKAuthentication
+InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.PreSharedKey.1.PreSharedKey=antel{serialNumber}
+InternetGatewayDevice.LANDevice.1.WLANConfiguration.2.Enable=1
+InternetGatewayDevice.LANDevice.1.WLANConfiguration.2.SSID=ANTEL_5G_{serialNumber}
+InternetGatewayDevice.LANDevice.1.WLANConfiguration.2.Channel=36`
+                },
+                wan: {
+                    nombre: 'Configurar WAN PPPoE',
+                    comando: `SetParameterValues:
+InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.Enable=1
+InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.ConnectionType=IP_Routed
+InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.Username={pppoeUser}
+InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.Password={pppoePass}
+InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.DefaultGateway=1
+InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.NATEnabled=1
+InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.ConnectionTrigger=AlwaysOn`
+                },
+                voip: {
+                    nombre: 'Configurar Línea VoIP',
+                    comando: `SetParameterValues:
+InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.Enable=Enabled
+InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.SIP.ProxyServer=sip.antel.com.uy
+InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.SIP.ProxyServerPort=5060
+InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.SIP.RegistrarServer=sip.antel.com.uy
+InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.Line.1.Enable=Enabled
+InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.Line.1.DirectoryNumber={voipUser}
+InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.Line.1.SIP.AuthUserName={voipUser}
+InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.Line.1.SIP.AuthPassword={voipPass}`
+                },
+                firmware: {
+                    nombre: 'Download Firmware',
+                    comando: `Download:
+CommandKey=FW_UPGRADE_{serialNumber}_{timestamp}
+FileType=1 Firmware Upgrade Image
+URL=http://firmware.antel.com.uy/{deviceModel}/latest.bin
+Username=firmware_user
+Password=antel_fw_2024
+FileSize=0
+TargetFileName=
+DelaySeconds=60
+SuccessURL=
+FailureURL=`
+                },
+                diagnostic: {
+                    nombre: 'Diagnóstico Completo TR-069',
+                    comando: `GetParameterValues:
+InternetGatewayDevice.DeviceInfo.SoftwareVersion
+InternetGatewayDevice.DeviceInfo.HardwareVersion
+InternetGatewayDevice.DeviceInfo.SerialNumber
+InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.ExternalIPAddress
+InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.ConnectionStatus
+InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.Status
+InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.AssociatedDeviceNumberOfEntries
 
-        // Función para editar comando específico de un modelo guardado
-        async function editarComandoDeModelo(modeloId, comandoId) {
-            const modelo = modelosONT.find(m => m.id === modeloId);
-            if (!modelo) return;
+SetParameterValues:
+InternetGatewayDevice.IPPingDiagnostics.DiagnosticsState=Requested
+InternetGatewayDevice.IPPingDiagnostics.Host=8.8.8.8
+InternetGatewayDevice.IPPingDiagnostics.NumberOfRepetitions=4`
+                },
+                reset: {
+                    nombre: 'Factory Reset TR-069',
+                    comando: `FactoryReset
 
-            const comandoIndex = modelo.comandos.findIndex(cmd => cmd.id === comandoId);
-            if (comandoIndex === -1) return;
+# O para reinicio simple:
+# Reboot
 
-            const comandoActual = modelo.comandos[comandoIndex];
+# O reset selectivo de configuración:
+# SetParameterValues:
+# InternetGatewayDevice.DeviceConfig.ConfigFile=""
+# Reboot`
+                },
+                custom: {
+                    nombre: 'Comando TR-069 Personalizado',
+                    comando: `# Comandos TR-069 disponibles:
+# SetParameterValues: Configurar parámetros
+# GetParameterValues: Obtener valores actuales  
+# GetParameterNames: Listar parámetros disponibles
+# AddObject: Agregar instancia de objeto
+# DeleteObject: Eliminar instancia de objeto
+# Download: Descargar archivo (firmware, config)
+# Upload: Subir archivo (logs, config)
+# Reboot: Reiniciar dispositivo
+# FactoryReset: Reset completo a fábrica
 
-            try {
-                // Solicitar nuevo comando
-                const nuevoComando = await mostrarPrompt(
-                    'Editar Comando',
-                    'Edite el comando:',
-                    'Comando ACS',
-                    comandoActual.comando
-                );
+# Ejemplo SetParameterValues:
+SetParameterValues:
+InternetGatewayDevice.Time.NTPServer1=pool.ntp.org
+InternetGatewayDevice.Time.Enable=1
 
-                if (!nuevoComando || nuevoComando.trim() === '') return;
-
-                // Solicitar nueva descripción
-                const nuevaDescripcion = await mostrarPrompt(
-                    'Editar Descripción',
-                    'Edite la descripción:',
-                    'Descripción del comando',
-                    comandoActual.descripcion
-                );
-
-                if (nuevaDescripcion === null) return;
-
-                // Actualizar en la base de datos usando el endpoint DELETE + POST simplificado
-                await fetch(`${API_BASE}/modelos-ont/${modeloId}/comandos/${comandoId}`, {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ usuarioId: usuarioActual.id })
-                });
-
-                const response = await fetch(`${API_BASE}/modelos-ont/${modeloId}/comandos`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        comandoId: comandoId,
-                        comando: nuevoComando.trim(),
-                        descripcion: nuevaDescripcion.trim() || comandoActual.descripcion,
-                        usuarioId: usuarioActual.id
-                    })
-                });
-
-                const data = await response.json();
-                
-                if (data.success) {
-                    // Actualizar el array local
-                    modelo.comandos[comandoIndex] = {
-                        ...comandoActual,
-                        comando: nuevoComando.trim(),
-                        descripcion: nuevaDescripcion.trim() || comandoActual.descripcion
-                    };
-                    
-                    await cargarModelosONT();
-                    mostrarNotificacion(`Comando editado en modelo ${modelo.fabricante} ${modelo.modelo}`, 'success', 3000, 'Comando Editado');
-                } else {
-                    mostrarNotificacion('Error al editar comando: ' + data.message, 'error', 4000);
+# Ejemplo GetParameterValues:
+GetParameterValues:
+InternetGatewayDevice.DeviceInfo.
+InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                 }
-            } catch (error) {
-                console.error('Error al editar comando:', error);
-                mostrarNotificacion('Error de conexión al editar comando', 'error', 4000);
+            };
+            
+            const plantilla = plantillasTR069[categoria] || plantillasTR069.custom;
+            
+            const comandoHTML = `
+                <div id="${comandoId}" style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 12px; border-left: 4px solid var(--azul-antel); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                            <span style="background: var(--azul-antel); color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold;">
+                                ${categoria.toUpperCase()}
+                            </span>
+                            <input type="text" value="${plantilla.nombre}" 
+                                   style="flex: 1; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; font-weight: 500;">
+                        </div>
+                        <button type="button" onclick="eliminarComandoNuevoModelo('${comandoId}')" 
+                                style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: background 0.2s;">
+                            🗑️
+                        </button>
+                    </div>
+                    <textarea placeholder="Comando TR-069..." rows="8" 
+                              style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 11px; resize: vertical; background: #ffffff; line-height: 1.4;">${plantilla.comando}</textarea>
+                    <div style="margin-top: 8px; font-size: 10px; color: #6c757d;">
+                        🌐 <strong>TR-069:</strong> Comandos ACS - SetParameterValues, GetParameterValues, Download, AddObject, DeleteObject, Reboot, FactoryReset
+                        <br>📋 <strong>Variables:</strong> {serialNumber}, {macAddress}, {deviceModel}, {pppoeUser}, {pppoePass}, {voipUser}, {voipPass}
+                    </div>
+                </div>
+            `;
+            
+            listaComandos.insertAdjacentHTML('beforeend', comandoHTML);
+        }
+        
+        // Función para eliminar un comando
+        function eliminarComandoNuevoModelo(comandoId) {
+            const elemento = document.getElementById(comandoId);
+            if (elemento) {
+                elemento.remove();
             }
         }
-
-        // Función para agregar comando a modelo existente
-        async function agregarComandoAModeloExistente(modeloId) {
-            const modelo = modelosONT.find(m => m.id === modeloId);
-            if (!modelo) return;
-
-            // Solicitar nuevo comando
-            mostrarPrompt(
-                'Nuevo Comando',
-                `Ingrese el comando para el modelo ${modelo.fabricante} ${modelo.modelo}:`,
-                'Comando ACS (ej: GetParameterValues: Device.WiFi.Radio.1.Enable)',
-                ''
-            ).then(nuevoComando => {
-                if (!nuevoComando || nuevoComando.trim() === '') return;
-
-                // Solicitar descripción
-                mostrarPrompt(
-                    'Descripción del Comando',
-                    'Ingrese una descripción para el comando:',
-                    'Descripción del comando',
-                    ''
-                ).then(async (descripcion) => {
-                    if (descripcion === null) return;
-
-                    // Crear nuevo comando
-                    const comandoId = Date.now().toString();
-                    const comando = nuevoComando.trim();
-                    const desc = descripcion.trim() || 'Sin descripción';
-
-                    try {
-                        const response = await fetch(`${API_BASE}/modelos-ont/${modeloId}/comandos`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                comandoId: comandoId,
-                                comando: comando,
-                                descripcion: desc,
-                                usuarioId: usuarioActual.id
-                            })
-                        });
-
-                        const data = await response.json();
-                        
-                        if (data.success) {
-                            // Actualizar el array local
-                            if (!modelo.comandos) modelo.comandos = [];
-                            modelo.comandos.push({
-                                id: comandoId,
-                                comando: comando,
-                                descripcion: desc
-                            });
-                            
-                            await cargarModelosONT();
-                            mostrarNotificacion(`Comando agregado al modelo ${modelo.fabricante} ${modelo.modelo}`, 'success', 3000, 'Comando Agregado');
-                        } else {
-                            mostrarNotificacion('Error al agregar comando: ' + data.message, 'error', 4000);
-                        }
-                    } catch (error) {
-                        console.error('Error al agregar comando:', error);
-                        mostrarNotificacion('Error de conexión al agregar comando', 'error', 4000);
-                    }
-                });
+        
+        // Función para procesar el nuevo modelo
+        async function procesarNuevoModelo() {
+            const fabricante = document.getElementById('nuevoFabricante').value;
+            const modelo = document.getElementById('nuevoModelo').value;
+            const tipo = document.getElementById('nuevoTipo').value;
+            const version = document.getElementById('nuevoVersion').value;
+            const descripcion = document.getElementById('nuevoDescripcion').value;
+            
+            // Validar campos requeridos
+            if (!fabricante || !modelo || !tipo) {
+                mostrarNotificacion('Por favor complete todos los campos obligatorios (*)', 'error');
+                return;
+            }
+            
+            // Recopilar comandos
+            const comandos = [];
+            const comandosElements = document.querySelectorAll('#listaComandosNuevoModelo > div');
+            
+            comandosElements.forEach(comandoDiv => {
+                const nombreInput = comandoDiv.querySelector('input[type="text"]');
+                const comandoTextarea = comandoDiv.querySelector('textarea');
+                const categoriaSpan = comandoDiv.querySelector('span');
+                
+                if (nombreInput && comandoTextarea && nombreInput.value.trim() && comandoTextarea.value.trim()) {
+                    // Extraer categoría del span
+                    const categoriaTexto = categoriaSpan ? categoriaSpan.textContent.toLowerCase() : 'custom';
+                    
+                    comandos.push({
+                        nombre: nombreInput.value.trim(),
+                        comando: comandoTextarea.value.trim(),
+                        categoria: categoriaTexto,
+                        tipo: 'TR069'  // Marcar como comando TR-069
+                    });
+                }
             });
-        }
-
-        // Funciones para comandos ACS
-        function copiarComandoACS(comando) {
-            copiarTexto(comando);
-            mostrarNotificacion('📋 Comando ACS copiado al portapapeles', 'success', 3000, 'Comando ACS');
-        }
-
-        function agregarComandoACS(comando, descripcion) {
-            if (agregarComandoABaseDatos(comando, `ACS: ${descripcion}`)) {
-                mostrarModal('Comando ACS Agregado', `✅ ${descripcion} agregado a la base de datos.`, 'success');
-                cargarComandos();
-            }
-        }
-
-        // Función para actualizar plantilla ACS
-        function actualizarPlantillaACS() {
-            const tipo = document.getElementById('acsComandoTipo').value;
-            const parametroField = document.getElementById('acsParametro');
-            const valorField = document.getElementById('acsValor');
-
-            // Limpiar campos
-            parametroField.value = '';
-            valorField.value = '';
-
-            // Habilitar/deshabilitar campos según el tipo
-            if (tipo === 'Reboot' || tipo === 'FactoryReset') {
-                parametroField.disabled = true;
-                valorField.disabled = true;
-                parametroField.placeholder = 'No aplica';
-                valorField.placeholder = 'No aplica';
-            } else if (tipo === 'GetParameterValues') {
-                parametroField.disabled = false;
-                valorField.disabled = true;
-                parametroField.placeholder = 'Ej: Device.DeviceInfo.ModelName';
-                valorField.placeholder = 'No aplica';
-            } else {
-                parametroField.disabled = false;
-                valorField.disabled = false;
-                parametroField.placeholder = 'Ej: Device.WiFi.Radio.1.Enable';
-                valorField.placeholder = 'Ej: true, false, etc.';
-            }
-        }
-
-        // Función para generar comando ACS personalizado
-        function generarComandoACS() {
-            const tipo = document.getElementById('acsComandoTipo').value;
-            const parametro = document.getElementById('acsParametro').value.trim();
-            const valor = document.getElementById('acsValor').value.trim();
-
-            if (!tipo) {
-                mostrarModal('Error', '⚠️ Debe seleccionar un tipo de comando.', 'error');
-                return;
-            }
-
-            let comando = '';
-
-            switch(tipo) {
-                case 'GetParameterValues':
-                    if (!parametro) {
-                        mostrarModal('Error', '⚠️ Debe especificar el parámetro para GetParameterValues.', 'error');
-                        return;
-                    }
-                    comando = `GetParameterValues: ${parametro}`;
-                    break;
-                
-                case 'SetParameterValues':
-                    if (!parametro || !valor) {
-                        mostrarModal('Error', '⚠️ Debe especificar el parámetro y valor para SetParameterValues.', 'error');
-                        return;
-                    }
-                    comando = `SetParameterValues: ${parametro}=${valor}`;
-                    break;
-                
-                case 'AddObject':
-                    if (!parametro) {
-                        mostrarModal('Error', '⚠️ Debe especificar el objeto para AddObject.', 'error');
-                        return;
-                    }
-                    comando = `AddObject: ${parametro}`;
-                    break;
-                
-                case 'DeleteObject':
-                    if (!parametro) {
-                        mostrarModal('Error', '⚠️ Debe especificar el objeto para DeleteObject.', 'error');
-                        return;
-                    }
-                    comando = `DeleteObject: ${parametro}`;
-                    break;
-                
-                case 'Download':
-                    if (!parametro) {
-                        mostrarModal('Error', '⚠️ Debe especificar la URL para Download.', 'error');
-                        return;
-                    }
-                    comando = `Download: ${parametro}`;
-                    break;
-                
-                case 'Reboot':
-                    comando = 'Reboot';
-                    break;
-                
-                case 'FactoryReset':
-                    comando = 'FactoryReset';
-                    break;
-                
-                default:
-                    mostrarModal('Error', '⚠️ Tipo de comando no válido.', 'error');
-                    return;
-            }
-
-            document.getElementById('acsResultadoComando').value = comando;
-            document.getElementById('acsComandoGenerado').style.display = 'block';
             
-            mostrarModal('Comando ACS Generado', '✅ Comando ACS generado correctamente.', 'success');
-        }
-
-        // Función para copiar comando generado ACS
-        function copiarComandoGeneradoACS() {
-            const comando = document.getElementById('acsResultadoComando').value;
-            if (comando) {
-                copiarTexto(comando);
-                mostrarNotificacion('📋 Comando ACS copiado al portapapeles', 'success', 3000, 'Comando ACS');
-            } else {
-                mostrarNotificacion('⚠️ No hay comando generado para copiar', 'error', 3000, 'Error');
-            }
-        }
-
-        // Función para agregar comando personalizado ACS a BD
-        function agregarComandoPersonalizadoACS() {
-            const comando = document.getElementById('acsResultadoComando').value;
-            const descripcion = document.getElementById('acsDescripcion').value.trim();
+            // Preparar datos para enviar
+            const nuevoModelo = {
+                fabricante: fabricante,
+                modelo: modelo,
+                tipo: tipo,
+                version: version || null,
+                descripcion: descripcion || null,
+                comandos: comandos
+            };
             
-            if (!comando) {
-                mostrarModal('Error', '⚠️ No hay comando generado para agregar.', 'error');
-                return;
-            }
-
-            const desc = descripcion || 'Comando ACS personalizado';
-            
-            if (agregarComandoABaseDatos(comando, `ACS: ${desc}`)) {
-                mostrarModal('Comando Agregado', '✅ Comando ACS agregado a la base de datos.', 'success');
-                cargarComandos();
-                limpiarFormularioComandoACS();
-            }
-        }
-
-        // Función para limpiar formulario de comando ACS
-        function limpiarFormularioComandoACS() {
-            document.getElementById('acsComandoTipo').value = '';
-            document.getElementById('acsParametro').value = '';
-            document.getElementById('acsValor').value = '';
-            document.getElementById('acsDescripcion').value = '';
-            document.getElementById('acsComandoGenerado').style.display = 'none';
-            
-            // Rehabilitar campos
-            document.getElementById('acsParametro').disabled = false;
-            document.getElementById('acsValor').disabled = false;
-            document.getElementById('acsParametro').placeholder = 'Ej: Device.WiFi.Radio.1.Enable';
-            document.getElementById('acsValor').placeholder = 'Ej: true, false, etc.';
-        }
-
-        // Funciones adicionales para comandos ACS personalizados
-        function copiarTodosComandosPersonalizados() {
-            // Esta función se puede usar para copiar comandos específicos de un modelo
-            mostrarModal('Información', 
-                'ℹ️ Los comandos ACS ahora se gestionan individualmente por cada modelo ONT que agregue.', 
-                'info');
-        }
-
-        // Inicializar ACS al cargar la página
-        function inicializarACS() {
-            cargarModelosONT();
-        }
-
-        // Función para copiar comando personalizado
-        async function copiarComandoPersonalizado(comandoId) {
             try {
-                const response = await fetch(`${API_BASE}/comandos-ims`);
+                mostrarNotificacion('Creando nuevo modelo...', 'info');
+                
+                const response = await fetch('/api/modelo-ont', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(nuevoModelo)
+                });
+                
+                const resultado = await response.json();
+                
+                if (response.ok) {
+                    mostrarNotificacion(`✅ Modelo ${fabricante} ${modelo} creado exitosamente`, 'success');
+                    cerrarModalAgregarModelo();
+                    // Recargar la lista de modelos
+                    cargarModelosACS();
+                } else {
+                    mostrarNotificacion(`Error: ${resultado.error}`, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error al crear modelo:', error);
+                mostrarNotificacion('Error de conexión al crear el modelo', 'error');
+            }
+        }
+        
+        // Función para forzar recarga completa de ACS
+        function forzarRecargaACS() {
+            console.log('🔄 FORZANDO RECARGA COMPLETA DE ACS...');
+            
+            mostrarNotificacion('🔄 Forzando recarga completa de ACS...', 'info', 2000, 'Recarga Forzada');
+            
+            // Limpiar todos los cachés posibles
+            if (typeof localStorage !== 'undefined') {
+                localStorage.clear();
+            }
+            if (typeof sessionStorage !== 'undefined') {
+                const user = sessionStorage.getItem('user');
+                sessionStorage.clear();
+                if (user) sessionStorage.setItem('user', user); // Mantener sesión de usuario
+            }
+            
+            // Limpiar container completamente
+            const container = document.getElementById('listaModelosACS');
+            if (container) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; border-radius: 8px; margin: 20px;">
+                        <div style="font-size: 30px; margin-bottom: 15px; animation: spin 2s linear infinite;">🔄</div>
+                        <div style="font-weight: bold; font-size: 18px;">RECARGA FORZADA EN PROGRESO</div>
+                        <div style="font-size: 14px; margin-top: 10px;">Limpiando caché y revalidando datos...</div>
+                        <div style="font-size: 12px; margin-top: 5px; opacity: 0.9;">${new Date().toLocaleString()}</div>
+                    </div>
+                    <style>
+                        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+                    </style>
+                `;
+            }
+            
+            // Esperar un momento y luego recargar
+            setTimeout(() => {
+                console.log('🚀 Ejecutando cargarModelosACS después de limpieza...');
+                cargarModelosACS();
+            }, 1000);
+        }
+        
+        // Función para eliminar un modelo ONT
+        async function eliminarModeloACS(modeloId, nombreModelo) {
+            console.log('🐛 DEBUG - eliminarModeloACS llamada con:', { modeloId, nombreModelo, tipo: typeof modeloId });
+            
+            const titulo = "🗑️ Eliminar Modelo ONT";
+            const mensaje = `¿Estás seguro de que deseas eliminar el modelo "${nombreModelo}"?\n\nEsta acción no se puede deshacer y eliminará todos los comandos asociados.`;
+            
+            mostrarConfirmacion(titulo, mensaje, async () => {
+                try {
+                    console.log('🔗 DEBUG - Enviando DELETE a:', `/api/modelos-ont/${modeloId}`);
+                    mostrarNotificacion('🔄 Eliminando modelo...', 'info', 2000, 'Procesando');
+                    
+                    const response = await fetch(`/api/modelos-ont/${modeloId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    console.log('📡 DEBUG - Response status:', response.status);
+                    const result = await response.json();
+                    console.log('📊 DEBUG - Response data:', result);
+                    
+                    if (result.success) {
+                        mostrarNotificacion(`✅ Modelo "${nombreModelo}" eliminado correctamente`, 'success', 4000, 'Eliminación Exitosa');
+                        // Recargar la lista de modelos
+                        cargarModelosACS();
+                    } else {
+                        mostrarNotificacion(`❌ Error al eliminar modelo: ${result.error}`, 'error', 5000, 'Error de Eliminación');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Error al eliminar modelo:', error);
+                    mostrarNotificacion('❌ Error de conexión al eliminar modelo', 'error', 5000, 'Error de Conexión');
+                }
+            }, null, 'delete');
+        }
+        
+        // Función para editar un modelo ONT
+        async function editarModeloACS(modeloId) {
+            try {
+                // Obtener datos actuales del modelo
+                const response = await fetch(`/api/modelos-ont/${modeloId}`);
                 const data = await response.json();
                 
-                if (data.success) {
-                    const comando = data.comandos.find(cmd => cmd.id === comandoId);
+                if (!data.success) {
+                    mostrarNotificacion('❌ Error al cargar datos del modelo', 'error', 4000, 'Error de Carga');
+                    return;
+                }
+                
+                const modelo = data.modelo;
+                
+                // Crear formulario de edición dinámico
+                const formHTML = `
+                    <div id="modalEditarModelo" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+                        <div style="background: white; padding: 30px; border-radius: 8px; max-width: 800px; width: 90%; max-height: 90%; overflow-y: auto;">
+                            <h3 style="margin-top: 0; color: var(--azul-antel);">✏️ Editar Modelo ONT</h3>
+                            
+                            <form id="formEditarModelo">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Fabricante:</label>
+                                        <input type="text" id="editFabricante" value="${modelo.fabricante}" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Modelo:</label>
+                                        <input type="text" id="editModelo" value="${modelo.modelo}" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    </div>
+                                </div>
+                                
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Tipo:</label>
+                                        <select id="editTipo" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                            <option value="ONT" ${modelo.tipo === 'ONT' ? 'selected' : ''}>ONT</option>
+                                            <option value="FWA-4G" ${modelo.tipo === 'FWA-4G' ? 'selected' : ''}>FWA-4G</option>
+                                            <option value="FWA-5G" ${modelo.tipo === 'FWA-5G' ? 'selected' : ''}>FWA-5G</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Versión:</label>
+                                        <input type="text" id="editVersion" value="${modelo.version || ''}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-bottom: 20px;">
+                                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Descripción:</label>
+                                    <textarea id="editDescripcion" rows="3" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;">${modelo.descripcion || ''}</textarea>
+                                </div>
+                                
+                                <div style="margin-bottom: 20px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                        <h4 style="margin: 0;">⚡ Comandos (${modelo.comandos ? modelo.comandos.length : 0})</h4>
+                                        <button type="button" onclick="agregarComandoEdicion()" style="background: var(--azul-antel); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+                                            ➕ Agregar Comando
+                                        </button>
+                                    </div>
+                                    <div id="listaComandosEdicion">
+                                        ${modelo.comandos ? modelo.comandos.map((cmd, index) => `
+                                            <div class="comando-edicion" style="border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin-bottom: 10px; background: #f8f9fa;">
+                                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                                                    <div style="flex: 1;">
+                                                        <label style="display: block; margin-bottom: 5px; font-weight: bold; font-size: 12px;">Comando:</label>
+                                                        <input type="text" class="comando-input" value="${cmd.comando}" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 3px; font-family: monospace; font-size: 12px; margin-bottom: 8px;">
+                                                        <label style="display: block; margin-bottom: 5px; font-weight: bold; font-size: 12px;">Descripción:</label>
+                                                        <input type="text" class="descripcion-input" value="${cmd.descripcion}" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 3px; font-size: 12px;">
+                                                    </div>
+                                                    <button type="button" onclick="eliminarComandoEdicion(this)" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;">🗑️</button>
+                                                </div>
+                                            </div>
+                                        `).join('') : ''}
+                                    </div>
+                                </div>
+                                
+                                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                                    <button type="button" onclick="cerrarModalEdicion()" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" style="background: var(--azul-antel); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
+                                        💾 Guardar Cambios
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+                
+                // Insertar modal en el DOM
+                document.body.insertAdjacentHTML('beforeend', formHTML);
+                
+                // Agregar evento al formulario
+                document.getElementById('formEditarModelo').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    guardarCambiosModelo(modeloId);
+                });
+                
+            } catch (error) {
+                console.error('❌ Error al abrir editor:', error);
+                mostrarNotificacion('❌ Error al abrir editor de modelo', 'error', 5000, 'Error del Sistema');
+            }
+        }
+        
+        // Función para agregar un nuevo comando en la edición
+        function agregarComandoEdicion() {
+            const container = document.getElementById('listaComandosEdicion');
+            const nuevoComando = `
+                <div class="comando-edicion" style="border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin-bottom: 10px; background: #f8f9fa;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                        <div style="flex: 1;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold; font-size: 12px;">Comando:</label>
+                            <input type="text" class="comando-input" placeholder="Ej: show running-config" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 3px; font-family: monospace; font-size: 12px; margin-bottom: 8px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold; font-size: 12px;">Descripción:</label>
+                            <input type="text" class="descripcion-input" placeholder="Descripción del comando" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 3px; font-size: 12px;">
+                        </div>
+                        <button type="button" onclick="eliminarComandoEdicion(this)" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;">🗑️</button>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', nuevoComando);
+        }
+        
+        // Función para eliminar un comando en la edición
+        function eliminarComandoEdicion(boton) {
+            boton.closest('.comando-edicion').remove();
+        }
+        
+        // Función para cerrar el modal de edición
+        function cerrarModalEdicion() {
+            const modal = document.getElementById('modalEditarModelo');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        // Función para guardar los cambios del modelo
+        async function guardarCambiosModelo(modeloId) {
+            try {
+                // Recopilar datos del formulario
+                const fabricante = document.getElementById('editFabricante').value.trim();
+                const modelo = document.getElementById('editModelo').value.trim();
+                const tipo = document.getElementById('editTipo').value;
+                const version = document.getElementById('editVersion').value.trim();
+                const descripcion = document.getElementById('editDescripcion').value.trim();
+                
+                // Recopilar comandos
+                const comandosElements = document.querySelectorAll('.comando-edicion');
+                const comandos = [];
+                
+                comandosElements.forEach(element => {
+                    const comando = element.querySelector('.comando-input').value.trim();
+                    const descripcionCmd = element.querySelector('.descripcion-input').value.trim();
                     
-                    if (comando) {
-                        navigator.clipboard.writeText(comando.template).then(() => {
-                            mostrarNotificacion(`Plantilla "${comando.nombre}" copiada`, 'success', 1500, 'Copiado');
+                    if (comando && descripcionCmd) {
+                        comandos.push({
+                            comando: comando,
+                            descripcion: descripcionCmd
                         });
                     }
+                });
+                
+                // Validaciones
+                if (!fabricante || !modelo) {
+                    mostrarNotificacion('❌ Fabricante y modelo son obligatorios', 'error', 4000, 'Campos Requeridos');
+                    return;
                 }
+                
+                const datosModelo = {
+                    fabricante,
+                    modelo,
+                    tipo,
+                    version: version || null,
+                    descripcion: descripcion || null,
+                    comandos
+                };
+                
+                mostrarNotificacion('🔄 Guardando cambios...', 'info', 2000, 'Procesando');
+                
+                const response = await fetch(`/api/modelos-ont/${modeloId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(datosModelo)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    mostrarNotificacion('✅ Modelo actualizado correctamente', 'success', 4000, 'Actualización Exitosa');
+                    cerrarModalEdicion();
+                    cargarModelosACS(); // Recargar lista
+                } else {
+                    mostrarNotificacion(`❌ Error al actualizar: ${result.error}`, 'error', 5000, 'Error de Actualización');
+                }
+                
             } catch (error) {
-                console.error('Error al obtener comandos IMS:', error);
-                mostrarNotificacion('Error al obtener comando', 'error');
+                console.error('❌ Error al guardar cambios:', error);
+                mostrarNotificacion('❌ Error al guardar cambios', 'error', 5000, 'Error de Conexión');
             }
         }
-
-        // Función para eliminar comando personalizado
-        async function eliminarComandoPersonalizado(comandoId) {
-            try {
-                const response = await fetch(`${API_BASE}/comandos-ims`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    const comando = data.comandos.find(cmd => cmd.id === comandoId);
-                    
-                    if (comando) {
-                        mostrarConfirmacion(
-                            'Eliminar Comando Personalizado',
-                            `¿Está seguro que desea eliminar el comando "${comando.nombre}"?\\n\\nEsta acción no se puede deshacer.`,
-                            async () => {
-                                try {
-                                    const deleteResponse = await fetch(`${API_BASE}/comandos-ims/${comandoId}`, {
-                                        method: 'DELETE',
-                                        headers: {
-                                            'Content-Type': 'application/json'
-                                        },
-                                        body: JSON.stringify({ eliminadorId: usuarioActual.id })
-                                    });
-
-                                    const deleteData = await deleteResponse.json();
-                                    
-                                    if (deleteData.success) {
-                                        actualizarComandosPersonalizados();
-                                        mostrarNotificacion(`Comando "${comando.nombre}" eliminado`, 'success', 2000, 'Comando Eliminado');
-                                    } else {
-                                        mostrarNotificacion('Error al eliminar comando: ' + deleteData.message, 'error');
-                                    }
-                                } catch (error) {
-                                    console.error('Error al eliminar comando IMS:', error);
-                                    mostrarNotificacion('Error de conexión al eliminar comando', 'error');
-                                }
-                            },
-                            null,
-                            'delete'
-                        );
-                    }
-                }
-            } catch (error) {
-                console.error('Error al obtener comandos IMS:', error);
-                mostrarNotificacion('Error al obtener comando', 'error');
+        
+        function inicializarACS() {
+            console.log('🌍 Inicializando pestaña ACS...');
+            
+            // Limpiar container primero para evitar contenido cached
+            const container = document.getElementById('listaModelosACS');
+            if (container) {
+                container.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">🔄 Cargando modelos...</p>';
             }
+            
+            // Forzar recarga de modelos con un pequeño delay para asegurar que el DOM esté listo
+            setTimeout(() => {
+                cargarModelosACS();
+            }, 100);
         }
 
         // ===== FUNCIONES DE COPIA Y PORTAPAPELES =====
@@ -5291,9 +4854,14 @@ Fecha Creación: ${modelo.fecha_creacion}
                 `ZTE C600 - ${olts.length + 1}`
             );
             
-            if (!nombre || nombre === '') return;
+            if (!nombre || nombre === '') {
+                mostrarNotificacion('❌ El nombre de la OLT es obligatorio', 'warning', 3000, 'Campo Requerido');
+                return;
+            }
             
             try {
+                mostrarNotificacion('🔄 Creando nueva OLT...', 'info', 2000, 'Procesando');
+                
                 const response = await fetch(`${API_BASE}/olts`, {
                     method: 'POST',
                     headers: {
@@ -5313,13 +4881,13 @@ Fecha Creación: ${modelo.fecha_creacion}
                 
                 if (data.success) {
                     await cargarOLTs();
-                    mostrarNotificacion(`Nueva OLT "${nombre}" creada correctamente`, 'success', 3000, 'OLT Creada');
+                    mostrarNotificacion(`✅ Nueva OLT "${nombre}" creada correctamente`, 'success', 4000, 'OLT Creada');
                 } else {
-                    mostrarNotificacion('Error al crear OLT', 'error', 4000);
+                    mostrarNotificacion(`❌ Error al crear OLT: ${data.message || 'Error desconocido'}`, 'error', 5000, 'Error de Creación');
                 }
             } catch (error) {
                 console.error('Error al crear OLT:', error);
-                mostrarNotificacion('Error de conexión al crear OLT', 'error', 4000);
+                mostrarNotificacion('❌ Error de conexión al crear OLT', 'error', 5000, 'Error de Conexión');
             }
         }
 
@@ -5371,10 +4939,12 @@ Fecha Creación: ${modelo.fecha_creacion}
             if (!olt) return;
 
             mostrarConfirmacion(
-                'Eliminar OLT',
+                '🗑️ Eliminar OLT',
                 `¿Seguro que deseas eliminar la OLT "${olt.nombre}"?\n\nEsta acción no se puede deshacer y eliminará todos los comandos asociados.`,
                 async () => {
                     try {
+                        mostrarNotificacion('🔄 Eliminando OLT...', 'info', 2000, 'Procesando');
+                        
                         const response = await fetch(`${API_BASE}/olts/${oltId}`, {
                             method: 'DELETE',
                             headers: {
@@ -5387,13 +4957,13 @@ Fecha Creación: ${modelo.fecha_creacion}
                         
                         if (data.success) {
                             await cargarOLTs();
-                            mostrarNotificacion(`OLT "${olt.nombre}" eliminada correctamente`, 'success', 3000, 'OLT Eliminada');
+                            mostrarNotificacion(`✅ OLT "${olt.nombre}" eliminada correctamente`, 'success', 4000, 'Eliminación Exitosa');
                         } else {
-                            mostrarNotificacion('Error al eliminar OLT', 'error', 4000);
+                            mostrarNotificacion(`❌ Error al eliminar OLT: ${data.message || 'Error desconocido'}`, 'error', 5000, 'Error de Eliminación');
                         }
                     } catch (error) {
                         console.error('Error al eliminar OLT:', error);
-                        mostrarNotificacion('Error de conexión al eliminar OLT', 'error', 4000);
+                        mostrarNotificacion('❌ Error de conexión al eliminar OLT', 'error', 5000, 'Error de Conexión');
                     }
                 },
                 null,
@@ -5661,6 +5231,8 @@ Fecha Creación: ${modelo.fecha_creacion}
         // ===== ELIMINAR COMANDO =====
         async function eliminarComando(comandoId, nombreComando) {
             try {
+                mostrarNotificacion('🔄 Eliminando comando...', 'info', 2000, 'Procesando');
+                
                 const response = await fetch(`${API_BASE}/comandos/${comandoId}`, {
                     method: 'DELETE',
                     headers: {
@@ -5672,7 +5244,7 @@ Fecha Creación: ${modelo.fecha_creacion}
                 const data = await response.json();
                 
                 if (data.success) {
-                    mostrarNotificacion(`Comando "${nombreComando}" eliminado correctamente`, 'success', 3000, 'Comando Eliminado');
+                    mostrarNotificacion(`✅ Comando "${nombreComando}" eliminado correctamente`, 'success', 4000, 'Eliminación Exitosa');
                     
                     // Recargar la OLT actual para reflejar los cambios
                     const selector = document.getElementById('selector-olt');
@@ -5682,11 +5254,11 @@ Fecha Creación: ${modelo.fecha_creacion}
                         await cargarEstadisticas(); // Actualizar estadísticas
                     }
                 } else {
-                    mostrarNotificacion('Error al eliminar comando: ' + data.message, 'error', 4000);
+                    mostrarNotificacion(`❌ Error al eliminar comando: ${data.message}`, 'error', 5000, 'Error de Eliminación');
                 }
             } catch (error) {
                 console.error('Error al eliminar comando:', error);
-                mostrarNotificacion('Error de conexión al eliminar comando', 'error', 4000);
+                mostrarNotificacion('❌ Error de conexión al eliminar comando', 'error', 5000, 'Error de Conexión');
             }
         }
 
@@ -6796,7 +6368,6 @@ Fecha Creación: ${modelo.fecha_creacion}
                     // Inicializar funcionalidades específicas según la pestaña
                     if (tabId === 'ims') {
                         inicializarIMS();
-                    } else if (tabId === 'acs') {
                         inicializarACS();
                     }
                 });
@@ -6828,7 +6399,7 @@ Fecha Creación: ${modelo.fecha_creacion}
             const oltId = selector.value;
             
             if (!oltId) {
-                mostrarNotificacion('Selecciona una OLT antes de agregar un comando', 'warning', 3000);
+                mostrarNotificacion('⚠️ Selecciona una OLT antes de agregar un comando', 'warning', 4000, 'OLT Requerida');
                 return;
             }
 
@@ -6840,7 +6411,7 @@ Fecha Creación: ${modelo.fecha_creacion}
                 ''
             );
             if (!nombre) {
-                mostrarNotificacion('El nombre del comando es obligatorio', 'warning', 2000);
+                mostrarNotificacion('❌ El nombre del comando es obligatorio', 'warning', 3000, 'Campo Requerido');
                 return;
             }
 
@@ -6861,13 +6432,15 @@ Fecha Creación: ${modelo.fecha_creacion}
             );
             
             if (!comandosTexto) {
-                mostrarNotificacion('Los comandos son obligatorios', 'warning', 2000);
+                mostrarNotificacion('❌ Los comandos son obligatorios', 'warning', 3000, 'Campo Requerido');
                 return;
             }
 
             const comandosArray = comandosTexto.split('\n').filter(cmd => cmd.trim() !== '');
 
             try {
+                mostrarNotificacion('🔄 Creando comando...', 'info', 2000, 'Procesando');
+                
                 const response = await fetch(`${API_BASE}/comandos`, {
                     method: 'POST',
                     headers: {
@@ -6885,17 +6458,17 @@ Fecha Creación: ${modelo.fecha_creacion}
                 const data = await response.json();
                 
                 if (data.success) {
-                    mostrarNotificacion(`Comando "${nombre}" agregado correctamente`, 'success', 3000, 'Comando Creado');
+                    mostrarNotificacion(`✅ Comando "${nombre}" agregado correctamente`, 'success', 4000, 'Comando Creado');
                     
                     // Recargar la OLT actual para mostrar el nuevo comando
                     await cargarOLT(oltId);
                     await cargarEstadisticas(); // Actualizar estadísticas
                 } else {
-                    mostrarNotificacion('Error al agregar comando: ' + data.message, 'error', 4000);
+                    mostrarNotificacion(`❌ Error al agregar comando: ${data.message}`, 'error', 5000, 'Error de Creación');
                 }
             } catch (error) {
                 console.error('Error al agregar comando:', error);
-                mostrarNotificacion('Error de conexión al agregar comando', 'error', 4000);
+                mostrarNotificacion('❌ Error de conexión al agregar comando', 'error', 5000, 'Error de Conexión');
             }
         }
 
@@ -8053,33 +7626,36 @@ Fecha Creación: ${modelo.fecha_creacion}
 
         // Eliminar rol
         async function eliminarRol(rolId, nombreRol) {
-            if (!confirm(`¿Estás seguro de que deseas eliminar el rol "${nombreRol}"?`)) {
-                return;
-            }
+            const titulo = "🗑️ Eliminar Rol";
+            const mensaje = `¿Estás seguro de que deseas eliminar el rol "${nombreRol}"?\n\nEsta acción no se puede deshacer.`;
             
-            try {
-                const response = await fetch(`/api/roles/${rolId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        eliminadorId: usuarioActual?.id || 1
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    mostrarNotificacion('Rol eliminado correctamente', 'success');
-                    cargarRoles();
-                } else {
-                    mostrarNotificacion('Error: ' + data.message, 'error');
+            mostrarConfirmacion(titulo, mensaje, async () => {
+                try {
+                    mostrarNotificacion('🔄 Eliminando rol...', 'info', 2000, 'Procesando');
+                    
+                    const response = await fetch(`/api/roles/${rolId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            eliminadorId: usuarioActual?.id || 1
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        mostrarNotificacion(`✅ Rol "${nombreRol}" eliminado correctamente`, 'success', 4000, 'Eliminación Exitosa');
+                        cargarRoles();
+                    } else {
+                        mostrarNotificacion(`❌ Error al eliminar rol: ${data.message}`, 'error', 5000, 'Error de Eliminación');
+                    }
+                } catch (error) {
+                    console.error('Error al eliminar rol:', error);
+                    mostrarNotificacion('❌ Error de conexión al eliminar rol', 'error', 5000, 'Error de Conexión');
                 }
-            } catch (error) {
-                console.error('Error al eliminar rol:', error);
-                mostrarNotificacion('Error de conexión al eliminar rol', 'error');
-            }
+            }, null, 'delete');
         }
 
         // Cerrar modal de rol
@@ -8667,6 +8243,8 @@ Fecha Creación: ${modelo.fecha_creacion}
                         const currentUser = userJson ? JSON.parse(userJson) : { id: 1 };
                         
                         try {
+                            mostrarNotificacion('🔄 Eliminando tarea...', 'info', 2000, 'Procesando');
+                            
                             const response = await fetch(`/api/tareas/${tareaId}`, {
                                 method: 'DELETE',
                                 headers: {
@@ -8680,17 +8258,17 @@ Fecha Creación: ${modelo.fecha_creacion}
                             const data = await response.json();
                             
                             if (data.success) {
-                                mostrarNotificacion('Tarea eliminada correctamente', 'success');
+                                mostrarNotificacion('✅ Tarea eliminada correctamente', 'success', 4000, 'Eliminación Exitosa');
                                 cargarTareas(); // Recargar lista de tareas
                                 cargarEstadisticasTareas(); // Actualizar estadísticas
                                 resolve(true);
                             } else {
-                                mostrarNotificacion('Error al eliminar tarea: ' + data.message, 'error');
+                                mostrarNotificacion(`❌ Error al eliminar tarea: ${data.message}`, 'error', 5000, 'Error de Eliminación');
                                 resolve(false);
                             }
                         } catch (error) {
                             console.error('Error al eliminar tarea:', error);
-                            mostrarNotificacion('Error de conexión al eliminar tarea', 'error');
+                            mostrarNotificacion('❌ Error de conexión al eliminar tarea', 'error', 5000, 'Error de Conexión');
                             resolve(false);
                         }
                     },
@@ -8821,6 +8399,20 @@ Fecha Creación: ${modelo.fecha_creacion}
                 console.log('🔄 Cargando pestaña de tareas...');
                 setTimeout(() => {
                     inicializarTareas();
+                }, 100);
+            } else if (tabName === 'acs') {
+                console.log('🎯 Pestaña ACS seleccionada - inicializando...');
+                setTimeout(() => {
+                    if (typeof inicializarACS === 'function') {
+                        console.log('🚀 Ejecutando inicializarACS()...');
+                        inicializarACS();
+                    } else {
+                        console.error('❌ Función inicializarACS no encontrada');
+                    }
+                }, 100);
+            } else if (tabName === 'ims') {
+                setTimeout(() => {
+                    if (typeof inicializarIMS === 'function') inicializarIMS();
                 }, 100);
             }
         };
