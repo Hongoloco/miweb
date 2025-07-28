@@ -2637,12 +2637,6 @@
                                 </select>
                             </div>
                             <div>
-                                <label style="font-weight: bold; margin-right: 5px;">Categoría:</label>
-                                <select id="filtro-categoria" onchange="filtrarTareas()" style="padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
-                                    <option value="">Todas</option>
-                                </select>
-                            </div>
-                            <div>
                                 <label style="font-weight: bold; margin-right: 5px;">Prioridad:</label>
                                 <select id="filtro-prioridad" onchange="filtrarTareas()" style="padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
                                     <option value="">Todas</option>
@@ -7134,18 +7128,14 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                         </div>
                     </div>
                     
-                    <div style="text-align: center; padding: 40px; background: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6; margin-top: 20px;">
-                        <div style="font-size: 48px; margin-bottom: 20px;">⚙️</div>
-                        <h3 style="color: #666; margin-bottom: 15px;">Configuración Avanzada</h3>
-                        <p style="color: #999; margin-bottom: 25px;">
-                            Funcionalidad en desarrollo:<br>
-                            • Editor de permisos personalizado<br>
-                            • Creación de roles customizados<br>
-                            • Asignación masiva de permisos
-                        </p>
-                        <button class="btn btn-secondary">
-                            🔧 Próximamente
-                        </button>
+                    <!-- Contenedor para mostrar los roles existentes -->
+                    <div id="roles-container" style="margin-top: 20px;">
+                        <div style="text-align: center; padding: 20px;">
+                            <div class="spinner-border" role="status">
+                                <span class="sr-only">Cargando roles...</span>
+                            </div>
+                            <p style="margin-top: 10px; color: #666;">Cargando roles...</p>
+                        </div>
                     </div>
                 </div>
             `;
@@ -7552,14 +7542,35 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
             
             roles.forEach(rol => {
                 const iconosRol = {
+                    'admin': '👑',
                     'administrador': '👑',
                     'tecnico': '🔧',
                     'operador': '👷',
-                    'usuario': '👤'
+                    'usuario': '👤',
+                    'supervisor': '👨‍💼'
                 };
                 
-                const icono = iconosRol[rol.nombre] || '🎭';
-                const totalPermisos = Object.values(rol.permisos).reduce((total, categoria) => total + categoria.length, 0);
+                const icono = iconosRol[rol.nombre.toLowerCase()] || '🎭';
+                
+                // Manejar permisos como array o como objeto
+                let totalPermisos = 0;
+                let permisosDisplay = '';
+                
+                if (Array.isArray(rol.permisos)) {
+                    totalPermisos = rol.permisos.length;
+                    permisosDisplay = rol.permisos.map(permiso => 
+                        `<span style="background: #e3f2fd; color: #1976d2; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin: 2px;">${permiso}</span>`
+                    ).join('');
+                } else {
+                    totalPermisos = Object.values(rol.permisos).reduce((total, categoria) => total + categoria.length, 0);
+                    Object.entries(rol.permisos).forEach(([categoria, permisos]) => {
+                        if (permisos.length > 0) {
+                            permisos.forEach(permiso => {
+                                permisosDisplay += `<span style="background: #e3f2fd; color: #1976d2; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin: 2px;">${permiso}</span>`;
+                            });
+                        }
+                    });
+                }
                 
                 html += `
                     <div style="background: white; border-radius: 8px; border: 1px solid #e9ecef; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -7582,35 +7593,14 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                         </div>
                         
                         <div style="padding: 15px;">
-                            <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                 <span style="font-weight: bold; color: #555;">Permisos:</span>
                                 <span style="background: #e3f2fd; color: #1976d2; padding: 2px 8px; border-radius: 12px; font-size: 12px;">
                                     ${totalPermisos} permisos
                                 </span>
                             </div>
-                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                `;
-                
-                Object.entries(rol.permisos).forEach(([categoria, permisos]) => {
-                    if (permisos.length > 0) {
-                        html += `
-                            <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; padding: 8px; margin-bottom: 8px; width: 100%;">
-                                <div style="font-weight: bold; color: #495057; margin-bottom: 4px; font-size: 12px; text-transform: uppercase;">
-                                    ${categoria}
-                                </div>
-                                <div style="display: flex; flex-wrap: wrap; gap: 4px;">
-                `;
-                        permisos.forEach(permiso => {
-                            html += `<span style="background: #e3f2fd; color: #1976d2; padding: 2px 6px; border-radius: 4px; font-size: 11px;">${permiso}</span>`;
-                        });
-                        html += `
-                                </div>
-                            </div>
-                        `;
-                    }
-                });
-                
-                html += `
+                            <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                                ${permisosDisplay || '<span style="color: #999; font-style: italic;">Sin permisos específicos</span>'}
                             </div>
                         </div>
                     </div>
@@ -8120,7 +8110,7 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                     categoriasDisponibles = data.categorias;
                     
                     // Actualizar selectores
-                    const selectores = ['tareaCategoria', 'filtro-categoria'];
+                    const selectores = ['tareaCategoria'];
                     selectores.forEach(selectorId => {
                         const selector = document.getElementById(selectorId);
                         if (selector) {
@@ -8128,11 +8118,7 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                                 `<option value="${cat.nombre}">${cat.icono} ${cat.nombre}</option>`
                             ).join('');
                             
-                            if (selectorId === 'filtro-categoria') {
-                                selector.innerHTML = '<option value="">Todas</option>' + opcionesHTML;
-                            } else {
-                                selector.innerHTML = opcionesHTML;
-                            }
+                            selector.innerHTML = opcionesHTML;
                         }
                     });
                 }
@@ -8457,7 +8443,6 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
         // Filtrar tareas
         function filtrarTareas() {
             const filtroEstado = document.getElementById('filtro-estado').value;
-            const filtroCategoria = document.getElementById('filtro-categoria').value;
             const filtroPrioridad = document.getElementById('filtro-prioridad').value;
             const busqueda = document.getElementById('buscar-tareas').value.toLowerCase();
             
@@ -8474,7 +8459,6 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                 
                 const cumpleFiltros = 
                     (!filtroEstado || estado === filtroEstado) &&
-                    (!filtroCategoria || categoria === filtroCategoria) &&
                     (!filtroPrioridad || prioridad === filtroPrioridad) &&
                     (!busqueda || titulo.includes(busqueda) || descripcion.includes(busqueda));
                 

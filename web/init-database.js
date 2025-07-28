@@ -61,6 +61,23 @@ db.serialize(() => {
         fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
         ultimo_acceso DATETIME
     )`);
+
+    // Tabla de roles
+    db.run(`CREATE TABLE IF NOT EXISTS roles (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT UNIQUE NOT NULL,
+        descripcion TEXT,
+        permisos TEXT,
+        activo INTEGER DEFAULT 1,
+        fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    // Insertar roles por defecto
+    db.run(`INSERT OR IGNORE INTO roles (nombre, descripcion, permisos) VALUES 
+        ('admin', 'Administrador del sistema', '["all"]'),
+        ('operador', 'Operador estándar', '["read", "execute"]'),
+        ('supervisor', 'Supervisor de operaciones', '["read", "execute", "manage_users"]')`);
+    
     // Tabla de comandos IMS personalizados
     db.run(`CREATE TABLE IF NOT EXISTS comandos_ims (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
