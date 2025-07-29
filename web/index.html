@@ -1949,16 +1949,6 @@
             margin-bottom: 15px;
         }
 
-        .tarea-categoria {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 4px 8px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            font-size: 12px;
-        }
-
         .tarea-progreso {
             margin: 10px 0;
         }
@@ -2218,17 +2208,9 @@
             </div>
             
             <form id="formTarea">
-                <div class="form-row">
-                    <div class="form-grupo">
-                        <label for="tareaTitle">Título *</label>
-                        <input type="text" id="tareaTitle" name="titulo" required maxlength="200">
-                    </div>
-                    <div class="form-grupo">
-                        <label for="tareaCategoria">Categoría</label>
-                        <select id="tareaCategoria" name="categoria">
-                            <option value="General">General</option>
-                        </select>
-                    </div>
+                <div class="form-grupo">
+                    <label for="tareaTitle">Título *</label>
+                    <input type="text" id="tareaTitle" name="titulo" required maxlength="200">
                 </div>
                 
                 <div class="form-grupo">
@@ -7972,9 +7954,6 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                         ${tarea.descripcion ? `<div class="tarea-descripcion">${escapeHtml(tarea.descripcion)}</div>` : ''}
                         
                         <div class="tarea-meta">
-                            <div class="tarea-categoria" style="background-color: ${tarea.categoria_color || '#f8f9fa'};">
-                                ${tarea.categoria_icono || '📁'} ${tarea.categoria}
-                            </div>
                             <div>👤 ${tarea.creador_username || 'Sistema'}</div>
                             <div>📅 ${new Date(tarea.fecha_creacion).toLocaleDateString()}</div>
                             ${tarea.fecha_vencimiento ? `<div style="color: ${new Date(tarea.fecha_vencimiento) < new Date() ? '#dc3545' : '#666'};">⏰ ${new Date(tarea.fecha_vencimiento).toLocaleDateString()}</div>` : ''}
@@ -8100,33 +8079,6 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
             }
         }
         
-        // Cargar categorías disponibles
-        async function cargarCategorias() {
-            try {
-                const response = await fetch('/api/categorias-tareas');
-                const data = await response.json();
-                
-                if (data.success) {
-                    categoriasDisponibles = data.categorias;
-                    
-                    // Actualizar selectores
-                    const selectores = ['tareaCategoria'];
-                    selectores.forEach(selectorId => {
-                        const selector = document.getElementById(selectorId);
-                        if (selector) {
-                            const opcionesHTML = categoriasDisponibles.map(cat => 
-                                `<option value="${cat.nombre}">${cat.icono} ${cat.nombre}</option>`
-                            ).join('');
-                            
-                            selector.innerHTML = opcionesHTML;
-                        }
-                    });
-                }
-            } catch (error) {
-                console.error('Error al cargar categorías:', error);
-            }
-        }
-        
         // Mostrar modal para nueva tarea
         function mostrarModalNuevaTarea() {
             tareaEnEdicion = null;
@@ -8216,7 +8168,6 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                             ${tarea.descripcion ? `<div style="margin-bottom: 15px;"><strong>Descripción:</strong><br>${escapeHtml(tarea.descripcion)}</div>` : ''}
                             
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                                <div><strong>Categoría:</strong> ${tarea.categoria_icono || '📁'} ${tarea.categoria}</div>
                                 <div><strong>Prioridad:</strong> <span class="tarea-estado prioridad-${tarea.prioridad}">${tarea.prioridad}</span></div>
                                 <div><strong>Creador:</strong> ${tarea.creador_username || 'Sistema'}</div>
                                 <div><strong>Fecha Creación:</strong> ${new Date(tarea.fecha_creacion).toLocaleString()}</div>
@@ -8300,7 +8251,6 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                     document.getElementById('tareaDescripcion').value = tarea.descripcion || '';
                     document.getElementById('tareaEstado').value = tarea.estado;
                     document.getElementById('tareaPrioridad').value = tarea.prioridad;
-                    document.getElementById('tareaCategoria').value = tarea.categoria;
                     document.getElementById('tareaTiempoEstimado').value = tarea.tiempo_estimado || '';
                     document.getElementById('tareaTiempoReal').value = tarea.tiempo_real || '';
                     document.getElementById('tareaProgreso').value = tarea.progreso || 0;
@@ -8454,7 +8404,6 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                 const titulo = tarjeta.querySelector('.tarea-titulo').textContent.toLowerCase();
                 const descripcion = tarjeta.querySelector('.tarea-descripcion')?.textContent.toLowerCase() || '';
                 const estado = tarjeta.dataset.estado;
-                const categoria = tarjeta.querySelector('.tarea-categoria').textContent.split(' ').slice(1).join(' ');
                 const prioridad = tarjeta.classList[1]; // segunda clase es la prioridad
                 
                 const cumpleFiltros = 
@@ -8516,7 +8465,6 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
             try {
                 // Cargar datos en paralelo
                 await Promise.all([
-                    cargarCategorias(),
                     cargarTareas(),
                     cargarEstadisticasTareas()
                 ]);

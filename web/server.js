@@ -1512,19 +1512,18 @@ app.post('/api/modelo-ont', (req, res) => {
                         }
                         
                         const comando = comandos[index];
-                        if (comando.nombre && comando.comando) {
-                            // Determinar categoría (usar la del comando o 'tr069' por defecto)
-                            const categoria = comando.categoria || 'tr069';
-                            const tipoComando = comando.tipo || 'TR069';
+                        if (comando.comando) {
+                            // Generar ID único para el comando
+                            const comandoId = `cmd-tr069-${modeloId}-${Date.now()}-${index}`;
                             
-                            db.run(`INSERT INTO comandos_ont (modelo_id, nombre, comando, categoria, tipo) VALUES (?, ?, ?, ?, ?)`,
-                                [modeloId, comando.nombre, comando.comando, categoria, tipoComando],
+                            db.run(`INSERT INTO comandos_ont (id, modelo_id, comando, descripcion, orden) VALUES (?, ?, ?, ?, ?)`,
+                                [comandoId, modeloId, comando.comando, comando.nombre || comando.descripcion || '', index + 1],
                                 function(err) {
                                     if (err) {
                                         console.error(`Error al insertar comando TR-069 ${index + 1}:`, err);
                                         erroresComandos++;
                                     } else {
-                                        console.log(`Comando TR-069 ${index + 1} insertado exitosamente - Categoría: ${categoria}`);
+                                        console.log(`Comando TR-069 ${index + 1} insertado exitosamente`);
                                         comandosInsertados++;
                                     }
                                     insertarComando(index + 1);
@@ -1660,12 +1659,13 @@ app.put('/api/modelos-ont/:id', (req, res) => {
 
                     // Insertar nuevos comandos si existen
                     if (comandos && comandos.length > 0) {
-                        const stmt = db.prepare(`INSERT INTO comandos_ont (modelo_id, comando, descripcion, orden) VALUES (?, ?, ?, ?)`);
+                        const stmt = db.prepare(`INSERT INTO comandos_ont (id, modelo_id, comando, descripcion, orden) VALUES (?, ?, ?, ?, ?)`);
                         
                         let erroresComandos = false;
                         
                         comandos.forEach((cmd, index) => {
-                            stmt.run([modeloId, cmd.comando, cmd.descripcion, index + 1], (err) => {
+                            const comandoId = `cmd-${modeloId}-${Date.now()}-${index}`;
+                            stmt.run([comandoId, modeloId, cmd.comando, cmd.descripcion, index + 1], (err) => {
                                 if (err) {
                                     console.error('Error al insertar comando:', err);
                                     erroresComandos = true;
@@ -1720,7 +1720,10 @@ app.put('/api/modelos-ont/:id', (req, res) => {
 // Agregar comando a modelo ONT existente
 app.post('/api/modelos-ont/:id/comandos', (req, res) => {
     const modeloId = req.params.id;
-    const { comandoId, comando, descripcion, usuarioId } = req.body;
+    const { comando, descripcion, usuarioId } = req.body;
+    
+    // Generar ID único para el comando
+    const comandoId = `cmd-${modeloId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     // Obtener el próximo orden
     db.get(`SELECT MAX(orden) as maxOrden FROM comandos_ont WHERE modelo_id = ?`, [modeloId], (err, result) => {
