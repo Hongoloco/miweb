@@ -1,7 +1,7 @@
-# Sistema OLT Antel - Versión Web
+# Desarrollo Residenciales - Versión Web
 
 ## 🌐 Descripción
-Versión web completa del Sistema de Gestión OLT Antel. Una aplicación web completa para la gestión técnica de servicios de telecomunicaciones residenciales con base de datos SQLite.
+Versión web completa del Sistema de Gestión Desarrollo Residenciales. Una aplicación web completa para la gestión técnica de servicios de telecomunicaciones residenciales con base de datos SQLite.
 
 ## 🚀 Instalación y Ejecución
 

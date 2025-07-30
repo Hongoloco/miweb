@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Sistema OLT Antel - Versión Web"
+echo "🚀 Desarrollo Residenciales - Versión Web"
 echo "=================================="
 echo ""
 

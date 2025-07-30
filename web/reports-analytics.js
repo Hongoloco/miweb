@@ -1,6 +1,6 @@
 /**
  * Sistema de Reportes y Analytics
- * Análisis y generación de reportes para el sistema OLT Antel
+ * Análisis y generación de reportes para el sistema Desarrollo Residenciales
  */
 
 class ReportsAndAnalytics {

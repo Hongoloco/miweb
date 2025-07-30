@@ -1,6 +1,6 @@
 /**
  * Service Worker Principal para PWA
- * Sistema OLT Antel v2.0
+ * Desarrollo Residenciales v2.0
  */
 
 const CACHE_NAME = 'olt-antel-pwa-v2.1';

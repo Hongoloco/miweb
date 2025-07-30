@@ -1,6 +1,6 @@
 /**
  * Sistema de Automatización y Tareas Programadas
- * Gestión de procesos automáticos para el sistema OLT Antel
+ * Gestión de procesos automáticos para el sistema Desarrollo Residenciales
  */
 
 class AutomationSystem {

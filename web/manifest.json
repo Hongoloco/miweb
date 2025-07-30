@@ -1,6 +1,6 @@
 {
-    "name": "Sistema OLT Antel v2.0",
-    "short_name": "OLT Antel",
+        "name": "Desarrollo Residenciales - Gestión Avanzada",
+    "short_name": "Desarrollo Residenciales",
     "description": "Sistema de gestión de OLTs y comandos para Antel",
     "start_url": "/",
     "display": "standalone",

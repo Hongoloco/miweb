@@ -1,7 +1,7 @@
 {
-  "name": "sistema-olt-antel-workspace",
+  "name": "desarrollo-residenciales-workspace",
   "version": "2.0.0",
-  "description": "Sistema OLT Antel - Workspace con versiones Web y Portable organizadas",
+  "description": "Desarrollo Residenciales - Gestión Avanzada de OLT",
   "main": "web/server.js",
   "homepage": "./",
   "scripts": {
@@ -27,7 +27,7 @@
     "web",
     "portable"
   ],
-  "author": "Sistema OLT Antel v2.0 - Workspace",
+  "author": "Desarrollo Residenciales v2.0 - Workspace",
   "license": "MIT",
   "workspaces": [
     "web",

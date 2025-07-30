@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "📱 Sistema OLT Antel - Versión Portable"
+echo "📱 Desarrollo Residenciales - Versión Portable"
 echo "======================================"
 echo ""
 

@@ -1,6 +1,6 @@
 /**
  * Sistema de Gráficos y Dashboards Avanzados
- * Gestión de visualizaciones para el sistema OLT Antel
+ * Gestión de visualizaciones para el sistema Desarrollo Residenciales
  */
 
 class DashboardCharts {
