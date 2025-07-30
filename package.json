@@ -1,7 +1,7 @@
 {
   "name": "desarrollo-residenciales-workspace",
-  "version": "2.0.0",
-  "description": "Desarrollo Residenciales - Gestión Avanzada de OLT",
+  "version": "3.0.0",
+  "description": "Desarrollo de Servicios Residenciales - Sistema Integral de Gestión",
   "main": "web/server.js",
   "homepage": "./",
   "scripts": {

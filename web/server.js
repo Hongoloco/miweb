@@ -3,6 +3,7 @@ const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
+const session = require('express-session');
 const path = require('path');
 
 const app = express();
@@ -13,9 +14,25 @@ let sseClients = new Set();
 let notificationSubscriptions = new Set();
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+    origin: true,
+    credentials: true
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Configuración de sesiones
+app.use(session({
+    secret: 'desarrollo-residenciales-secret-key-2025',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: false, // true para HTTPS, false para desarrollo local
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000 // 24 horas
+    }
+}));
+
 app.use(express.static('public'));
 
 // Servir archivos estáticos adicionales
@@ -74,6 +91,15 @@ app.post('/api/login', (req, res) => {
         // Actualizar último acceso
         db.run(`UPDATE usuarios SET ultimo_acceso = CURRENT_TIMESTAMP WHERE id = ?`, [user.id]);
         
+        // Guardar usuario en la sesión
+        req.session.user = {
+            id: user.id,
+            username: user.username,
+            nombre_completo: user.nombre_completo,
+            email: user.email,
+            rol: user.rol
+        };
+        
         logActivity(user.id, 'login_exitoso', `Usuario: ${username}`, clientIP);
 
         res.json({
@@ -87,6 +113,24 @@ app.post('/api/login', (req, res) => {
                 rol: user.rol
             }
         });
+    });
+});
+
+// Endpoint de logout
+app.post('/api/logout', (req, res) => {
+    const userId = req.session?.user?.id;
+    const username = req.session?.user?.username;
+    
+    if (userId) {
+        logActivity(userId, 'logout', `Usuario: ${username}`, req.ip);
+    }
+    
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Error al destruir sesión:', err);
+            return res.status(500).json({ success: false, message: 'Error al cerrar sesión' });
+        }
+        res.json({ success: true, message: 'Sesión cerrada correctamente' });
     });
 });
 
@@ -126,6 +170,12 @@ app.get('/api/usuarios/:id', (req, res) => {
 // Crear nuevo usuario
 app.post('/api/usuarios', (req, res) => {
     const { username, password, nombre_completo, email, rol, descripcion, activo, creadorId } = req.body;
+    const usuarioActual = req.session && req.session.user;
+    
+    // Solo admin puede crear usuarios
+    if (!usuarioActual || usuarioActual.rol !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Solo administradores pueden crear usuarios' });
+    }
     
     if (!username || !password) {
         return res.status(400).json({ success: false, message: 'Username y password son obligatorios' });
@@ -147,14 +197,14 @@ app.post('/api/usuarios', (req, res) => {
         
         db.run(`INSERT INTO usuarios (username, password_hash, nombre_completo, email, rol, activo) 
                 VALUES (?, ?, ?, ?, ?, ?)`,
-            [username, hashedPassword, nombre_completo, email, rol || 'usuario', activo !== false],
+            [username, hashedPassword, nombre_completo, email, rol || 'tecnico', activo !== false],
             function(err) {
                 if (err) {
                     console.error('Error al crear usuario:', err);
                     return res.status(500).json({ success: false, message: 'Error del servidor' });
                 }
 
-                logActivity(creadorId, 'crear_usuario', `Usuario: ${username}, Rol: ${rol}`, req.ip);
+                logActivity(usuarioActual.id, 'crear_usuario', `Usuario: ${username}, Rol: ${rol}`, req.ip);
                 
                 res.json({
                     success: true,
@@ -170,6 +220,21 @@ app.post('/api/usuarios', (req, res) => {
 app.put('/api/usuarios/:id', (req, res) => {
     const userId = req.params.id;
     const { username, nombre_completo, email, rol, descripcion, activo, editorId } = req.body;
+    const usuarioActual = req.session && req.session.user;
+    
+    if (!usuarioActual) {
+        return res.status(401).json({ success: false, message: 'No autorizado' });
+    }
+
+    // Verificar permisos: admin puede editar cualquier usuario, técnico solo su propio perfil
+    if (usuarioActual.rol !== 'admin' && usuarioActual.id != userId) {
+        return res.status(403).json({ success: false, message: 'Solo puedes editar tu propio perfil' });
+    }
+    
+    // Solo admin puede cambiar roles
+    if (usuarioActual.rol !== 'admin' && rol && usuarioActual.rol !== rol) {
+        return res.status(403).json({ success: false, message: 'No puedes cambiar tu rol' });
+    }
 
     if (!username) {
         return res.status(400).json({ success: false, message: 'Username es obligatorio' });
@@ -186,25 +251,33 @@ app.put('/api/usuarios/:id', (req, res) => {
             return res.status(400).json({ success: false, message: 'El nombre de usuario ya existe' });
         }
 
-        db.run(`UPDATE usuarios SET 
-                username = ?, nombre_completo = ?, email = ?, rol = ?, activo = ?
-                WHERE id = ?`,
-            [username, nombre_completo, email, rol, activo, userId],
-            function(err) {
-                if (err) {
-                    console.error('Error al actualizar usuario:', err);
-                    return res.status(500).json({ success: false, message: 'Error del servidor' });
-                }
+        // Construir query según permisos
+        let updateQuery = `UPDATE usuarios SET username = ?, nombre_completo = ?, email = ?`;
+        let params = [username, nombre_completo, email];
+        
+        // Solo admin puede actualizar rol y estado activo
+        if (usuarioActual.rol === 'admin') {
+            updateQuery += `, rol = ?, activo = ?`;
+            params.push(rol, activo);
+        }
+        
+        updateQuery += ` WHERE id = ?`;
+        params.push(userId);
 
-                if (this.changes === 0) {
-                    return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
-                }
-
-                logActivity(editorId, 'actualizar_usuario', `Usuario: ${username}`, req.ip);
-                
-                res.json({ success: true, message: 'Usuario actualizado correctamente' });
+        db.run(updateQuery, params, function(err) {
+            if (err) {
+                console.error('Error al actualizar usuario:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
             }
-        );
+
+            if (this.changes === 0) {
+                return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+            }
+
+            logActivity(usuarioActual.id, 'actualizar_usuario', `Usuario: ${username}`, req.ip);
+            
+            res.json({ success: true, message: 'Usuario actualizado correctamente' });
+        });
     });
 });
 
@@ -212,6 +285,12 @@ app.put('/api/usuarios/:id', (req, res) => {
 app.delete('/api/usuarios/:id', (req, res) => {
     const userId = req.params.id;
     const { eliminadorId } = req.body;
+    const usuarioActual = req.session && req.session.user;
+    
+    // Solo admin puede eliminar usuarios
+    if (!usuarioActual || usuarioActual.rol !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Solo administradores pueden eliminar usuarios' });
+    }
 
     // Verificar que no sea el usuario alito
     db.get(`SELECT username FROM usuarios WHERE id = ?`, [userId], (err, usuario) => {
@@ -238,7 +317,7 @@ app.delete('/api/usuarios/:id', (req, res) => {
                 return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
             }
 
-            logActivity(eliminadorId, 'eliminar_usuario', `Usuario: ${usuario.username}`, req.ip);
+            logActivity(usuarioActual.id, 'eliminar_usuario', `Usuario: ${usuario.username}`, req.ip);
             
             res.json({ success: true, message: 'Usuario eliminado correctamente' });
         });
@@ -466,14 +545,25 @@ app.get('/api/usuarios/:id/permisos', (req, res) => {
 // Obtener todas las tareas
 app.get('/api/tareas', (req, res) => {
     const { estado, categoria, usuario_id } = req.query;
+    const usuarioActual = req.session && req.session.user;
+    
+    if (!usuarioActual) {
+        return res.status(401).json({ success: false, message: 'No autorizado' });
+    }
     
     let query = `SELECT t.*, c.color as categoria_color, c.icono as categoria_icono,
-                 u.username as creador_username 
+                 u.username as usuario_asignado_username, u.nombre_completo as usuario_asignado_nombre
                  FROM tareas t 
                  LEFT JOIN categorias_tareas c ON t.categoria = c.nombre
                  LEFT JOIN usuarios u ON t.usuario_id = u.id
                  WHERE t.activa = 1`;
     let params = [];
+    
+    // Si no es admin, solo puede ver sus propias tareas
+    if (usuarioActual.rol !== 'admin') {
+        query += ` AND t.usuario_id = ?`;
+        params.push(usuarioActual.id);
+    }
     
     if (estado) {
         query += ` AND t.estado = ?`;
@@ -485,7 +575,8 @@ app.get('/api/tareas', (req, res) => {
         params.push(categoria);
     }
     
-    if (usuario_id) {
+    // Si se especifica usuario_id y el usuario actual es admin, filtrar por ese usuario
+    if (usuario_id && usuarioActual.rol === 'admin') {
         query += ` AND t.usuario_id = ?`;
         params.push(usuario_id);
     }
@@ -511,11 +602,21 @@ app.get('/api/tareas', (req, res) => {
 // Obtener estadísticas de tareas
 app.get('/api/tareas/estadisticas', (req, res) => {
     const { usuario_id } = req.query;
+    const usuarioActual = req.session && req.session.user;
+    
+    if (!usuarioActual) {
+        return res.status(401).json({ success: false, message: 'No autorizado' });
+    }
     
     let whereClause = 'WHERE t.activa = 1';
     let params = [];
     
-    if (usuario_id) {
+    // Si no es admin, solo puede ver estadísticas de sus propias tareas
+    if (usuarioActual.rol !== 'admin') {
+        whereClause += ' AND t.usuario_id = ?';
+        params.push(usuarioActual.id);
+    } else if (usuario_id) {
+        // Si es admin y especifica un usuario, filtrar por ese usuario
         whereClause += ' AND t.usuario_id = ?';
         params.push(usuario_id);
     }
@@ -543,7 +644,7 @@ app.get('/api/tareas/:id', (req, res) => {
     
     // Obtener tarea
     db.get(`SELECT t.*, c.color as categoria_color, c.icono as categoria_icono,
-            u.username as creador_username 
+            u.username as usuario_asignado_username, u.nombre_completo as usuario_asignado_nombre
             FROM tareas t 
             LEFT JOIN categorias_tareas c ON t.categoria = c.nombre
             LEFT JOIN usuarios u ON t.usuario_id = u.id
@@ -579,22 +680,37 @@ app.get('/api/tareas/:id', (req, res) => {
 // Crear nueva tarea
 app.post('/api/tareas', (req, res) => {
     const { titulo, descripcion, estado, prioridad, categoria, usuario_id } = req.body;
+    const usuarioActual = req.session && req.session.user;
+    
+    if (!usuarioActual) {
+        return res.status(401).json({ success: false, message: 'No autorizado' });
+    }
     
     if (!titulo) {
         return res.status(400).json({ success: false, message: 'El título es obligatorio' });
     }
     
+    // Determinar usuario asignado según el rol
+    let usuarioAsignado;
+    if (usuarioActual.rol === 'admin') {
+        // Admin puede asignar a cualquier usuario o dejarlo sin asignar
+        usuarioAsignado = usuario_id || usuarioActual.id;
+    } else {
+        // Técnicos solo pueden crear tareas asignadas a ellos mismos
+        usuarioAsignado = usuarioActual.id;
+    }
+    
     db.run(`INSERT INTO tareas (titulo, descripcion, estado, prioridad, categoria, usuario_id) 
             VALUES (?, ?, ?, ?, ?, ?)`,
         [titulo, descripcion || '', estado || 'pendiente', prioridad || 'media', 
-         categoria || 'General', usuario_id || 1],
+         categoria || 'General', usuarioAsignado],
         function(err) {
             if (err) {
                 console.error('Error al crear tarea:', err);
                 return res.status(500).json({ success: false, message: 'Error del servidor' });
             }
             
-            logActivity(usuario_id || 1, 'crear_tarea', `Tarea: ${titulo}`, req.ip);
+            logActivity(usuarioActual.id, 'crear_tarea', `Tarea: ${titulo}`, req.ip);
             
             res.json({
                 success: true,
@@ -608,32 +724,57 @@ app.post('/api/tareas', (req, res) => {
 // Actualizar tarea
 app.put('/api/tareas/:id', (req, res) => {
     const tareaId = req.params.id;
-    const { titulo, descripcion, estado, prioridad, categoria, editor_id } = req.body;
+    const { titulo, descripcion, estado, prioridad, categoria, usuario_id, editor_id } = req.body;
+    const usuarioActual = req.session && req.session.user;
+    
+    if (!usuarioActual) {
+        return res.status(401).json({ success: false, message: 'No autorizado' });
+    }
     
     if (!titulo) {
         return res.status(400).json({ success: false, message: 'El título es obligatorio' });
     }
+
+    // Verificar permisos según el rol
+    let updateQuery = `UPDATE tareas SET titulo = ?, descripcion = ?, estado = ?, prioridad = ?, 
+                       categoria = ?, fecha_modificacion = CURRENT_TIMESTAMP`;
+    let params = [titulo, descripcion || '', estado || 'pendiente', prioridad || 'media', 
+                  categoria || 'General'];
+    let whereClause = ` WHERE id = ? AND activa = 1`;
     
-    db.run(`UPDATE tareas SET titulo = ?, descripcion = ?, estado = ?, prioridad = ?, 
-            categoria = ?, fecha_modificacion = CURRENT_TIMESTAMP
-            WHERE id = ? AND activa = 1`,
-        [titulo, descripcion || '', estado || 'pendiente', prioridad || 'media', 
-         categoria || 'General', tareaId],
-        function(err) {
-            if (err) {
-                console.error('Error al actualizar tarea:', err);
-                return res.status(500).json({ success: false, message: 'Error del servidor' });
-            }
-            
-            if (this.changes === 0) {
+    // Solo admin puede actualizar usuario_id (reasignar tareas)
+    if (usuarioActual.rol === 'admin' && usuario_id !== undefined) {
+        updateQuery += `, usuario_id = ?`;
+        params.push(usuario_id);
+    }
+    
+    // Si no es admin, solo puede editar sus propias tareas
+    if (usuarioActual.rol !== 'admin') {
+        whereClause += ` AND usuario_id = ?`;
+        params.push(tareaId);
+        params.push(usuarioActual.id);
+    } else {
+        params.push(tareaId);
+    }
+    
+    db.run(updateQuery + whereClause, params, function(err) {
+        if (err) {
+            console.error('Error al actualizar tarea:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+        
+        if (this.changes === 0) {
+            if (usuarioActual.rol !== 'admin') {
+                return res.status(403).json({ success: false, message: 'No tienes permisos para editar esta tarea' });
+            } else {
                 return res.status(404).json({ success: false, message: 'Tarea no encontrada' });
             }
-            
-            logActivity(editor_id || 1, 'actualizar_tarea', `Tarea: ${titulo}`, req.ip);
-            
-            res.json({ success: true, message: 'Tarea actualizada correctamente' });
         }
-    );
+        
+        logActivity(usuarioActual.id, 'actualizar_tarea', `Tarea: ${titulo}`, req.ip);
+        
+        res.json({ success: true, message: 'Tarea actualizada correctamente' });
+    });
 });
 
 // Eliminar tarea (marcar como inactiva)
@@ -654,6 +795,24 @@ app.delete('/api/tareas/:id', (req, res) => {
         logActivity(eliminador_id, 'eliminar_tarea', `Tarea ID: ${tareaId}`, req.ip);
         
         res.json({ success: true, message: 'Tarea eliminada correctamente' });
+    });
+});
+
+// Obtener todos los usuarios (solo para admin)
+app.get('/api/usuarios', (req, res) => {
+    const usuarioActual = req.session && req.session.user;
+    
+    if (!usuarioActual || usuarioActual.rol !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Acceso denegado. Solo administradores.' });
+    }
+    
+    db.all(`SELECT id, username, nombre_completo, rol, activo, fecha_creacion 
+            FROM usuarios WHERE activo = 1 ORDER BY username`, [], (err, usuarios) => {
+        if (err) {
+            console.error('Error al obtener usuarios:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+        res.json({ success: true, usuarios });
     });
 });
 

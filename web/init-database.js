@@ -47,6 +47,19 @@ db.serialize(() => {
         'Mantenimiento',
         1
     )`);
+
+    // Tabla de notas/comentarios de tareas
+    db.run(`CREATE TABLE IF NOT EXISTS tareas_notas (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        tarea_id INTEGER,
+        nota TEXT NOT NULL,
+        fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+        usuario_id INTEGER,
+        tipo TEXT DEFAULT 'comentario',
+        FOREIGN KEY (tarea_id) REFERENCES tareas (id) ON DELETE CASCADE,
+        FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
+    )`);
+
     // Tabla de usuarios
     db.run(`CREATE TABLE IF NOT EXISTS usuarios (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

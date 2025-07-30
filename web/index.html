@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desarrollo Residenciales v2.0 - Gestión Avanzada</title>
-    
-    <!-- Meta tags anti-cache para desarrollo -->
+        <title>Desarrollo de Servicios Residenciales</title>    <!-- Meta tags anti-cache para desarrollo -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -15,11 +13,11 @@
     <meta name="theme-color" content="#007bff">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="OLT Antel">
+    <meta name="apple-mobile-web-app-title" content="Desarrollo de Servicios Residenciales">
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
     
     <!-- Meta tags para SEO -->
-    <meta name="description" content="Sistema avanzado de gestión de OLTs con dashboard, notificaciones, reportes y PWA">
+    <meta name="description" content="Desarrollo de Servicios Residenciales - Sistema avanzado con dashboard, notificaciones, reportes y PWA">
     <meta name="keywords" content="OLT, Antel, gestión, comandos, telecomunicaciones">
     
     <style>
@@ -2240,6 +2238,24 @@
                 
                 <div class="form-row">
                     <div class="form-grupo">
+                        <label for="tareaCategoria">Categoría</label>
+                        <select id="tareaCategoria" name="categoria">
+                            <option value="Mantenimiento">Mantenimiento</option>
+                            <option value="Soporte">Soporte</option>
+                            <option value="Mejora">Mejora</option>
+                            <option value="General">General</option>
+                        </select>
+                    </div>
+                    <div class="form-grupo" id="grupoAsignarUsuario" style="display: none;">
+                        <label for="tareaUsuario">Asignado a</label>
+                        <select id="tareaUsuario" name="usuario_id">
+                            <option value="">Seleccionar usuario...</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-grupo">
                         <label for="tareaFechaVencimiento">Fecha de Vencimiento</label>
                         <input type="datetime-local" id="tareaFechaVencimiento" name="fecha_vencimiento">
                     </div>
@@ -2336,7 +2352,7 @@
         <div class="login-container">
             <div class="login-logo">🔐</div>
             <h1 class="login-title">Desarrollo de Servicios Residenciales</h1>
-            <p class="login-subtitle">Sistema de Gestión OLT y Servicios de Red - Acceso Autorizado</p>
+            <p class="login-subtitle">Desarrollo de Servicios Residenciales - Acceso Autorizado</p>
             <p style="font-size: 12px; color: #666; margin-bottom: 20px; text-align: center;">
                 Gestión integral de infraestructura de telecomunicaciones ANTEL
             </p>
@@ -2379,7 +2395,7 @@
             </form>
             
             <div class="login-footer">
-                <p>🌐 Desarrollo de Servicios Residenciales v2.0</p>
+                <p>🌐 Desarrollo de Servicios Residenciales</p>
                 <p style="margin-top: 5px; font-size: 12px;">Base de Datos SQLite - Sistema Seguro</p>
                 
                 <div style="margin-top: 15px; padding: 12px; background: rgba(33, 150, 243, 0.1); border-radius: 8px; font-size: 11px; line-height: 1.5;">
@@ -2392,7 +2408,7 @@
                     
                     <div style="font-size: 10px; color: #999; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 8px; margin-top: 8px;">
                         <strong>Demo (solo para pruebas):</strong><br>
-                        Admin: alito/1234 • Técnico: tecnico1/1234 • Usuario: demo/demo
+                        Admin: alito/123 • maria/123 • Técnico: carlos/123 • luis/123
                     </div>
                 </div>
             </div>
@@ -2402,7 +2418,7 @@
     <!-- ===== CONTENIDO PRINCIPAL ===== -->
     <div class="main-content" id="mainContent">
         <div class="container">
-            <h1>🌐 Desarrollo de Servicios Residenciales - VERSIÓN ACTUALIZADA ✅</h1>
+            <h1>🌐 Desarrollo de Servicios Residenciales ✅</h1>
             <h2 style="text-align:center; color:var(--azul-antel); margin-bottom:20px; margin-top:0;">
                 Gestión Integral de Infraestructura de Red
             </h2>
@@ -2589,6 +2605,9 @@
                         <div class="metric-card" style="background: linear-gradient(145deg, #e8f5e8 0%, #c8e6c9 100%); padding: 20px; border-radius: 12px; text-align: center;">
                             <div style="font-size: 32px; font-weight: bold; color: #2e7d32;" id="dashboard-total-tareas">-</div>
                             <div style="font-size: 14px; color: #666;">Tareas Activas</div>
+                            <div style="font-size: 11px; color: #888; margin-top: 5px;" id="dashboard-tareas-scope">
+                                <span id="tareas-scope-indicator">Cargando...</span>
+                            </div>
                         </div>
                         <div class="metric-card" style="background: linear-gradient(145deg, #fff3e0 0%, #ffcc02 30%); padding: 20px; border-radius: 12px; text-align: center;">
                             <div style="font-size: 32px; font-weight: bold; color: #ef6c00;" id="total-usuarios">-</div>
@@ -2627,6 +2646,13 @@
                     <!-- Filtros y búsqueda -->
                     <div class="search-container" style="margin-bottom: 20px;">
                         <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                            <!-- Selector de usuario (solo para admin) -->
+                            <div id="filtro-usuario-container" style="display: none;">
+                                <label style="font-weight: bold; margin-right: 5px;">Usuario:</label>
+                                <select id="filtro-usuario" onchange="filtrarTareas()" style="padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                                    <option value="">Todos los usuarios</option>
+                                </select>
+                            </div>
                             <div>
                                 <label style="font-weight: bold; margin-right: 5px;">Estado:</label>
                                 <select id="filtro-estado" onchange="filtrarTareas()" style="padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
@@ -2638,7 +2664,7 @@
                             </div>
                             <div>
                                 <label style="font-weight: bold; margin-right: 5px;">Prioridad:</label>
-                                <select id="filtro-prioridad" onchange="filtrarTareas()" style="padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                                <select id="filtro-prioridad" onchange="aplicarFiltrosLocales()" style="padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
                                     <option value="">Todas</option>
                                     <option value="urgente">Urgente</option>
                                     <option value="alta">Alta</option>
@@ -2648,7 +2674,7 @@
                             </div>
                             <input type="text" id="buscar-tareas" placeholder="🔍 Buscar tareas..." 
                                    style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; flex: 1; min-width: 200px;"
-                                   oninput="filtrarTareas()">
+                                   oninput="aplicarFiltrosLocales()">
                         </div>
                     </div>
 
@@ -3237,9 +3263,8 @@
                                 <div>
                                     <label style="display: block; margin-bottom: 5px; font-weight: bold;">🏷️ Rol:</label>
                                     <select id="nuevo-rol" style="width: 100%; padding: 8px 12px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px;">
-                                        <option value="usuario">👤 Usuario</option>
+                                        <option value="tecnico">� Técnico</option>
                                         <option value="admin">👑 Administrador</option>
-                                        <option value="tecnico">🔧 Técnico</option>
                                     </select>
                                 </div>
                                 <div>
@@ -3325,10 +3350,10 @@
                 <div class="config-section">
                     <h2 class="section-title">
                         <span>❓</span>
-                        <span>Ayuda y Documentación v2.0</span>
+                        <span>Ayuda y Documentación</span>
                     </h2>
                     <div style="line-height: 1.8; color: #555;">
-                        <h3 style="color: var(--azul-antel); margin-top: 0;">🎯 Novedades de la versión con BD:</h3>
+                        <h3 style="color: var(--azul-antel); margin-top: 0;">🎯 Novedades del sistema:</h3>
                         <ul style="margin-left: 20px;">
                             <li><strong>Base de datos SQLite:</strong> Persistencia de datos local</li>
                             <li><strong>API REST:</strong> Comunicación con el servidor backend</li>
@@ -3424,7 +3449,14 @@
                 }, 100);
             } else if (tabName === 'tareas') {
                 setTimeout(() => {
-                    if (typeof inicializarTareas === 'function') inicializarTareas().catch(console.warn);
+                    // Verificar si el usuario está autenticado antes de cargar tareas
+                    const authenticated = sessionStorage.getItem('authenticated') === 'true';
+                    if (authenticated && typeof cargarTareas === 'function') {
+                        console.log('🔄 Cargando tareas automáticamente al cambiar a pestaña...');
+                        cargarTareas().catch(console.warn);
+                    } else if (typeof inicializarTareas === 'function') {
+                        inicializarTareas().catch(console.warn);
+                    }
                 }, 100);
             } else if (tabName === 'ims') {
                 setTimeout(() => {
@@ -3461,6 +3493,9 @@
 
         // Agregar eventos click a las pestañas
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Inicializando sistema...');
+            
+            // Configurar eventos de pestañas
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', function() {
                     const tabName = this.getAttribute('data-tab');
@@ -3470,17 +3505,58 @@
                 });
             });
             
-            // Verificar si ya está autenticado para restaurar la pestaña activa
+            // Verificar sesión una sola vez
             const isAuthenticated = sessionStorage.getItem('authenticated') === 'true';
             
             if (isAuthenticated) {
-                // Si está autenticado, restaurar la pestaña que estaba activa
-                const savedTab = localStorage.getItem('activeTab');
-                showTab(savedTab || 'inicio'); // Si no hay pestaña guardada, ir a inicio
+                // Verificar sesión detallada solo si está marcado como autenticado
+                if (verificarSesion()) {
+                    // Restaurar la pestaña que estaba activa
+                    const savedTab = localStorage.getItem('activeTab');
+                    const tabToShow = savedTab || 'inicio';
+                    showTab(tabToShow);
+                    
+                    // Si la pestaña activa es tareas, cargar las tareas automáticamente
+                    if (tabToShow === 'tareas') {
+                        setTimeout(() => {
+                            if (typeof cargarTareas === 'function') {
+                                console.log('🔄 Cargando tareas automáticamente al cargar página...');
+                                cargarTareas().catch(console.warn);
+                            }
+                        }, 500);
+                    }
+                    
+                    // Cargar datos de forma diferida
+                    setTimeout(() => {
+                        if (typeof cargarOLTs === 'function') cargarOLTs().catch(console.warn);
+                        if (typeof cargarEstadisticas === 'function') cargarEstadisticas().catch(console.warn);
+                    }, 300);
+                }
             } else {
                 // Si no está autenticado, mostrar inicio por defecto
                 showTab('inicio');
             }
+            
+            // Inicializar funciones auxiliares
+            if (typeof window.setupTabListeners === 'function') {
+                window.setupTabListeners();
+            }
+            
+            if (typeof window.setupAdvancedFeatures === 'function') {
+                window.setupAdvancedFeatures();
+            }
+            
+            // Test de conectividad simple y no bloqueante
+            fetch('/', { method: 'HEAD' })
+                .then(r => r.ok ? console.log('✅ Servidor OK') : console.warn('⚠️ Servidor problema'))
+                .catch(() => console.warn('⚠️ Sin conexión'));
+            
+            // Inicializar funcionalidades específicas
+            setTimeout(() => {
+                if (typeof inicializarACS === 'function') inicializarACS();
+            }, 100);
+            
+            console.log('✅ Sistema inicializado correctamente');
         });
 
         // ===== SISTEMA DE AUTENTICACIÓN OPTIMIZADO =====
@@ -3506,6 +3582,7 @@
             try {
                 const response = await fetch('/api/login', {
                     method: 'POST',
+                    credentials: 'include', // Incluir cookies
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
                 });
@@ -3532,7 +3609,7 @@
                     showTab('inicio');
                     
                     // Mostrar sección de gestión solo para admin
-                    if (data.user.username === 'alito') {
+                    if (data.user.rol === 'admin') {
                         const userSection = document.getElementById('user-management-section');
                         if (userSection) {
                             userSection.style.display = 'block';
@@ -3553,7 +3630,13 @@
                     setTimeout(() => {
                         if (typeof cargarOLTs === 'function') cargarOLTs().catch(console.warn);
                         if (typeof cargarEstadisticas === 'function') cargarEstadisticas().catch(console.warn);
-                    }, 100);
+                        
+                        // Cargar tareas automáticamente después del login
+                        if (typeof cargarTareas === 'function') {
+                            console.log('🔄 Cargando tareas automáticamente después del login...');
+                            cargarTareas().catch(console.warn);
+                        }
+                    }, 200);
                     
                 } else {
                     errorDiv.style.display = 'block';
@@ -3645,7 +3728,7 @@
                     document.getElementById('userInfo').classList.add('show');
                     
                     // Mostrar sección de gestión solo para admin
-                    if (usuarioActual.username === 'alito') {
+                    if (usuarioActual.rol === 'admin') {
                         const userSection = document.getElementById('user-management-section');
                         if (userSection) {
                             userSection.style.display = 'block';
@@ -3660,14 +3743,26 @@
                         }
                     }
                     
+                    // Cargar datos iniciales después de restaurar sesión
+                    setTimeout(() => {
+                        if (typeof cargarOLTs === 'function') cargarOLTs().catch(console.warn);
+                        if (typeof cargarEstadisticas === 'function') cargarEstadisticas().catch(console.warn);
+                        
+                        // Inicializar tareas si estamos en esa pestaña
+                        const tareaTab = document.getElementById('tareas');
+                        if (tareaTab && tareaTab.classList.contains('active')) {
+                            inicializarTareas();
+                        }
+                    }, 200);
+                    
                     return true;
                 } catch (e) {
-                    // Si hay error, limpiar datos corruptos
+                    // Si hay error, limpiar datos corruptos sin mostrar notificación molesta
                     sessionStorage.removeItem('authenticated');
                     sessionStorage.removeItem('user');
                     sessionStorage.removeItem('bienvenidaMostrada');
                     sessionStorage.removeItem('adminMostrada');
-                    mostrarNotificacionToast('Sesión expirada, inicie sesión nuevamente', 'warning', 4000);
+                    console.warn('Sesión expirada o corrupta');
                 }
             }
             return false;
@@ -5735,13 +5830,38 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                 }
                 
                 // Cargar estadísticas de tareas para el dashboard
-                const tareasResponse = await fetch('/api/tareas/estadisticas');
-                const tareasData = await tareasResponse.json();
-                
-                if (tareasData.success) {
-                    const stats = tareasData.estadisticas;
-                    document.getElementById('dashboard-total-tareas').textContent = stats.activas || 0;
-                    console.log('Estadísticas de dashboard cargadas');
+                try {
+                    const tareasResponse = await fetch('/api/tareas/estadisticas');
+                    const tareasData = await tareasResponse.json();
+                    
+                    if (tareasData.success) {
+                        const stats = tareasData.estadisticas;
+                        document.getElementById('dashboard-total-tareas').textContent = stats.activas || 0;
+                        
+                        // Actualizar indicador de scope
+                        const scopeIndicator = document.getElementById('tareas-scope-indicator');
+                        if (usuarioActual && usuarioActual.rol === 'admin') {
+                            scopeIndicator.textContent = '📊 Todas las tareas del sistema';
+                            scopeIndicator.style.color = '#1976d2';
+                        } else {
+                            scopeIndicator.textContent = '👤 Solo mis tareas';
+                            scopeIndicator.style.color = '#666';
+                        }
+                        
+                        console.log('Estadísticas de dashboard cargadas');
+                    } else {
+                        // Si no hay autorización, mostrar 0 y mensaje apropiado
+                        document.getElementById('dashboard-total-tareas').textContent = '0';
+                        const scopeIndicator = document.getElementById('tareas-scope-indicator');
+                        scopeIndicator.textContent = '🔐 Inicia sesión para ver tareas';
+                        scopeIndicator.style.color = '#999';
+                    }
+                } catch (error) {
+                    console.warn('Error al cargar estadísticas de tareas:', error);
+                    document.getElementById('dashboard-total-tareas').textContent = '0';
+                    const scopeIndicator = document.getElementById('tareas-scope-indicator');
+                    scopeIndicator.textContent = '❌ Error de conexión';
+                    scopeIndicator.style.color = '#dc3545';
                 }
             } catch (error) {
                 console.error('Error al cargar estadísticas:', error);
@@ -6452,7 +6572,7 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
 📝 Logs Recientes: ${data.logs.length}
 
 💾 Base de Datos: SQLite
-🌐 Sistema: OLT Antel v2.0`;
+🌐 Sistema: Desarrollo de Servicios Residenciales`;
 
                     await mostrarAlert('Estadísticas del Sistema', estadisticas, '📊');
                 } else {
@@ -6558,7 +6678,7 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
         }
 
         function setupEventListeners() {
-            console.log('🚀 Sistema de Desarrollo de Servicios Residenciales v2.0 iniciado correctamente');
+            console.log('🚀 Sistema de Desarrollo de Servicios Residenciales iniciado correctamente');
         }
 
         // ===== AGREGAR COMANDO =====
@@ -7103,59 +7223,283 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
             
             formContainer.innerHTML = `
                 <div>
-                    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
-                        <h4 style="color: #856404; margin: 0 0 10px 0;">🛡️ Sistema de Roles y Permisos</h4>
-                        <p style="color: #856404; margin: 0;">
-                            Configura los permisos y roles del sistema. Define qué pueden hacer los usuarios según su rol asignado.
+                    <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--azul-antel);">
+                        <h4 style="color: #1565c0; margin: 0 0 10px 0;">🛡️ Sistema de Roles del Sistema</h4>
+                        <p style="color: #1565c0; margin: 0;">
+                            El sistema utiliza dos roles principales con permisos claramente diferenciados para la gestión de tareas y usuarios.
                         </p>
                     </div>
                     
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e9ecef;">
-                            <h5 style="color: #333; margin: 0 0 15px 0;">👑 Administrador</h5>
-                            <ul style="color: #666; margin: 0; padding-left: 20px;">
-                                <li>Gestión completa de usuarios</li>
-                                <li>Configuración del sistema</li>
-                                <li>Acceso a todas las funciones</li>
-                                <li>Gestión de OLTs y comandos</li>
-                            </ul>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                        <div style="background: linear-gradient(145deg, #fff8e1 0%, #ffe082 100%); padding: 25px; border-radius: 12px; border: 2px solid #ffc107; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <h5 style="color: #e65100; margin: 0 0 15px 0; display: flex; align-items: center; gap: 8px; font-size: 18px;">
+                                👑 <strong>ADMINISTRADOR</strong>
+                            </h5>
+                            <div style="background: rgba(255,255,255,0.7); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                                <h6 style="color: #e65100; margin: 0 0 10px 0;">📋 Gestión de Tareas:</h6>
+                                <ul style="color: #d84315; margin: 0; padding-left: 20px; line-height: 1.6;">
+                                    <li>✅ Crear tareas y asignarlas a cualquier usuario</li>
+                                    <li>✅ Ver y editar todas las tareas del sistema</li>
+                                    <li>✅ Monitorear progreso de todos los usuarios</li>
+                                    <li>✅ Filtrar tareas por usuario asignado</li>
+                                </ul>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.7); padding: 15px; border-radius: 8px;">
+                                <h6 style="color: #e65100; margin: 0 0 10px 0;">👥 Gestión de Usuarios:</h6>
+                                <ul style="color: #d84315; margin: 0; padding-left: 20px; line-height: 1.6;">
+                                    <li>✅ Crear y modificar cualquier usuario</li>
+                                    <li>✅ Eliminar usuarios (excepto 'alito')</li>
+                                    <li>✅ Cambiar roles y permisos</li>
+                                    <li>✅ Acceso completo a configuración</li>
+                                </ul>
+                            </div>
                         </div>
                         
-                        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e9ecef;">
-                            <h5 style="color: #333; margin: 0 0 15px 0;">� Técnico</h5>
-                            <ul style="color: #666; margin: 0; padding-left: 20px;">
-                                <li>Gestión de OLTs</li>
-                                <li>Ejecución de comandos</li>
-                                <li>Visualización de datos</li>
-                                <li>Sin gestión de usuarios</li>
-                            </ul>
-                        </div>
-                        
-                        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e9ecef;">
-                            <h5 style="color: #333; margin: 0 0 15px 0;">👤 Usuario</h5>
-                            <ul style="color: #666; margin: 0; padding-left: 20px;">
-                                <li>Visualización de datos</li>
-                                <li>Comandos básicos</li>
-                                <li>Sin configuración</li>
-                                <li>Acceso limitado</li>
-                            </ul>
+                        <div style="background: linear-gradient(145deg, #e8f5e8 0%, #a5d6a7 100%); padding: 25px; border-radius: 12px; border: 2px solid #4caf50; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <h5 style="color: #2e7d32; margin: 0 0 15px 0; display: flex; align-items: center; gap: 8px; font-size: 18px;">
+                                🔧 <strong>TÉCNICO</strong>
+                            </h5>
+                            <div style="background: rgba(255,255,255,0.7); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                                <h6 style="color: #2e7d32; margin: 0 0 10px 0;">📋 Gestión de Tareas:</h6>
+                                <ul style="color: #1b5e20; margin: 0; padding-left: 20px; line-height: 1.6;">
+                                    <li>✅ Crear sus propias tareas (auto-asignadas)</li>
+                                    <li>✅ Ver y editar solo sus tareas</li>
+                                    <li>✅ Monitorear su propio progreso</li>
+                                    <li>❌ No puede asignar tareas a otros</li>
+                                </ul>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.7); padding: 15px; border-radius: 8px;">
+                                <h6 style="color: #2e7d32; margin: 0 0 10px 0;">� Gestión de Usuarios:</h6>
+                                <ul style="color: #1b5e20; margin: 0; padding-left: 20px; line-height: 1.6;">
+                                    <li>✅ Modificar solo su propio perfil</li>
+                                    <li>✅ Cambiar su propia contraseña</li>
+                                    <li>❌ No puede crear usuarios</li>
+                                    <li>❌ No puede modificar otros usuarios</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                     
-                    <!-- Contenedor para mostrar los roles existentes -->
-                    <div id="roles-container" style="margin-top: 20px;">
-                        <div style="text-align: center; padding: 20px;">
-                            <div class="spinner-border" role="status">
-                                <span class="sr-only">Cargando roles...</span>
+                    <!-- Usuarios actuales por rol -->
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; border: 1px solid #dee2e6;">
+                        <h4 style="color: var(--azul-antel); margin: 0 0 20px 0; display: flex; align-items: center; gap: 8px;">
+                            👥 Distribución Actual de Usuarios
+                        </h4>
+                        <div id="usuarios-por-rol" style="margin-bottom: 20px;">
+                            <div style="text-align: center; padding: 20px; color: #666;">
+                                <div style="font-size: 24px; margin-bottom: 10px;">⏳</div>
+                                <p>Cargando usuarios...</p>
                             </div>
-                            <p style="margin-top: 10px; color: #666;">Cargando roles...</p>
+                        </div>
+                        
+                        <div class="button-group">
+                            <button class="btn btn-primary" onclick="cargarUsuariosPorRol()">🔄 Actualizar Lista</button>
+                            <button class="btn btn-info" onclick="mostrarEstadisticasRoles()" style="background: #17a2b8;">📊 Ver Estadísticas</button>
                         </div>
                     </div>
                 </div>
             `;
             
-            // Cargar roles automáticamente
-            cargarRoles();
+            // Cargar usuarios por rol automáticamente
+            cargarUsuariosPorRol();
+        }
+
+        // Cargar usuarios agrupados por rol
+        async function cargarUsuariosPorRol() {
+            const container = document.getElementById('usuarios-por-rol');
+            
+            if (!container) return;
+            
+            container.innerHTML = `
+                <div style="text-align: center; padding: 20px; color: #666;">
+                    <div style="font-size: 24px; margin-bottom: 10px;">⏳</div>
+                    <p>Cargando usuarios...</p>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch('/api/usuarios', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const usuarios = data.usuarios;
+                    
+                    // Agrupar usuarios por rol
+                    const usuariosPorRol = {
+                        admin: usuarios.filter(u => u.rol === 'admin'),
+                        tecnico: usuarios.filter(u => u.rol === 'tecnico'),
+                        otros: usuarios.filter(u => !['admin', 'tecnico'].includes(u.rol))
+                    };
+                    
+                    let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">';
+                    
+                    // Administradores
+                    html += `
+                        <div style="background: linear-gradient(145deg, #fff8e1 0%, #ffe082 100%); padding: 15px; border-radius: 8px; border: 1px solid #ffc107;">
+                            <h6 style="color: #e65100; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+                                👑 Administradores (${usuariosPorRol.admin.length})
+                            </h6>
+                            <div style="max-height: 150px; overflow-y: auto;">
+                    `;
+                    
+                    if (usuariosPorRol.admin.length > 0) {
+                        usuariosPorRol.admin.forEach(usuario => {
+                            html += `
+                                <div style="background: rgba(255,255,255,0.7); padding: 8px; margin-bottom: 5px; border-radius: 4px; display: flex; align-items: center; gap: 8px;">
+                                    <strong style="color: #d84315;">${usuario.username}</strong>
+                                    <span style="color: #666; font-size: 12px;">${usuario.nombre_completo || 'Sin nombre'}</span>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        html += '<p style="color: #666; font-style: italic; margin: 0;">No hay administradores</p>';
+                    }
+                    
+                    html += '</div></div>';
+                    
+                    // Técnicos
+                    html += `
+                        <div style="background: linear-gradient(145deg, #e8f5e8 0%, #a5d6a7 100%); padding: 15px; border-radius: 8px; border: 1px solid #4caf50;">
+                            <h6 style="color: #2e7d32; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+                                🔧 Técnicos (${usuariosPorRol.tecnico.length})
+                            </h6>
+                            <div style="max-height: 150px; overflow-y: auto;">
+                    `;
+                    
+                    if (usuariosPorRol.tecnico.length > 0) {
+                        usuariosPorRol.tecnico.forEach(usuario => {
+                            html += `
+                                <div style="background: rgba(255,255,255,0.7); padding: 8px; margin-bottom: 5px; border-radius: 4px; display: flex; align-items: center; gap: 8px;">
+                                    <strong style="color: #1b5e20;">${usuario.username}</strong>
+                                    <span style="color: #666; font-size: 12px;">${usuario.nombre_completo || 'Sin nombre'}</span>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        html += '<p style="color: #666; font-style: italic; margin: 0;">No hay técnicos</p>';
+                    }
+                    
+                    html += '</div></div>';
+                    
+                    // Otros roles (si existen)
+                    if (usuariosPorRol.otros.length > 0) {
+                        html += `
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6;">
+                                <h6 style="color: #495057; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+                                    👤 Otros (${usuariosPorRol.otros.length})
+                                </h6>
+                                <div style="max-height: 150px; overflow-y: auto;">
+                        `;
+                        
+                        usuariosPorRol.otros.forEach(usuario => {
+                            html += `
+                                <div style="background: white; padding: 8px; margin-bottom: 5px; border-radius: 4px; display: flex; align-items: center; gap: 8px;">
+                                    <strong style="color: #495057;">${usuario.username}</strong>
+                                    <span style="color: #666; font-size: 12px;">${usuario.rol}</span>
+                                </div>
+                            `;
+                        });
+                        
+                        html += '</div></div>';
+                    }
+                    
+                    html += '</div>';
+                    container.innerHTML = html;
+                    
+                } else {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 20px; color: #dc3545;">
+                            <div style="font-size: 24px; margin-bottom: 10px;">❌</div>
+                            <p>Error al cargar usuarios</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error cargando usuarios por rol:', error);
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #dc3545;">
+                        <div style="font-size: 24px; margin-bottom: 10px;">🌐</div>
+                        <p>Error de conexión</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Mostrar estadísticas de roles
+        async function mostrarEstadisticasRoles() {
+            try {
+                const response = await fetch('/api/usuarios', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const usuarios = data.usuarios;
+                    const totalUsuarios = usuarios.length;
+                    const admins = usuarios.filter(u => u.rol === 'admin').length;
+                    const tecnicos = usuarios.filter(u => u.rol === 'tecnico').length;
+                    const otros = usuarios.filter(u => !['admin', 'tecnico'].includes(u.rol)).length;
+                    
+                    const porcentajeAdmin = totalUsuarios > 0 ? Math.round((admins / totalUsuarios) * 100) : 0;
+                    const porcentajeTecnico = totalUsuarios > 0 ? Math.round((tecnicos / totalUsuarios) * 100) : 0;
+                    const porcentajeOtros = totalUsuarios > 0 ? Math.round((otros / totalUsuarios) * 100) : 0;
+                    
+                    mostrarAlert(
+                        'Estadísticas de Roles',
+                        `
+                        <div style="text-align: left;">
+                            <h5 style="color: var(--azul-antel); margin: 0 0 15px 0;">📊 Distribución de Usuarios</h5>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <strong>Total de Usuarios:</strong> ${totalUsuarios}
+                            </div>
+                            
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                                <div style="margin-bottom: 10px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                        <span>👑 Administradores:</span>
+                                        <strong>${admins} (${porcentajeAdmin}%)</strong>
+                                    </div>
+                                    <div style="background: #e9ecef; border-radius: 4px; height: 8px;">
+                                        <div style="background: #ffc107; height: 100%; border-radius: 4px; width: ${porcentajeAdmin}%; transition: width 0.3s ease;"></div>
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-bottom: 10px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                        <span>🔧 Técnicos:</span>
+                                        <strong>${tecnicos} (${porcentajeTecnico}%)</strong>
+                                    </div>
+                                    <div style="background: #e9ecef; border-radius: 4px; height: 8px;">
+                                        <div style="background: #4caf50; height: 100%; border-radius: 4px; width: ${porcentajeTecnico}%; transition: width 0.3s ease;"></div>
+                                    </div>
+                                </div>
+                                
+                                ${otros > 0 ? `
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                        <span>👤 Otros:</span>
+                                        <strong>${otros} (${porcentajeOtros}%)</strong>
+                                    </div>
+                                    <div style="background: #e9ecef; border-radius: 4px; height: 8px;">
+                                        <div style="background: #6c757d; height: 100%; border-radius: 4px; width: ${porcentajeOtros}%; transition: width 0.3s ease;"></div>
+                                    </div>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        `,
+                        '📊'
+                    );
+                } else {
+                    mostrarNotificacion('Error al cargar estadísticas', 'error');
+                }
+            } catch (error) {
+                console.error('Error cargando estadísticas:', error);
+                mostrarNotificacion('Error de conexión al cargar estadísticas', 'error');
+            }
         }
 
         // Guardar usuario (crear o actualizar) - mejorada con notificaciones
@@ -7903,33 +8247,16 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
             }
         }
 
-        // ===== INICIALIZACIÓN =====
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 Iniciando sistema...');
-            
-            // Verificar sesión inmediatamente
-            if (verificarSesion()) {
-                console.log('✅ Sesión encontrada');
-                // Cargar datos de forma diferida para no bloquear
-                setTimeout(() => {
-                    if (typeof cargarOLTs === 'function') cargarOLTs().catch(console.warn);
-                    if (typeof cargarEstadisticas === 'function') cargarEstadisticas().catch(console.warn);
-                }, 300);
-            }
-            
-            // Configurar navegación entre pestañas
-            configurarNavegacion();
-            
-            // Test de conectividad simple y no bloqueante
-            fetch('/', { method: 'HEAD' })
-                .then(r => r.ok ? console.log('✅ Servidor OK') : console.warn('⚠️ Servidor problema'))
-                .catch(() => console.warn('⚠️ Sin conexión'));
-            
-            // Inicializar funcionalidades específicas
+        // ===== CONFIGURACIÓN DE DASHBOARD =====
+        window.setupDashboard = function() {
+            // Inicializar dashboard con gráficos
             setTimeout(() => {
-                if (typeof inicializarACS === 'function') inicializarACS();
-            }, 100);
-        });
+                if (window.dashboardCharts) {
+                    window.dashboardCharts.initializeDashboard();
+                    window.dashboardCharts.startAutoRefresh(5); // Cada 5 minutos
+                }
+            }, 1000);
+        };
 
         // ===== FUNCIONES DE GESTIÓN DE TAREAS =====
         
@@ -7939,18 +8266,128 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
         // Cargar tareas desde el servidor
         async function cargarTareas() {
             try {
-                const response = await fetch('/api/tareas');
+                console.log('🔍 Iniciando cargarTareas()');
+                console.log('👤 Usuario actual:', usuarioActual);
+                console.log('🍪 SessionStorage auth:', sessionStorage.getItem('authenticated'));
+                console.log('👥 SessionStorage user:', sessionStorage.getItem('user'));
+                
+                const response = await fetch('/api/tareas', {
+                    method: 'GET',
+                    credentials: 'include', // Importante: incluir cookies de sesión
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('📡 Response status:', response.status);
                 const data = await response.json();
+                console.log('📊 Response data:', data);
                 
                 if (data.success) {
+                    // Cargar usuarios si es admin
+                    if (usuarioActual && usuarioActual.rol === 'admin') {
+                        await cargarUsuarios();
+                        document.getElementById('filtro-usuario-container').style.display = 'block';
+                    } else {
+                        document.getElementById('filtro-usuario-container').style.display = 'none';
+                    }
+                    
                     mostrarTareas(data.tareas);
                     await cargarEstadisticasTareas();
                 } else {
-                    mostrarNotificacion('Error al cargar tareas: ' + data.message, 'error');
+                    if (response.status === 401) {
+                        console.warn('❌ Error 401 - No autorizado');
+                        // Error de autenticación - mostrar login necesario
+                        const listaTareas = document.getElementById('lista-tareas');
+                        if (listaTareas) {
+                            listaTareas.innerHTML = `
+                                <div style="text-align: center; padding: 40px; color: #666;">
+                                    <div style="font-size: 48px; margin-bottom: 15px;">🔐</div>
+                                    <h3 style="color: #007bff; margin-bottom: 10px;">Inicio de sesión requerido</h3>
+                                    <p>Para gestionar tareas necesitas iniciar sesión</p>
+                                    <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; font-size: 12px; color: #666;">
+                                        <strong>Debug info:</strong><br>
+                                        Status: ${response.status}<br>
+                                        Usuario: ${usuarioActual ? usuarioActual.username : 'null'}<br>
+                                        Session: ${sessionStorage.getItem('authenticated')}
+                                    </div>
+                                    <button class="btn btn-primary" onclick="showTab('inicio')" style="margin-top: 15px;">
+                                        🔓 Iniciar Sesión
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="location.reload()" style="margin-top: 15px; margin-left: 10px;">
+                                        🔄 Recargar Página
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    } else {
+                        mostrarNotificacion('Error al cargar tareas: ' + data.message, 'error');
+                    }
                 }
             } catch (error) {
                 console.error('Error al cargar tareas:', error);
-                mostrarNotificacion('Error de conexión al cargar tareas', 'error');
+                // Mostrar mensaje de conexión en lugar de notificación
+                const listaTareas = document.getElementById('lista-tareas');
+                if (listaTareas) {
+                    listaTareas.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #666;">
+                            <div style="font-size: 48px; margin-bottom: 15px;">🌐</div>
+                            <h3 style="color: #dc3545; margin-bottom: 10px;">Error de conexión</h3>
+                            <p>Verifique que el servidor esté funcionando</p>
+                            <button class="btn btn-secondary" onclick="cargarTareas()" style="margin-top: 15px;">
+                                🔄 Reintentar
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+        }
+        
+        // Cargar lista de usuarios para el filtro (solo admin)
+        async function cargarUsuarios() {
+            try {
+                const response = await fetch('/api/usuarios', {
+                    credentials: 'include' // Incluir cookies de sesión
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const select = document.getElementById('filtro-usuario');
+                    select.innerHTML = '<option value="">Todos los usuarios</option>';
+                    
+                    data.usuarios.forEach(usuario => {
+                        const option = document.createElement('option');
+                        option.value = usuario.id;
+                        option.textContent = `${usuario.nombre_completo} (${usuario.username})`;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error al cargar usuarios:', error);
+            }
+        }
+        
+        // Cargar lista de usuarios para asignación de tareas (solo admin)
+        async function cargarUsuariosParaAsignacion() {
+            try {
+                const response = await fetch('/api/usuarios', {
+                    credentials: 'include' // Incluir cookies de sesión
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const select = document.getElementById('tareaUsuario');
+                    select.innerHTML = '<option value="">Sin asignar</option>';
+                    
+                    data.usuarios.forEach(usuario => {
+                        const option = document.createElement('option');
+                        option.value = usuario.id;
+                        option.textContent = `${usuario.nombre_completo} (${usuario.username})`;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error al cargar usuarios para asignación:', error);
             }
         }
         
@@ -7986,7 +8423,13 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                         ${tarea.descripcion ? `<div class="tarea-descripcion">${escapeHtml(tarea.descripcion)}</div>` : ''}
                         
                         <div class="tarea-meta">
-                            <div>👤 ${tarea.creador_username || 'Sistema'}</div>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <span>👤</span>
+                                <span style="font-weight: ${tarea.usuario_asignado_nombre ? 'bold' : 'normal'}; color: ${tarea.usuario_asignado_nombre ? 'var(--azul-antel)' : '#666'};">
+                                    ${tarea.usuario_asignado_nombre || tarea.usuario_asignado_username || 'Sin asignar'}
+                                </span>
+                                ${!tarea.usuario_asignado_nombre && !tarea.usuario_asignado_username ? '<span style="background: #ffc107; color: #000; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">Sin asignar</span>' : ''}
+                            </div>
                             <div>📅 ${new Date(tarea.fecha_creacion).toLocaleDateString()}</div>
                             ${tarea.fecha_vencimiento ? `<div style="color: ${new Date(tarea.fecha_vencimiento) < new Date() ? '#dc3545' : '#666'};">⏰ ${new Date(tarea.fecha_vencimiento).toLocaleDateString()}</div>` : ''}
                         </div>
@@ -8068,7 +8511,9 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
         // Cargar estadísticas de tareas
         async function cargarEstadisticasTareas() {
             try {
-                const response = await fetch('/api/tareas/estadisticas');
+                const response = await fetch('/api/tareas/estadisticas', {
+                    credentials: 'include' // Incluir cookies de sesión
+                });
                 const data = await response.json();
                 
                 if (data.success) {
@@ -8082,10 +8527,24 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                     
                     console.log('Estadísticas cargadas:', stats);
                 } else {
-                    console.error('Error en respuesta de estadísticas:', data.message);
+                    if (response.status === 401) {
+                        console.log('No autorizado para ver estadísticas - usuario no logueado');
+                        // Poner contadores en 0 si no hay autorización
+                        actualizarContador('total-tareas', 0);
+                        actualizarContador('tareas-pendientes', 0);
+                        actualizarContador('tareas-activas', 0);
+                        actualizarContador('tareas-finalizadas', 0);
+                    } else {
+                        console.error('Error en respuesta de estadísticas:', data.message);
+                    }
                 }
             } catch (error) {
                 console.error('Error al cargar estadísticas:', error);
+                // En caso de error, mostrar 0 silenciosamente
+                actualizarContador('total-tareas', 0);
+                actualizarContador('tareas-pendientes', 0);
+                actualizarContador('tareas-activas', 0);
+                actualizarContador('tareas-finalizadas', 0);
             }
         }
         
@@ -8118,6 +8577,16 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
             document.getElementById('formTarea').reset();
             document.getElementById('progresoValor').textContent = '0%';
             document.getElementById('seccionNotas').style.display = 'none';
+            
+            // Mostrar campo de asignación solo para administradores
+            const grupoAsignarUsuario = document.getElementById('grupoAsignarUsuario');
+            if (usuarioActual && usuarioActual.rol === 'admin') {
+                grupoAsignarUsuario.style.display = 'block';
+                cargarUsuariosParaAsignacion();
+            } else {
+                grupoAsignarUsuario.style.display = 'none';
+            }
+            
             document.getElementById('modalTarea').style.display = 'block';
         }
         
@@ -8143,13 +8612,21 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                 }
             }
             
-            // Agregar usuario actual
+            // Agregar usuario actual o usuario asignado
             const userJson = sessionStorage.getItem('user');
             const currentUser = userJson ? JSON.parse(userJson) : { id: 1 };
             if (tareaEnEdicion) {
                 tareaData.editor_id = currentUser.id;
+                // Para edición, mantener el usuario_id del formulario si fue especificado
+                if (!tareaData.usuario_id) {
+                    // Si no se especificó usuario, mantener el actual del formulario
+                    delete tareaData.usuario_id;
+                }
             } else {
-                tareaData.usuario_id = currentUser.id;
+                // Para nueva tarea, usar usuario asignado o usuario actual como respaldo
+                if (!tareaData.usuario_id) {
+                    tareaData.usuario_id = currentUser.id;
+                }
             }
             
             try {
@@ -8288,6 +8765,16 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                     document.getElementById('tareaProgreso').value = tarea.progreso || 0;
                     document.getElementById('progresoValor').textContent = (tarea.progreso || 0) + '%';
                     
+                    // Mostrar campo de asignación solo para administradores
+                    const grupoAsignarUsuario = document.getElementById('grupoAsignarUsuario');
+                    if (usuarioActual && usuarioActual.rol === 'admin') {
+                        grupoAsignarUsuario.style.display = 'block';
+                        await cargarUsuariosParaAsignacion();
+                        document.getElementById('tareaUsuario').value = tarea.usuario_id || '';
+                    } else {
+                        grupoAsignarUsuario.style.display = 'none';
+                    }
+                    
                     if (tarea.fecha_vencimiento) {
                         const fecha = new Date(tarea.fecha_vencimiento);
                         document.getElementById('tareaFechaVencimiento').value = fecha.toISOString().slice(0, 16);
@@ -8423,8 +8910,37 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
         }
         
         // Filtrar tareas
-        function filtrarTareas() {
-            const filtroEstado = document.getElementById('filtro-estado').value;
+        async function filtrarTareas() {
+            try {
+                const filtroEstado = document.getElementById('filtro-estado').value;
+                const filtroUsuario = document.getElementById('filtro-usuario')?.value || '';
+                
+                // Construir URL con parámetros de filtro
+                let url = '/api/tareas?';
+                const params = new URLSearchParams();
+                
+                if (filtroEstado) params.append('estado', filtroEstado);
+                if (filtroUsuario && usuarioActual?.rol === 'admin') params.append('usuario_id', filtroUsuario);
+                
+                const response = await fetch(`/api/tareas?${params.toString()}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarTareas(data.tareas);
+                    await cargarEstadisticasTareas();
+                    
+                    // Aplicar filtros locales adicionales
+                    aplicarFiltrosLocales();
+                } else {
+                    mostrarNotificacion('Error al filtrar tareas: ' + data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error al filtrar tareas:', error);
+                mostrarNotificacion('Error de conexión al filtrar tareas', 'error');
+            }
+        }
+        
+        function aplicarFiltrosLocales() {
             const filtroPrioridad = document.getElementById('filtro-prioridad').value;
             const busqueda = document.getElementById('buscar-tareas').value.toLowerCase();
             
@@ -8439,7 +8955,6 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                 const prioridad = tarjeta.classList[1]; // segunda clase es la prioridad
                 
                 const cumpleFiltros = 
-                    (!filtroEstado || estado === filtroEstado) &&
                     (!filtroPrioridad || prioridad === filtroPrioridad) &&
                     (!busqueda || titulo.includes(busqueda) || descripcion.includes(busqueda));
                 
@@ -8495,7 +9010,7 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
             console.log('🚀 Inicializando sistema de tareas...');
             
             try {
-                // Cargar datos en paralelo
+                // Cargar datos en paralelo - la verificación de auth se hace en cargarTareas()
                 await Promise.all([
                     cargarTareas(),
                     cargarEstadisticasTareas()
@@ -8504,7 +9019,7 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                 console.log('✅ Sistema de tareas inicializado correctamente');
             } catch (error) {
                 console.error('❌ Error al inicializar sistema de tareas:', error);
-                mostrarNotificacion('Error al inicializar el sistema de tareas', 'error');
+                // No mostrar notificación aquí para evitar duplicados
             }
         }
         
@@ -8556,8 +9071,8 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
             }
         };
         
-        // Agregar listeners a las pestañas
-        document.addEventListener('DOMContentLoaded', function() {
+        // Funciones de inicialización (se ejecutarán desde el DOMContentLoaded principal)
+        window.setupTabListeners = function() {
             // Listener para clicks en la pestaña de tareas
             const tareaTab = document.querySelector('[data-tab="tareas"]');
             if (tareaTab) {
@@ -8577,7 +9092,7 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                     inicializarTareas();
                 }, 500);
             }
-        });
+        };
     </script>
     
     <!-- Parche para gestión de roles -->
@@ -8660,7 +9175,7 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
         console.log('🎯 Parche aplicado. La gestión de roles ahora funcionará correctamente.');
     </script>
     
-    <!-- Nuevos sistemas v2.0 -->
+    <!-- Nuevos sistemas -->
     <script src="/dashboard-charts.js"></script>
     <script src="/notification-system.js"></script>
     <script src="/reports-analytics.js"></script>
@@ -8704,9 +9219,9 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
             });
         }
         
-        // Inicialización avanzada del sistema
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Iniciando Desarrollo Residenciales v2.0...');
+        // Inicialización avanzada del sistema (función independiente)
+        window.setupAdvancedFeatures = function() {
+            console.log('🚀 Iniciando Desarrollo Residenciales...');
             
             // Inicializar dashboard con gráficos
             setTimeout(() => {
@@ -8786,14 +9301,14 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                 });
             }
             
-            console.log('✅ Desarrollo Residenciales v2.0 iniciado correctamente');
-        });
+            console.log('✅ Desarrollo Residenciales iniciado correctamente');
+        };
         
         // Función para mostrar información sobre las nuevas características
         function mostrarCaracteristicasV2() {
             if (window.showInfo) {
                 window.showInfo(
-                    '🚀 Desarrollo Residenciales v2.0',
+                    '🚀 Desarrollo de Servicios Residenciales',
                     `Nuevas características disponibles:
                     
 • 📊 Dashboard con gráficos en tiempo real

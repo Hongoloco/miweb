@@ -1,7 +1,7 @@
 {
-        "name": "Desarrollo Residenciales - Gestión Avanzada",
-    "short_name": "Desarrollo Residenciales",
-    "description": "Sistema de gestión de OLTs y comandos para Antel",
+        "name": "Desarrollo de Servicios Residenciales",
+    "short_name": "Desarrollo de Servicios Residenciales",
+    "description": "Desarrollo de Servicios Residenciales - Sistema integral de gestión de red",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",
