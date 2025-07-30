@@ -167,10 +167,8 @@ db.serialize(() => {
     // Los comandos están guardados en la base de datos y se restauran con restore-zte-commands.js
     // Para evitar pérdida de datos, este script solo crea las tablas básicas
 
-    // Insertar OLTs de ejemplo adicionales
-    db.run(`INSERT OR IGNORE INTO olts (id, nombre, shelf, slot, port, onu_id, modelo, estado) VALUES ('olt-demo-1', 'ZTE C600 Demo', 1, 1, 1, 1, 'ZTE C600', 'activa')`);
-    db.run(`INSERT OR IGNORE INTO olts (id, nombre, shelf, slot, port, onu_id, modelo, estado) VALUES ('olt-demo-2', 'Huawei MA5800', 2, 2, 2, 2, 'Huawei MA5800', 'activa')`);
-    db.run(`INSERT OR IGNORE INTO olts (id, nombre, shelf, slot, port, onu_id, modelo, estado) VALUES ('olt-demo-3', 'Nokia FX-4', 3, 3, 3, 3, 'Nokia FX-4', 'inactiva')`);
+    // No insertar OLTs de ejemplo - el usuario cargará sus propias OLTs
+    // Las OLTs demo han sido eliminadas por solicitud del usuario
 
     console.log('✅ Base de datos inicializada correctamente');
     console.log('📊 Tablas creadas:');
