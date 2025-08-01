@@ -61,6 +61,45 @@
             --sombra: rgba(0, 86, 179, 0.1);
         }
 
+        /* ===== MODO OSCURO FORZADO ===== */
+        body.dark-theme {
+            --bg-primary: #1a1a1a !important;
+            --bg-secondary: #2d2d2d !important;
+            --bg-tertiary: #404040 !important;
+            --text-primary: #ffffff !important;
+            --text-secondary: #ffffff !important;
+            --text-muted: #e9ecef !important;
+            --border-color: #495057 !important;
+            --border-light: #404040 !important;
+            --border-dark: #2d2d2d !important;
+        }
+
+        body.dark-theme,
+        body.dark-theme * {
+            background-color: var(--bg-primary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        body.dark-theme .tab,
+        body.dark-theme .tab-content,
+        body.dark-theme .config-section {
+            background: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        body.dark-theme .login-container {
+            background: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        body.dark-theme input,
+        body.dark-theme textarea,
+        body.dark-theme select {
+            background: var(--bg-tertiary) !important;
+            color: var(--text-primary) !important;
+            border-color: var(--border-color) !important;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -70,8 +109,10 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
+            transition: all 0.3s ease;
         }
 
         /* ===== PANTALLA DE LOGIN ===== */
@@ -125,7 +166,7 @@
         }
 
         .login-subtitle {
-            color: #666;
+            color: var(--text-secondary);
             margin-bottom: 30px;
             font-size: 16px;
         }
@@ -143,16 +184,16 @@
         .login-input {
             width: 100%;
             padding: 15px 20px;
-            border: 2px solid #e1e5e9;
+            border: 2px solid var(--border-color);
             border-radius: 12px;
             font-size: 16px;
             transition: all 0.3s ease;
-            background: #f8f9fa;
+            background: var(--bg-secondary);
         }
 
         .login-input:focus {
             border-color: var(--azul-antel);
-            background: white;
+            background: var(--bg-primary);
             box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
             outline: none;
         }
@@ -176,21 +217,21 @@
         }
 
         .login-error {
-            background: #fee;
-            color: #c62828;
+            background: var(--danger-bg, #fee);
+            color: var(--danger-color);
             padding: 12px;
             border-radius: 8px;
             margin-top: 15px;
-            border: 1px solid #ffcdd2;
+            border: 1px solid var(--danger-border, #ffcdd2);
             display: none;
         }
 
         .login-footer {
             margin-top: 30px;
             padding-top: 20px;
-            border-top: 1px solid #eee;
+            border-top: 1px solid var(--border-light);
             font-size: 14px;
-            color: #666;
+            color: var(--text-secondary);
         }
 
         /* ===== CONTENIDO PRINCIPAL ===== */
@@ -219,7 +260,7 @@
 
         .tabs {
             display: flex;
-            background: white;
+            background: var(--bg-primary);
             border-radius: 10px 10px 0 0;
             overflow: hidden;
             box-shadow: 0 2px 10px var(--sombra);
@@ -229,7 +270,7 @@
         .tab {
             flex: 1;
             padding: 15px 20px;
-            background: #f8f9fa;
+            background: var(--bg-secondary);
             cursor: pointer;
             font-weight: 600;
             display: flex;
@@ -238,6 +279,7 @@
             gap: 6px;
             transition: all 0.3s ease;
             border-right: 1px solid #dee2e6;
+            color: var(--text-primary);
         }
 
         .tab:last-child {
@@ -245,7 +287,7 @@
         }
 
         .tab:hover {
-            background: #e9ecef;
+            background: var(--bg-tertiary);
             transform: translateY(-2px);
         }
 
@@ -256,7 +298,7 @@
 
         .tab-content {
             display: none;
-            background: white;
+            background: var(--bg-primary);
             border-radius: 0 0 10px 10px;
             box-shadow: 0 2px 10px var(--sombra);
             padding: 30px;
@@ -268,11 +310,12 @@
         }
 
         .config-section {
-            background: #fff;
+            background: var(--bg-primary);
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
             box-shadow: 0 2px 6px var(--sombra);
+            border: 1px solid var(--border-color);
         }
 
         .input-group {
@@ -321,7 +364,7 @@
 
         .btn-warning {
             background: linear-gradient(145deg, #ffc107 0%, #e0a800 100%);
-            color: #212529;
+            color: var(--text-primary);
             border: 1px solid #ffc107;
         }
 
@@ -380,7 +423,7 @@
 
         .btn-secondary {
             background: var(--amarillo-antel);
-            color: #333;
+            color: var(--text-primary);
         }
 
         .btn:hover {
@@ -389,7 +432,7 @@
         }
 
         .btn-delete {
-            background: #dc3545 !important;
+            background: var(--danger-color) !important;
             color: white !important;
             border: 2px solid #c82333 !important;
         }
@@ -436,7 +479,7 @@
 
         .command {
             font-family: 'Fira Code', 'Courier New', Courier, monospace;
-            background: #f8f9fa;
+            background: var(--bg-secondary);
             border: 1px solid #e9ecef;
             padding: 15px;
             border-radius: 8px;
@@ -511,7 +554,7 @@
         }
 
         .search-result-item:hover {
-            background: #f8f9fa;
+            background: var(--bg-secondary);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
@@ -519,7 +562,7 @@
         .loading {
             text-align: center;
             padding: 20px;
-            color: #666;
+            color: var(--text-secondary);
         }
 
         .user-info {
@@ -541,13 +584,33 @@
         }
 
         .logout-btn {
-            background: #dc3545;
+            background: var(--danger-color);
             color: white;
             border: none;
             padding: 5px 15px;
             border-radius: 15px;
             cursor: pointer;
             font-size: 12px;
+        }
+
+        .theme-toggle-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+        }
+
+        .theme-toggle-btn:hover {
+            background: var(--secondary-color);
+            transform: scale(1.1);
         }
 
         @keyframes fadeIn {
@@ -2343,6 +2406,7 @@
 
     <!-- ===== INFO DE USUARIO ===== -->
     <div class="user-info" id="userInfo">
+        <button class="theme-toggle-btn" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
         <span id="userDisplay"></span>
         <button class="logout-btn" onclick="logout()">🚪 Salir</button>
     </div>
@@ -3495,6 +3559,22 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Inicializando sistema...');
             
+            // Inicializar sistema de temas
+            setTimeout(() => {
+                if (typeof ThemeSystem !== 'undefined') {
+                    window.themeSystem = new ThemeSystem();
+                    console.log('🎨 Sistema de temas inicializado');
+                    
+                    // Actualizar botón de tema después de la inicialización
+                    setTimeout(() => {
+                        const currentTheme = window.themeSystem.getCurrentTheme();
+                        updateThemeButton(currentTheme.id === 'dark' ? '☀️' : '🌙');
+                    }, 500);
+                } else {
+                    console.warn('⚠️ ThemeSystem no está disponible');
+                }
+            }, 100);
+            
             // Configurar eventos de pestañas
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', function() {
@@ -4136,8 +4216,15 @@ CNL URCNL: TYPE=IMPU,IMPU="tel:+59898465369";`;
                                     </summary>
                                     <div style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
                                         ${modelo.comandos.map(cmd => `
-                                            <div style="margin-bottom: 8px; padding: 8px; background: white; border-radius: 4px; border: 1px solid #e9ecef;">
-                                                <div style="font-family: monospace; font-size: 11px; color: #333; margin-bottom: 4px;">${cmd.comando}</div>
+                                            <div style="margin-bottom: 8px; padding: 8px; background: white; border-radius: 4px; border: 1px solid #e9ecef; position: relative;">
+                                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                                    <div style="font-family: monospace; font-size: 11px; color: #333; flex: 1; word-break: break-all; padding-right: 10px;">${cmd.comando}</div>
+                                                    <button onclick="copiarComandoACS('${cmd.comando.replace(/'/g, "\\'")}', this)" 
+                                                            style="background: #17a2b8; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; white-space: nowrap; flex-shrink: 0;"
+                                                            title="Copiar comando">
+                                                        📋 Copiar
+                                                    </button>
+                                                </div>
                                                 <div style="font-size: 10px; color: #666;">${cmd.descripcion}</div>
                                             </div>
                                         `).join('')}
@@ -4879,6 +4966,41 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                 }
             } catch (error) {
                 console.error('❌ Error en fallback de copia:', error);
+            }
+        }
+        
+        // Función específica para copiar comandos ACS
+        function copiarComandoACS(comando, botonElement) {
+            try {
+                // Limpiar el comando de escapes y comillas
+                const comandoLimpio = comando.replace(/\\'/g, "'");
+                
+                // Copiar el comando al portapapeles
+                copiarTexto(comandoLimpio);
+                
+                // Feedback visual en el botón
+                const textoOriginal = botonElement.innerHTML;
+                const colorOriginal = botonElement.style.background;
+                
+                botonElement.innerHTML = '✅ Copiado';
+                botonElement.style.background = '#28a745';
+                botonElement.style.transform = 'scale(0.95)';
+                
+                // Restaurar el botón después de 2 segundos
+                setTimeout(() => {
+                    botonElement.innerHTML = textoOriginal;
+                    botonElement.style.background = colorOriginal;
+                    botonElement.style.transform = 'scale(1)';
+                }, 2000);
+                
+                // Mostrar notificación
+                mostrarNotificacion('📋 Comando copiado al portapapeles', 'success', 2000, 'Comando ACS');
+                
+                console.log('✅ Comando ACS copiado:', comandoLimpio);
+                
+            } catch (error) {
+                console.error('❌ Error al copiar comando ACS:', error);
+                mostrarNotificacion('❌ Error al copiar comando', 'error', 3000, 'Error de Copia');
             }
         }
 
@@ -9175,12 +9297,20 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
         console.log('🎯 Parche aplicado. La gestión de roles ahora funcionará correctamente.');
     </script>
     
-    <!-- Nuevos sistemas -->
+    <!-- Sistemas principales -->
     <script src="/dashboard-charts.js"></script>
     <script src="/notification-system.js"></script>
     <script src="/reports-analytics.js"></script>
-    <script src="/theme-system.js"></script>
     <script src="/automation-system.js"></script>
+    
+    <!-- Sistema de modo oscuro -->
+    <script src="/elegant-dark-mode.js"></script>
+    <script src="/force-commands-dark.js"></script>
+    <script src="/adaptive-colors.js"></script>
+    
+    <!-- Sistemas de funcionalidad -->
+    <script src="/diagnostico-tareas.js"></script>
+    <script src="/fix-tareas-login.js"></script>
     
     <!-- Registro de Service Worker para PWA -->
     <script>
@@ -9342,6 +9472,29 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                 localStorage.setItem('v2-features-shown', 'true');
             }
         }, 3000);
+
+        // Función para alternar entre tema claro y oscuro ELEGANTE
+        function toggleTheme() {
+            console.log('� Toggle tema elegante clicked');
+            
+            // Usar el nuevo sistema elegante
+            if (typeof toggleElegantDarkMode === 'function') {
+                console.log('✨ Usando modo oscuro elegante');
+                toggleElegantDarkMode();
+                return;
+            }
+            
+            console.log('❌ Sistema elegante no disponible');
+        }
+
+        // Función para actualizar el icono del botón de tema
+        function updateThemeButton(icon) {
+            const themeBtn = document.querySelector('.theme-toggle-btn');
+            if (themeBtn) {
+                themeBtn.innerHTML = icon;
+                themeBtn.title = icon === '🌙' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro';
+            }
+        }
     </script>
 </body>
 </html>

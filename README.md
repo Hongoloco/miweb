@@ -1,25 +1,29 @@
-# 🌐 Sistema de Desarrollo de Servicios Residenciales
+# 🌐 Sistema OLT Antel
 
-Sistema integral para la gestión de equipos OLT, comandos de telecomunicaciones y tareas operativas.
+Sistema integral para la gestión de equipos OLT, comandos de telecomunicaciones, modelos ACS y tareas operativas con modo oscuro avanzado.
 
-## 🚀 Características
+## 🚀 Características Principales
 
-- ✅ **Gestión de OLTs ZTE C600/C300**
-- ✅ **Sistema de comandos telecomunicaciones**  
-- ✅ **Dashboard con analytics en tiempo real**
-- ✅ **Sistema de usuarios y roles**
-- ✅ **Gestión de tareas y seguimiento**
-- ✅ **PWA (Progressive Web App)**
-- ✅ **Notificaciones en tiempo real (SSE)**
-- ✅ **Sistema de temas (claro/oscuro)**
+- ✅ **Gestión de OLTs ZTE C600/C300** - Configuración y gestión completa
+- ✅ **Sistema de comandos telecomunicaciones** - Generación automática  
+- ✅ **Modelos ACS** - Gestión de modelos con comandos personalizables
+- ✅ **Dashboard con analytics en tiempo real** - Métricas y estadísticas
+- ✅ **Sistema de usuarios y roles** - Control de acceso granular
+- ✅ **Gestión de tareas y seguimiento** - Workflow operativo
+- ✅ **PWA (Progressive Web App)** - Instalable y offline
+- ✅ **Notificaciones en tiempo real (SSE)** - Updates automáticos
+- ✅ **Modo Oscuro Inteligente** - Adaptación automática de colores
+- ✅ **Sistema de Auditoría** - Trazabilidad completa
+- ✅ **Copiar Comandos** - Funcionalidad de portapapeles integrada
 
 ## 🛠️ Tecnologías
 
-- **Backend:** Node.js + Express
-- **Base de datos:** SQLite3
-- **Frontend:** HTML5 + CSS3 + JavaScript vanilla
+- **Backend:** Node.js + Express + SQLite3
+- **Frontend:** HTML5 + CSS3 + JavaScript ES6+
 - **Autenticación:** bcrypt + express-session
 - **Tiempo real:** Server-Sent Events (SSE)
+- **PWA:** Service Workers + Web App Manifest
+- **Modo Oscuro:** Sistema CSS + JavaScript adaptativo
 
 ## 📦 Instalación
 

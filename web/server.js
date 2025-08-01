@@ -42,6 +42,12 @@ app.use('/reports-analytics.js', express.static(path.join(__dirname, 'reports-an
 app.use('/sw-notifications.js', express.static(path.join(__dirname, 'sw-notifications.js')));
 app.use('/theme-system.js', express.static(path.join(__dirname, 'theme-system.js')));
 app.use('/automation-system.js', express.static(path.join(__dirname, 'automation-system.js')));
+app.use('/elegant-dark-mode.js', express.static(path.join(__dirname, 'elegant-dark-mode.js')));
+app.use('/test-dark-mode.js', express.static(path.join(__dirname, 'test-dark-mode.js')));
+app.use('/force-commands-dark.js', express.static(path.join(__dirname, 'force-commands-dark.js')));
+app.use('/diagnostico-tareas.js', express.static(path.join(__dirname, 'diagnostico-tareas.js')));
+app.use('/fix-tareas-login.js', express.static(path.join(__dirname, 'fix-tareas-login.js')));
+app.use('/adaptive-colors.js', express.static(path.join(__dirname, 'adaptive-colors.js')));
 app.use('/sw.js', express.static(path.join(__dirname, 'sw.js')));
 app.use('/manifest.json', express.static(path.join(__dirname, 'manifest.json')));
 
