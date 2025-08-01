@@ -678,6 +678,37 @@
             border: 1px solid var(--border-color) !important;
         }
 
+        /* ===== ESTILOS DROPDOWN USUARIO TEMA OSCURO ===== */
+        body.dark-theme .user-info {
+            background: var(--bg-secondary) !important;
+            border: 1px solid var(--border-color) !important;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3) !important;
+        }
+
+        body.dark-theme .user-header:hover {
+            background: var(--hover-bg) !important;
+        }
+
+        body.dark-theme .user-dropdown {
+            border-top-color: var(--border-color) !important;
+        }
+
+        body.dark-theme .user-dropdown-item {
+            color: var(--text-primary) !important;
+        }
+
+        body.dark-theme .user-dropdown-item:hover {
+            background: var(--hover-bg) !important;
+        }
+
+        body.dark-theme #userDisplay {
+            color: var(--text-primary) !important;
+        }
+
+        body.dark-theme .dropdown-arrow {
+            color: var(--text-secondary) !important;
+        }
+
         /* Selector más específico para las tarjetas del dashboard */
         body.dark-theme .metric-card[style*="background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%)"],
         body.dark-theme .metric-card[style*="background: linear-gradient(145deg, #f3e5f5 0%, #e1bee7 100%)"],
@@ -1318,17 +1349,84 @@
             top: 20px;
             right: 20px;
             background: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 4px 8px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
             z-index: 1000;
             display: none;
+            min-width: 110px;
+            font-size: 11px;
         }
 
         .user-info.show {
+            display: block;
+        }
+
+        .user-header {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 6px;
+            cursor: pointer;
+            padding: 1px 4px;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+
+        .user-header:hover {
+            background: var(--hover-bg, rgba(0,0,0,0.05));
+        }
+
+        .user-dropdown {
+            display: none;
+            margin-top: 4px;
+            padding-top: 4px;
+            border-top: 1px solid var(--border-color, #e0e0e0);
+            animation: slideDown 0.15s ease;
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .user-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+            margin: 1px 0;
+            font-size: 10px;
+        }
+
+        .user-dropdown-item:hover {
+            background: var(--hover-bg, rgba(0,0,0,0.05));
+        }
+
+        .user-dropdown-item span:first-child {
+            font-size: 9px;
+        }
+
+        .dropdown-arrow {
+            transition: transform 0.15s ease;
+            font-size: 7px;
+            color: var(--text-secondary, #666);
+        }
+
+        .dropdown-arrow.rotated {
+            transform: rotate(180deg);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .logout-btn {
@@ -1625,19 +1723,19 @@
         .notification-container {
             position: fixed;
             bottom: 20px;
-            right: 20px;
+            left: 20px;
             z-index: 10002;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            max-width: 420px;
+            gap: 10px;
+            max-width: 280px;
         }
 
         .notification {
             background: white;
-            border-radius: 16px;
-            padding: 22px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            border-radius: 12px;
+            padding: 12px 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: flex-start;
             gap: 18px;
@@ -1700,7 +1798,7 @@
         }
 
         .notification-icon {
-            font-size: 28px;
+            font-size: 18px;
             flex-shrink: 0;
             animation: notificationIconBounce 0.6s ease 0.2s both;
         }
@@ -1738,26 +1836,26 @@
 
         .notification-title {
             font-weight: 700;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             color: #ffffff !important;
-            font-size: 16px;
+            font-size: 13px;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
 
         .notification-message {
-            font-size: 15px;
+            font-size: 12px;
             color: #e2e8f0 !important;
-            line-height: 1.5;
+            line-height: 1.4;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
 
         .notification-close {
             background: none;
             border: none;
-            font-size: 20px;
+            font-size: 16px;
             cursor: pointer;
             color: #999;
-            padding: 8px;
+            padding: 4px;
             border-radius: 50%;
             transition: all 0.3s ease;
             width: 36px;
@@ -1997,30 +2095,30 @@
             }
             
             .toast-container {
-                left: 20px;
-                right: 20px;
-                top: 20px;
-                max-width: none;
+                right: 10px !important;
+                bottom: 20px !important;
+                left: auto !important;
+                max-width: 250px;
             }
             
             .notification-container {
                 left: 10px;
-                right: 10px;
-                bottom: 10px;
-                max-width: none;
+                right: auto;
+                bottom: 20px;
+                max-width: 250px;
             }
             
             .notification {
-                margin-bottom: 10px;
-                padding: 18px;
-                border-radius: 12px;
+                margin-bottom: 8px;
+                padding: 10px 12px;
+                border-radius: 10px;
             }
             
             .notification-container {
-                left: 20px;
-                right: 20px;
-                top: 20px;
-                max-width: none;
+                left: 15px;
+                right: auto;
+                bottom: 15px;
+                max-width: 260px;
             }
         }
 
@@ -3357,9 +3455,28 @@
 
     <!-- ===== INFO DE USUARIO ===== -->
     <div class="user-info" id="userInfo">
-        <button class="theme-toggle-btn" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
-        <span id="userDisplay"></span>
-        <button class="logout-btn" onclick="logout()">🚪 Salir</button>
+        <div class="user-header" id="userHeader" onclick="toggleUserDropdown()">
+            <span id="userDisplay"></span>
+            <span class="dropdown-arrow" id="dropdownArrow">▼</span>
+        </div>
+        <div class="user-dropdown" id="userDropdown">
+            <div class="user-dropdown-item" onclick="showUserProfile()" title="Ver perfil">
+                <span>👤</span>
+                <span>Mi Perfil</span>
+            </div>
+            <div class="user-dropdown-item" onclick="toggleTheme()" title="Cambiar tema">
+                <span>🌙</span>
+                <span>Tema</span>
+            </div>
+            <div class="user-dropdown-item" onclick="showSettings()" title="Configuración">
+                <span>⚙️</span>
+                <span>Configuración</span>
+            </div>
+            <div class="user-dropdown-item" onclick="logout()" title="Cerrar sesión">
+                <span>🚪</span>
+                <span>Salir</span>
+            </div>
+        </div>
     </div>
 
     <!-- ===== PANTALLA DE LOGIN ===== -->
@@ -4643,7 +4760,7 @@
                     document.getElementById('loginOverlay').style.display = 'none';
                     document.getElementById('mainContent').classList.add('authenticated');
                     
-                    // Mostrar info de usuario
+                    // Mostrar info de usuario sin rol en el header
                     document.getElementById('userDisplay').textContent = `👤 ${data.user.nombre_completo || data.user.username}`;
                     document.getElementById('userInfo').classList.add('show');
                     
@@ -4813,6 +4930,96 @@
             }
             return false;
         }
+
+        // ===== FUNCIONES PARA DROPDOWN DE USUARIO =====
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            const arrow = document.getElementById('dropdownArrow');
+            
+            if (dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+                arrow.classList.remove('rotated');
+            } else {
+                dropdown.classList.add('show');
+                arrow.classList.add('rotated');
+            }
+        }
+
+        function showUserProfile() {
+            const userJson = sessionStorage.getItem('user');
+            const userData = userJson ? JSON.parse(userJson) : null;
+            
+            if (!userData) {
+                mostrarNotificacion('⚠️ Error al obtener información del usuario', 'warning');
+                toggleUserDropdown();
+                return;
+            }
+            
+            // Determinar el rol correctamente
+            const rolTexto = userData.rol === 'admin' ? 'Administrador' : 'Técnico';
+            const emailTexto = userData.email || 'No disponible';
+            
+            mostrarModal(
+                '👤 Mi Perfil',
+                `<div style="text-align: center; padding: 10px;">
+                    <h4 style="margin: 5px 0; color: var(--text-primary); font-size: 16px;">${userData.username || userData.nombre || 'Usuario'}</h4>
+                    <p style="color: var(--text-secondary); margin: 3px 0; font-size: 13px;">
+                        <strong>Rol:</strong> ${rolTexto}
+                    </p>
+                    <p style="color: var(--text-secondary); margin: 3px 0; font-size: 13px;">
+                        <strong>Email:</strong> ${emailTexto}
+                    </p>
+                    <p style="color: var(--text-muted); margin: 3px 0; font-size: 11px;">
+                        ID: ${userData.id} • Sistema OLT Antel
+                    </p>
+                    <p style="color: var(--text-muted); margin: 2px 0; font-size: 10px;">
+                        Sesión: ${new Date().toLocaleDateString()}
+                    </p>
+                </div>`,
+                null,
+                'info'
+            );
+            toggleUserDropdown(); // Cerrar dropdown
+        }
+
+        function showSettings() {
+            mostrarModal(
+                '⚙️',
+                `<div style="padding: 6px;">
+                    <div style="margin: 3px 0; font-size: 11px;">
+                        <label style="color: var(--text-secondary); display: flex; align-items: center;">
+                            <input type="checkbox" checked style="margin-right: 4px; transform: scale(0.8);"> 
+                            Notificaciones
+                        </label>
+                    </div>
+                    <div style="margin: 3px 0; font-size: 11px;">
+                        <label style="color: var(--text-secondary); display: flex; align-items: center;">
+                            <input type="checkbox" style="margin-right: 4px; transform: scale(0.8);"> 
+                            Sonidos
+                        </label>
+                    </div>
+                    <div style="margin: 3px 0; font-size: 11px;">
+                        <label style="color: var(--text-secondary); display: flex; align-items: center;">
+                            <input type="checkbox" checked style="margin-right: 4px; transform: scale(0.8);"> 
+                            Auto-guardar
+                        </label>
+                    </div>
+                </div>`,
+                null,
+                'info'
+            );
+            toggleUserDropdown(); // Cerrar dropdown
+        }
+
+        // Cerrar dropdown al hacer clic fuera
+        document.addEventListener('click', function(event) {
+            const userInfo = document.getElementById('userInfo');
+            const dropdown = document.getElementById('userDropdown');
+            
+            if (!userInfo.contains(event.target) && dropdown.classList.contains('show')) {
+                toggleUserDropdown();
+            }
+        });
 
         // Función para cerrar sesión - con modal estandarizado y limpieza
         function logout() {
@@ -7335,13 +7542,13 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                 container.className = 'toast-container';
                 container.style.cssText = `
                     position: fixed;
-                    top: 20px;
+                    bottom: 20px;
                     right: 20px;
                     z-index: 10005;
                     display: flex;
                     flex-direction: column;
-                    gap: 12px;
-                    max-width: 400px;
+                    gap: 8px;
+                    max-width: 280px;
                 `;
                 document.body.appendChild(container);
             }
@@ -7351,18 +7558,19 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
             toast.style.cssText = `
                 background: linear-gradient(135deg, #2d3748, #1a202c);
                 color: #ffffff;
-                border-radius: 12px;
-                padding: 16px 20px;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+                border-radius: 8px;
+                padding: 10px 14px;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
                 display: flex;
                 align-items: center;
-                gap: 12px;
-                animation: toastSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-                border-left: 4px solid;
-                backdrop-filter: blur(10px);
+                gap: 8px;
+                animation: toastSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+                border-left: 3px solid;
+                backdrop-filter: blur(8px);
                 max-width: 100%;
                 word-wrap: break-word;
                 border: 1px solid #4a5568;
+                font-size: 12px;
             `;
 
             const colores = {
@@ -10572,6 +10780,20 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                 themeBtn.innerHTML = icon;
                 themeBtn.title = icon === '🌙' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro';
             }
+            
+            // También actualizar el icono en el dropdown de usuario
+            const dropdownItems = document.querySelectorAll('.user-dropdown-item');
+            dropdownItems.forEach(item => {
+                const span = item.querySelector('span');
+                if (span && (span.textContent === '🌙' || span.textContent === '☀️')) {
+                    span.textContent = icon;
+                }
+                // Actualizar también el texto del elemento
+                const textSpan = item.querySelector('span:last-child');
+                if (textSpan && textSpan.textContent === 'Cambiar Tema') {
+                    item.title = icon === '🌙' ? 'Cambiar a tema oscuro' : 'Cambiar a tema claro';
+                }
+            });
         }
 
         // ===== SISTEMA SIMPLIFICADO PARA PRESERVAR COLORES DE EMOJIS =====
