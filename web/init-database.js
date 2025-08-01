@@ -193,12 +193,70 @@ db.serialize(() => {
     console.log('🔐 Usuario por defecto:');
     console.log('   Username: alito');
     console.log('   Password: 123');
-});
-
-db.close((err) => {
-    if (err) {
-        console.error('❌ Error al cerrar la base de datos:', err.message);
-    } else {
-        console.log('🔒 Conexión a base de datos cerrada.');
+    console.log('');
+    console.log('🔧 Restaurando comandos ZTE C600 automáticamente...');
+    
+    // Restaurar comandos ZTE C600 automáticamente
+    const fs = require('fs');
+    const ztePath = path.join(__dirname, '..', 'docs', 'ZTE C600-2025-07-22.json');
+    
+    try {
+        if (fs.existsSync(ztePath)) {
+            const zteData = JSON.parse(fs.readFileSync(ztePath, 'utf8'));
+            const oltId = zteData.id || 'olt-zte-c600-restored';
+            
+            // Crear la OLT
+            db.run(`INSERT OR REPLACE INTO olts (id, nombre, shelf, slot, port, onu_id) 
+                    VALUES (?, ?, ?, ?, ?, ?)`, 
+                    [oltId, zteData.nombre, zteData.shelf, zteData.slot, zteData.port, zteData.onuId], 
+                    function() {
+                
+                console.log(`📡 OLT creada/actualizada: ${zteData.nombre}`);
+                
+                // Insertar cada comando
+                let insertedCount = 0;
+                zteData.comandos.forEach((comando, index) => {
+                    const lineasSinComentarios = comando.lines.filter(line => !line.trim().startsWith('#'));
+                    const comandoJson = JSON.stringify(lineasSinComentarios);
+                    
+                    db.run(`INSERT INTO comandos (olt_id, nombre, descripcion, comandos_json, orden) 
+                            VALUES (?, ?, ?, ?, ?)`, 
+                            [oltId, comando.summary, 'Comando ZTE C600', comandoJson, index + 1], 
+                            function(err) {
+                        if (!err) {
+                            insertedCount++;
+                            if (insertedCount === zteData.comandos.length) {
+                                console.log(`✅ ${insertedCount} comandos ZTE C600 restaurados automáticamente`);
+                                db.close((err) => {
+                                    if (err) {
+                                        console.error('❌ Error al cerrar la base de datos:', err.message);
+                                    } else {
+                                        console.log('🔒 Conexión a base de datos cerrada.');
+                                    }
+                                });
+                            }
+                        }
+                    });
+                });
+            });
+        } else {
+            console.log('⚠️ Archivo de comandos ZTE no encontrado, comandos no restaurados automáticamente');
+            db.close((err) => {
+                if (err) {
+                    console.error('❌ Error al cerrar la base de datos:', err.message);
+                } else {
+                    console.log('🔒 Conexión a base de datos cerrada.');
+                }
+            });
+        }
+    } catch (error) {
+        console.error('❌ Error restaurando comandos automáticamente:', error.message);
+        db.close((err) => {
+            if (err) {
+                console.error('❌ Error al cerrar la base de datos:', err.message);
+            } else {
+                console.log('🔒 Conexión a base de datos cerrada.');
+            }
+        });
     }
 });

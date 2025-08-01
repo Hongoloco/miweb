@@ -1,0 +1,89 @@
+{
+  "fecha_backup": "2025-08-01T12:23:03.512Z",
+  "olts": [
+    {
+      "id": "olt-1747418871049",
+      "nombre": "ZTE C600",
+      "shelf": 1,
+      "slot": 13,
+      "port": 4,
+      "onu_id": 38,
+      "ip_address": null,
+      "modelo": "ZTE C600",
+      "ubicacion": null,
+      "estado": "activa",
+      "comandos": [
+        {
+          "nombre": "Factory Reset",
+          "descripcion": "Comando ZTE C600",
+          "comandos_json": "[\"pon-onu-mng gpon_onu-{shelf}/{slot}/{port}:{onuId}\",\"restore factory\"]",
+          "categoria": "general",
+          "orden": 1
+        },
+        {
+          "nombre": "Ver la base de ONU's",
+          "descripcion": "Comando ZTE C600",
+          "comandos_json": "[\"pon-onu-mng gpon_onu-1/13/4:2\",\"show gpon onu baseinfo gpon_olt-{shelf}/{slot}/{port}:{onuId}\"]",
+          "categoria": "general",
+          "orden": 2
+        },
+        {
+          "nombre": "Ver configuración de la ONU en la ONT",
+          "descripcion": "Comando ZTE C600",
+          "comandos_json": "[\"show collection pon-onu gpon_onu-{shelf}/{slot}/{port}:{onuId} config\"]",
+          "categoria": "general",
+          "orden": 3
+        },
+        {
+          "nombre": "Configurar en modo bridge (desde modo router)",
+          "descripcion": "Comando ZTE C600",
+          "comandos_json": "[\"pon-onu-mng gpon_onu-{shelf}/{slot}/{port}:{onuId}\",\"no wan-ip\",\"dhcp-ip ethuni eth_0/1 from-internet\",\"dhcp-ip ethuni eth_0/2 from-internet\",\"dhcp-ip ethuni eth_0/3 from-internet\",\"dhcp-ip ethuni eth_0/4 from-internet\",\"vlan port eth_0/1 mode tag vlan 10\",\"vlan port eth_0/2 mode tag vlan 10\",\"vlan port eth_0/3 mode tag vlan 10\",\"vlan port eth_0/4 mode tag vlan 10\",\"interface wifi wifi_0/1 arc disable arc-interval 0 state lock\",\"interface wifi wifi_0/2 arc disable arc-interval 0 state lock\",\"interface wifi wifi_0/3 arc disable arc-interval 0 state lock\",\"interface wifi wifi_0/4 arc disable arc-interval 0 state lock\",\"interface wifi wifi_0/5 arc disable arc-interval 0 state lock\",\"interface wifi wifi_0/6 arc disable arc-interval 0 state lock\",\"interface wifi wifi_0/7 arc disable arc-interval 0 state lock\",\"interface wifi wifi_0/8 arc disable arc-interval 0 state lock\",\"exit\"]",
+          "categoria": "general",
+          "orden": 4
+        },
+        {
+          "nombre": "Configurar en modo bridge (desde modo router) (Copia)",
+          "descripcion": "Comando ZTE C600",
+          "comandos_json": "[\"pon-onu-mng gpon_onu-{shelf}/{slot}/{port}:{onuId}\",\"no wan-ip\",\"dhcp-ip ethuni eth_0/1 from-internet\",\"dhcp-ip ethuni eth_0/2 from-internet\",\"dhcp-ip ethuni eth_0/3 from-internet\",\"dhcp-ip ethuni eth_0/4 from-internet\",\"vlan port eth_0/1 mode tag vlan 10\",\"vlan port eth_0/2 mode tag vlan 10\",\"vlan port eth_0/3 mode tag vlan 10\",\"vlan port eth_0/4 mode tag vlan 10\",\"interface wifi wifi_0/1 arc disable arc-interval 0 state lock\",\"interface wifi wifi_0/2 arc disable arc-interval 0 state lock\",\"interface wifi wifi_0/3 arc disable arc-interval 0 state lock\",\"interface wifi wifi_0/4 arc disable arc-interval 0 state lock\",\"interface wifi wifi_0/5 arc disable arc-interval 0 state lock\",\"interface wifi wifi_0/6 arc disable arc-interval 0 state lock\",\"interface wifi wifi_0/7 arc disable arc-interval 0 state lock\",\"interface wifi wifi_0/8 arc disable arc-interval 0 state lock\",\"exit\"]",
+          "categoria": "general",
+          "orden": 5
+        },
+        {
+          "nombre": "Configurar en modo bridge (desde modo router) (Copia)",
+          "descripcion": "Comando ZTE C600",
+          "comandos_json": "[\"pon-onu-mng gpon_onu-{shelf}/{slot}/{port}:{onuId}\",\"no wan-ip\",\"dhcp-ip ethuni eth_0/1 from-internet\",\"dhcp-ip ethuni eth_0/2 from-internet\",\"dhcp-ip ethuni eth_0/3 from-internet\",\"dhcp-ip ethuni eth_0/4 from-internet\",\"vlan port eth_0/1 mode tag vlan 10\",\"vlan port eth_0/2 mode tag vlan 10\",\"vlan port eth_0/3 mode tag vlan 10\",\"vlan port eth_0/4 mode tag vlan 10\",\"interface wifi wifi_0/1 arc disable arc-interval 0 state lock\",\"interface wifi wifi_0/2 arc disable arc-interval 0 state lock\",\"interface wifi wifi_0/3 arc disable arc-interval 0 state lock\",\"interface wifi wifi_0/4 arc disable arc-interval 0 state lock\",\"interface wifi wifi_0/5 arc disable arc-interval 0 state lock\",\"interface wifi wifi_0/6 arc disable arc-interval 0 state lock\",\"interface wifi wifi_0/7 arc disable arc-interval 0 state lock\",\"interface wifi wifi_0/8 arc disable arc-interval 0 state lock\",\"exit\"]",
+          "categoria": "general",
+          "orden": 6
+        },
+        {
+          "nombre": "Volverla a Configurar en modo router (desde modo bridge)",
+          "descripcion": "Comando ZTE C600",
+          "comandos_json": "[\"pon-onu-mng gpon_onu-{shelf}/{slot}/{port}:{onuId}\",\"wan-ip ipv4 mode inner vlan-profile vlanHSI host 1\",\"dhcp-ip ethuni eth_0/1 from-onu\",\"dhcp-ip ethuni eth_0/2 from-onu\",\"dhcp-ip ethuni eth_0/3 from-onu\",\"dhcp-ip ethuni eth_0/4 from-onu\",\"no vlan port eth_0/1 mode\",\"no vlan port eth_0/2 mode\",\"no vlan port eth_0/3 mode\",\"no vlan port eth_0/4 mode\",\"interface wifi wifi_0/1 arc disable arc-interval 0 state unlock\",\"interface wifi wifi_0/5 arc disable arc-interval 0 state unlock\",\"interface wifi wifi_0/8 arc disable arc-interval 0 state unlock\",\"exit\"]",
+          "categoria": "general",
+          "orden": 7
+        },
+        {
+          "nombre": "Ver configuracion ONU",
+          "descripcion": "Comando ZTE C600",
+          "comandos_json": "[\"pon-onu-mng gpon_onu-1/13/4:1\",\"show collection pon-onu gpon_onu-{shelf}/{slot}/{port}:{onuId} config\"]",
+          "categoria": "general",
+          "orden": 8
+        },
+        {
+          "nombre": "Ver estado de la linea VoiP",
+          "descripcion": "Comando ZTE C600",
+          "comandos_json": "[\"show gpon remote-onu voip-linestatus gpon_onu-{shelf}/{slot}/{port}:{onuId}\",\"\"]",
+          "categoria": "general",
+          "orden": 9
+        },
+        {
+          "nombre": "Ver IP de Voip",
+          "descripcion": "Comando ZTE C600",
+          "comandos_json": "[\"show gpon remote-onu voip-ip gpon_onu-{shelf}/{slot}/{port}\"]",
+          "categoria": "general",
+          "orden": 10
+        }
+      ]
+    }
+  ]
+}
