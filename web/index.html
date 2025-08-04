@@ -709,6 +709,151 @@
             color: var(--text-secondary) !important;
         }
 
+        /* ===== ESTILOS PARA DROPDOWN DE GESTIÓN DE USUARIOS EN MODO OSCURO ===== */
+        body.dark-theme #userDropdownMenu {
+            background-color: var(--bg-secondary) !important;
+            border: 1px solid var(--border-color) !important;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5) !important;
+        }
+
+        body.dark-theme #userDropdownMenu a {
+            color: var(--text-primary) !important;
+            border-bottom: 1px solid var(--border-color) !important;
+        }
+
+        body.dark-theme #userDropdownMenu a:hover {
+            background-color: var(--bg-tertiary) !important;
+        }
+
+        body.dark-theme #userDropdownMenu a div div[style*="color: #666"] {
+            color: var(--text-muted) !important;
+        }
+
+        /* Sobrescribir estilos inline específicos del dropdown de usuarios */
+        body.dark-theme .dropdown-content-user[style*="background-color: white"] {
+            background-color: var(--bg-secondary) !important;
+        }
+
+        body.dark-theme .dropdown-content-user a[style*="color: #333"] {
+            color: var(--text-primary) !important;
+        }
+
+        body.dark-theme .dropdown-content-user a[style*="border-bottom: 1px solid #f0f0f0"] {
+            border-bottom: 1px solid var(--border-color) !important;
+        }
+
+        /* ===== ESTILOS PARA MODAL AGREGAR MODELO ACS EN MODO OSCURO ===== */
+        body.dark-theme #modalAgregarModelo div[style*="background: white"] {
+            background: var(--bg-secondary) !important;
+        }
+
+        body.dark-theme #modalAgregarModelo h3[style*="color: var(--azul-antel)"] {
+            color: var(--primary-dark) !important;
+        }
+
+        body.dark-theme #modalAgregarModelo button[style*="color: #666"] {
+            color: var(--text-muted) !important;
+        }
+
+        body.dark-theme #modalAgregarModelo label {
+            color: var(--text-primary) !important;
+        }
+
+        body.dark-theme #modalAgregarModelo input,
+        body.dark-theme #modalAgregarModelo select,
+        body.dark-theme #modalAgregarModelo textarea {
+            background: var(--bg-tertiary) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+
+        body.dark-theme #modalAgregarModelo input::placeholder,
+        body.dark-theme #modalAgregarModelo textarea::placeholder {
+            color: var(--text-muted) !important;
+        }
+
+        body.dark-theme #modalAgregarModelo div[style*="background: #e8f5e8"] {
+            background: var(--bg-quaternary) !important;
+            border-left: 4px solid var(--success-dark) !important;
+        }
+
+        body.dark-theme #modalAgregarModelo div[style*="color: #2e7d32"] {
+            color: var(--text-secondary) !important;
+        }
+
+        /* ===== ESTILOS ESPECÍFICOS PARA CLASES MODAL ACS ===== */
+        .modal-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #ffffff !important;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #4a5568;
+            border-radius: 6px;
+            background: #2d3748;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: #4dabf7;
+            box-shadow: 0 0 0 2px rgba(77, 171, 247, 0.2);
+        }
+
+        .modal-input::placeholder {
+            color: #a0aec0;
+        }
+
+        .modal-subtitle {
+            margin: 0;
+            color: #ffffff !important;
+            font-size: 16px;
+        }
+
+        .modal-info-box {
+            margin-top: 10px;
+            padding: 15px;
+            background: #2d3748;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #e2e8f0 !important;
+            border-left: 4px solid #4dabf7;
+        }
+
+        .modal-info-box strong {
+            color: #ffffff !important;
+        }
+
+        /* Adaptación para modo claro */
+        body:not(.dark-theme) .modal-input {
+            background: #ffffff;
+            color: #333333;
+            border: 1px solid #ddd;
+        }
+
+        body:not(.dark-theme) .modal-label {
+            color: #333333 !important;
+        }
+
+        body:not(.dark-theme) .modal-subtitle {
+            color: #333333 !important;
+        }
+
+        body:not(.dark-theme) .modal-info-box {
+            background: #e8f5e8;
+            color: #2e7d32 !important;
+            border-left: 4px solid #4caf50;
+        }
+
+        body:not(.dark-theme) .modal-info-box strong {
+            color: #2e7d32 !important;
+        }
+
         /* Selector más específico para las tarjetas del dashboard */
         body.dark-theme .metric-card[style*="background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%)"],
         body.dark-theme .metric-card[style*="background: linear-gradient(145deg, #f3e5f5 0%, #e1bee7 100%)"],
@@ -5434,17 +5579,17 @@ CNL URCNL: TYPE=IMPU,IMPU="tel:+59898465369";`;
         // Función para mostrar el modal de agregar modelo
         function mostrarModalAgregarModelo() {
             const modalHTML = `
-                <div id="modalAgregarModelo" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; display: flex; align-items: center; justify-content: center;">
-                    <div style="background: white; padding: 30px; border-radius: 12px; max-width: 800px; width: 90%; max-height: 90%; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                <div class="modal-overlay" id="modalAgregarModelo" style="display: flex;">
+                    <div class="modal-content" style="max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                            <h3 style="margin: 0; color: var(--azul-antel);">➕ Agregar Nuevo Modelo ONT</h3>
-                            <button onclick="cerrarModalAgregarModelo()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">×</button>
+                            <h3 class="modal-title">➕ Agregar Nuevo Modelo ONT</h3>
+                            <button onclick="cerrarModalAgregarModelo()" class="modal-btn modal-btn-secondary" style="padding: 5px 10px; border-radius: 50%;">×</button>
                         </div>
                         
                         <form id="formAgregarModelo">
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                                 <div>
-                                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">* Fabricante:</label>
+                                    <label class="modal-label">* Fabricante:</label>
                                     <select id="nuevoFabricante" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                                         <option value="">Seleccione fabricante...</option>
                                         <option value="ZTE">ZTE</option>
@@ -10485,6 +10630,7 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
     <!-- Sistemas de funcionalidad -->
     <script src="/diagnostico-tareas.js"></script>
     <script src="/fix-tareas-login.js"></script>
+    <script src="/elegant-dark-mode.js"></script>
     
     <!-- Registro de Service Worker para PWA -->
     <script>
@@ -10694,6 +10840,29 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                     }
                 });
                 
+                // Aplicar estilos específicos al dropdown de gestión de usuarios
+                const userDropdown = document.getElementById('userDropdownMenu');
+                if (userDropdown) {
+                    userDropdown.style.setProperty('background-color', '#2a2a2a', 'important');
+                    userDropdown.style.setProperty('border', '1px solid #495057', 'important');
+                    userDropdown.style.setProperty('box-shadow', '0px 8px 16px 0px rgba(0,0,0,0.5)', 'important');
+                    
+                    // Aplicar estilos a los enlaces dentro del dropdown
+                    const dropdownLinks = userDropdown.querySelectorAll('a');
+                    dropdownLinks.forEach(link => {
+                        link.style.setProperty('color', '#ffffff', 'important');
+                        link.style.setProperty('border-bottom', '1px solid #495057', 'important');
+                        
+                        // Cambiar textos descriptivos (color: #666)
+                        const descriptions = link.querySelectorAll('div[style*="color: #666"]');
+                        descriptions.forEach(desc => {
+                            desc.style.setProperty('color', '#adb5bd', 'important');
+                        });
+                    });
+                    
+                    console.log('✅ Dropdown de usuarios actualizado para modo oscuro');
+                }
+                
                 console.log('✅ Estilos de tema oscuro aplicados completamente');
             } else {
                 console.log('☀️ Aplicando tema claro...');
@@ -10720,6 +10889,30 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                     }
                 });
                 
+                // Restaurar estilos del dropdown de gestión de usuarios
+                const userDropdown = document.getElementById('userDropdownMenu');
+                if (userDropdown) {
+                    // Restaurar valores originales del HTML inline
+                    userDropdown.style.setProperty('background-color', 'white', 'important');
+                    userDropdown.style.setProperty('border', '1px solid #e1e5e9', 'important');
+                    userDropdown.style.setProperty('box-shadow', '0px 8px 16px 0px rgba(0,0,0,0.2)', 'important');
+                    
+                    // Restaurar estilos de los enlaces
+                    const dropdownLinks = userDropdown.querySelectorAll('a');
+                    dropdownLinks.forEach(link => {
+                        link.style.setProperty('color', '#333', 'important');
+                        link.style.setProperty('border-bottom', '1px solid #f0f0f0', 'important');
+                        
+                        // Restaurar textos descriptivos a color original
+                        const descriptions = link.querySelectorAll('div[style*="color: #adb5bd"]');
+                        descriptions.forEach(desc => {
+                            desc.style.setProperty('color', '#666', 'important');
+                        });
+                    });
+                    
+                    console.log('✅ Dropdown de usuarios restaurado para modo claro');
+                }
+                
                 console.log('✅ Estilos de tema claro restaurados');
             }
         }
@@ -10729,12 +10922,19 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
             console.log('🎨 Toggling theme...');
             
             const body = document.body;
-            const isDark = body.classList.contains('dark-theme');
+            const isDark = body.classList.contains('dark-theme') || body.classList.contains('elegant-dark');
             
             if (isDark) {
                 // Cambiar a tema claro
                 body.classList.remove('dark-theme');
                 localStorage.setItem('darkMode', 'false');
+                
+                // También remover el modo elegante si está activo
+                if (typeof removeElegantDarkMode === 'function') {
+                    removeElegantDarkMode();
+                }
+                localStorage.setItem('elegantDarkMode', 'false');
+                
                 updateThemeButton('🌙');
                 console.log('☀️ Tema claro aplicado');
             } else {
@@ -10755,13 +10955,18 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
         // Función para cargar la preferencia de tema al iniciar
         function loadThemePreference() {
             const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            const isElegantDark = localStorage.getItem('elegantDarkMode') === 'true';
             
-            if (isDarkMode) {
+            if (isDarkMode || isElegantDark) {
                 document.body.classList.add('dark-theme');
                 updateThemeButton('☀️');
                 console.log('🌙 Tema oscuro cargado desde preferencias');
             } else {
                 document.body.classList.remove('dark-theme');
+                // Asegurar que el modo elegante también esté desactivado
+                if (typeof removeElegantDarkMode === 'function') {
+                    removeElegantDarkMode();
+                }
                 updateThemeButton('🌙');
                 console.log('☀️ Tema claro cargado desde preferencias');
             }
@@ -10821,6 +11026,7 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                 console.error('❌ Error en preservación de emojis:', error);
             }
         }
+        
         
         // Ejecutar cuando el DOM esté listo
         if (document.readyState === 'loading') {

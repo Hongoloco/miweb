@@ -204,11 +204,67 @@ function applyElegantDarkMode() {
         /* ===== ELEMENTOS CON ESTILOS INLINE ===== */
         body.elegant-dark div[style*="background: #f8f9fa"],
         body.elegant-dark div[style*="background:#f8f9fa"],
+        body.elegant-dark div[style*="background-color: #f8f9fa"],
+        body.elegant-dark div[style*="background-color:#f8f9fa"],
         body.elegant-dark .comando-individual[style*="background: #f8f9fa"],
         body.elegant-dark .comando-individual[style*="background:#f8f9fa"] {
             background: var(--bg-tertiary) !important;
             color: var(--text-primary) !important;
             border-color: var(--border-primary) !important;
+        }
+        
+        /* ===== OVERRIDE ESPECÍFICO PARA CONFIGURACIÓN ===== */
+        body.elegant-dark #configuracion div[style*="background"],
+        body.elegant-dark #configuracion .config-section div[style*="background"],
+        body.elegant-dark .tab-content div[style*="background: #f8f9fa"],
+        body.elegant-dark .tab-content div[style*="background:#f8f9fa"] {
+            background: var(--bg-tertiary) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-primary) !important;
+        }
+        
+        /* ===== DROPDOWN DE USUARIOS ESPECÍFICO ===== */
+        body.elegant-dark .dropdown-content-user,
+        body.elegant-dark #userDropdownMenu,
+        body.elegant-dark .dropdown-content-user a,
+        body.elegant-dark #userDropdownMenu a {
+            background: var(--bg-tertiary) !important;
+            color: var(--text-primary) !important;
+            border-color: var(--border-primary) !important;
+        }
+        
+        body.elegant-dark .dropdown-content-user a:hover,
+        body.elegant-dark #userDropdownMenu a:hover {
+            background: var(--bg-quaternary) !important;
+            color: var(--text-primary) !important;
+        }
+        
+        /* ===== ELEMENTOS CON ESTILOS INLINE FUERTES ===== */
+        body.elegant-dark div[style*="background-color: white"],
+        body.elegant-dark div[style*="background-color:white"],
+        body.elegant-dark div[style*="background: white"],
+        body.elegant-dark div[style*="background:white"],
+        body.elegant-dark a[style*="background-color: white"],
+        body.elegant-dark a[style*="background: white"] {
+            background: var(--bg-tertiary) !important;
+            background-color: var(--bg-tertiary) !important;
+            color: var(--text-primary) !important;
+        }
+        
+        /* ===== GRADIENTES EN MODO OSCURO ===== */
+        body.elegant-dark div[style*="linear-gradient"][style*="#f8f9fa"],
+        body.elegant-dark div[style*="linear-gradient"][style*="#e3f2fd"],
+        body.elegant-dark div[style*="linear-gradient"][style*="#bbdefb"] {
+            background: linear-gradient(145deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%) !important;
+            color: var(--text-primary) !important;
+        }
+        
+        /* ===== TEXTOS CON COLORES CLAROS INLINE ===== */
+        body.elegant-dark p[style*="color: #666"],
+        body.elegant-dark div[style*="color: #666"],
+        body.elegant-dark span[style*="color: #666"],
+        body.elegant-dark h3[style*="color: var(--azul-antel)"] {
+            color: var(--text-secondary) !important;
         }
         
         /* ===== OVERRIDE FUERTE PARA ELEMENTOS INLINE ===== */
@@ -492,6 +548,16 @@ function removeElegantDarkMode() {
     
     document.body.classList.remove('elegant-dark');
     
+    // Limpiar observer
+    if (window.darkModeObserver) {
+        window.darkModeObserver.disconnect();
+        window.darkModeObserver = null;
+    }
+    
+    // Remover clases dark-override
+    const overrideElements = document.querySelectorAll('.dark-override');
+    overrideElements.forEach(el => el.classList.remove('dark-override'));
+    
     // Remover forzado de comandos
     if (typeof removeForceCommandsDarkMode === 'function') {
         removeForceCommandsDarkMode();
@@ -519,12 +585,14 @@ function toggleElegantDarkMode() {
     }
 }
 
-// Cargar preferencia guardada
+// Cargar preferencia guardada - DESHABILITADO para evitar conflictos con sistema principal
+/*
 document.addEventListener('DOMContentLoaded', () => {
     if (localStorage.getItem('elegantDarkMode') === 'true') {
         setTimeout(applyElegantDarkMode, 500);
     }
 });
+*/
 
 // Exportar funciones
 window.applyElegantDarkMode = applyElegantDarkMode;
