@@ -213,40 +213,201 @@
             border: 1px solid var(--border-color) !important;
         }
 
-        /* Enlaces útiles - Tarjetas en modo oscuro */
+        /* Enlaces útiles - Mantener gradientes originales en modo oscuro con mejor contraste */
         body.dark-theme div[style*="background: linear-gradient(145deg, #e8f5e8"] {
-            background: var(--bg-tertiary) !important;
-            border: 1px solid var(--success-color) !important;
+            background: linear-gradient(145deg, #2d4a2d 0%, #1e3a1e 100%) !important;
+            color: #ffffff !important;
         }
 
         body.dark-theme div[style*="background: linear-gradient(145deg, #e3f2fd"] {
-            background: var(--bg-tertiary) !important;
-            border: 1px solid var(--primary-color) !important;
+            background: linear-gradient(145deg, #1e3a5f 0%, #0d2844 100%) !important;
+            color: #ffffff !important;
         }
 
         body.dark-theme div[style*="background: linear-gradient(145deg, #fff3e0"] {
-            background: var(--bg-tertiary) !important;
-            border: 1px solid var(--warning-color) !important;
+            background: linear-gradient(145deg, #5f4a1e 0%, #44350d 100%) !important;
+            color: #ffffff !important;
         }
 
         body.dark-theme div[style*="background: linear-gradient(145deg, #f3e5f5"] {
-            background: var(--bg-tertiary) !important;
-            border: 1px solid #9c27b0 !important;
+            background: linear-gradient(145deg, #4a1e5f 0%, #351044 100%) !important;
+            color: #ffffff !important;
         }
 
         body.dark-theme div[style*="background: linear-gradient(145deg, #fce4ec"] {
-            background: var(--bg-tertiary) !important;
-            border: 1px solid #e91e63 !important;
+            background: linear-gradient(145deg, #5f1e3a 0%, #44102d 100%) !important;
+            color: #ffffff !important;
+        }
+
+        /* Títulos de las tarjetas en modo oscuro */
+        body.dark-theme div[style*="background: linear-gradient(145deg, #e8f5e8"] h3,
+        body.dark-theme div[style*="background: linear-gradient(145deg, #e3f2fd"] h3,
+        body.dark-theme div[style*="background: linear-gradient(145deg, #fff3e0"] h3,
+        body.dark-theme div[style*="background: linear-gradient(145deg, #f3e5f5"] h3,
+        body.dark-theme div[style*="background: linear-gradient(145deg, #fce4ec"] h3 {
+            color: #ffffff !important;
+        }
+
+        /* Párrafos descriptivos en las tarjetas */
+        body.dark-theme div[style*="background: linear-gradient(145deg, #e8f5e8"] p,
+        body.dark-theme div[style*="background: linear-gradient(145deg, #e3f2fd"] p,
+        body.dark-theme div[style*="background: linear-gradient(145deg, #fff3e0"] p,
+        body.dark-theme div[style*="background: linear-gradient(145deg, #f3e5f5"] p,
+        body.dark-theme div[style*="background: linear-gradient(145deg, #fce4ec"] p {
+            color: #e9ecef !important;
         }
 
         /* Nota informativa en modo oscuro */
         body.dark-theme div[style*="background: #f8f9fa"] {
-            background: var(--bg-quaternary) !important;
-            border-left-color: var(--border-color) !important;
+            background: linear-gradient(145deg, #2d3748 0%, #1a202c 100%) !important;
+            border-left-color: var(--primary-color) !important;
+            color: #e2e8f0 !important;
         }
 
         body.dark-theme div[style*="color: #6c757d"] {
-            color: var(--text-muted) !important;
+            color: #cbd5e0 !important;
+        }
+
+        /* ===== GRADIENTES PARA TODAS LAS PESTAÑAS - MODO OSCURO ===== */
+        
+        /* Gradientes de tarjetas de tareas (135deg) */
+        body.dark-theme div[style*="background: linear-gradient(135deg, #667eea"] {
+            background: linear-gradient(135deg, #4a1e5f 0%, #2d1a3a 100%) !important;
+            color: #ffffff !important;
+        }
+
+        body.dark-theme div[style*="background: linear-gradient(135deg, #f093fb"] {
+            background: linear-gradient(135deg, #5f1e3a 0%, #3a1a2d 100%) !important;
+            color: #ffffff !important;
+        }
+
+        body.dark-theme div[style*="background: linear-gradient(135deg, #4facfe"] {
+            background: linear-gradient(135deg, #1e3a5f 0%, #1a2d3a 100%) !important;
+            color: #ffffff !important;
+        }
+
+        body.dark-theme div[style*="background: linear-gradient(135deg, #43e97b"],
+        body.dark-theme div[style*="background: linear-gradient(135deg, #a8edea"] {
+            background: linear-gradient(135deg, #2d4a2d 0%, #1a3a1a 100%) !important;
+            color: #ffffff !important;
+        }
+
+        /* Gradientes de información general */
+        body.dark-theme div[style*="background: linear-gradient(135deg, #f8fff9"],
+        body.dark-theme div[style*="background: linear-gradient(135deg, #f8f9fa"] {
+            background: linear-gradient(135deg, #2d4a2d 0%, #1e3a1e 100%) !important;
+            color: #ffffff !important;
+        }
+
+        body.dark-theme div[style*="background: linear-gradient(135deg, #fff8f8"] {
+            background: linear-gradient(135deg, #5f1e1e 0%, #3a1a1a 100%) !important;
+            color: #ffffff !important;
+        }
+
+        body.dark-theme div[style*="background: linear-gradient(135deg, #fffef8"] {
+            background: linear-gradient(135deg, #5f4a1e 0%, #3a2d1a 100%) !important;
+            color: #ffffff !important;
+        }
+
+        body.dark-theme div[style*="background: linear-gradient(135deg, #f8fcfd"] {
+            background: linear-gradient(135deg, #1e3a5f 0%, #1a2d3a 100%) !important;
+            color: #ffffff !important;
+        }
+
+        /* Gradientes de error/información crítica */
+        body.dark-theme div[style*="background: linear-gradient(135deg, #ff6b6b"] {
+            background: linear-gradient(135deg, #5f1e1e 0%, #3a1010 100%) !important;
+            color: #ffffff !important;
+        }
+
+        /* Botones con gradientes específicos */
+        body.dark-theme div[style*="background: linear-gradient(135deg, #4fc3f7"] {
+            background: linear-gradient(135deg, #1e4a5f 0%, #0d2844 100%) !important;
+            color: #ffffff !important;
+        }
+
+        body.dark-theme div[style*="background: linear-gradient(135deg, #78909c"] {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+            color: #ffffff !important;
+        }
+
+        body.dark-theme div[style*="background: linear-gradient(135deg, #66bb6a"] {
+            background: linear-gradient(135deg, #2d4a2d 0%, #1e3a1e 100%) !important;
+            color: #ffffff !important;
+        }
+
+        body.dark-theme div[style*="background: linear-gradient(135deg, #28a745"] {
+            background: linear-gradient(135deg, #2d4a2d 0%, #1e3a1e 100%) !important;
+            color: #ffffff !important;
+        }
+
+        /* ===== ELEMENTOS ESPECÍFICOS DE PESTAÑAS ADICIONALES ===== */
+        
+        /* Elementos de fondo gris claro que necesitan adaptación */
+        body.dark-theme div[style*="background: #f8f9fa; padding"] {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+            color: #ffffff !important;
+            border: 1px solid var(--border-color) !important;
+        }
+
+        /* Comandos individuales con fondos */
+        body.dark-theme .comando-individual[style*="background: #f8f9fa"] {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+            color: #ffffff !important;
+            border: 1px solid var(--border-color) !important;
+        }
+
+        /* Elementos de logs y contenido técnico */
+        body.dark-theme div[style*="background: #f8f9fa; padding: 15px"] {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+            color: #e2e8f0 !important;
+        }
+
+        /* Containers de información */
+        body.dark-theme div[style*="background: #f8f9fa; padding: 20px"] {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+            color: #ffffff !important;
+        }
+
+        /* Headers y títulos con fondos específicos */
+        body.dark-theme div[style*="background: white; border"] {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+            color: #ffffff !important;
+            border-color: var(--border-color) !important;
+        }
+
+        /* ===== TEXTOS Y ELEMENTOS INTERNOS EN TARJETAS CON GRADIENTES ===== */
+        
+        /* Asegurar legibilidad en todos los gradientes */
+        body.dark-theme div[style*="background: linear-gradient(135deg"] h1,
+        body.dark-theme div[style*="background: linear-gradient(135deg"] h2,
+        body.dark-theme div[style*="background: linear-gradient(135deg"] h3,
+        body.dark-theme div[style*="background: linear-gradient(135deg"] h4,
+        body.dark-theme div[style*="background: linear-gradient(135deg"] h5,
+        body.dark-theme div[style*="background: linear-gradient(135deg"] h6 {
+            color: #ffffff !important;
+        }
+
+        body.dark-theme div[style*="background: linear-gradient(135deg"] p,
+        body.dark-theme div[style*="background: linear-gradient(135deg"] span,
+        body.dark-theme div[style*="background: linear-gradient(135deg"] div {
+            color: #e2e8f0 !important;
+        }
+
+        /* Enlaces y botones dentro de gradientes */
+        body.dark-theme div[style*="background: linear-gradient(135deg"] a {
+            color: #90cdf4 !important;
+        }
+
+        body.dark-theme div[style*="background: linear-gradient(135deg"] a:hover {
+            color: #63b3ed !important;
+        }
+
+        /* Asegurar que los números y métricas se vean bien */
+        body.dark-theme div[style*="background: linear-gradient(135deg"] div[style*="font-size: 32px"],
+        body.dark-theme div[style*="background: linear-gradient(135deg"] div[style*="font-size: 24px"],
+        body.dark-theme div[style*="background: linear-gradient(135deg"] div[style*="font-weight: bold"] {
+            color: #ffffff !important;
         }
 
         /* ===== REGLAS ADICIONALES ESPECÍFICAS PARA MODO OSCURO ===== */
@@ -734,23 +895,21 @@
 
         /* Cards de métricas */
         body.dark-theme .metric-card {
-            background: var(--bg-tertiary) !important;
-            border: 1px solid var(--border-color) !important;
-            box-shadow: var(--shadow) !important;
+            color: #ffffff !important;
         }
 
         /* Sobrescribir estilos inline específicos de métricas */
         body.dark-theme .metric-card[style*="background: linear-gradient"] {
-            background: var(--bg-tertiary) !important;
+            color: #ffffff !important;
         }
 
         /* Textos descriptivos con estilos inline */
         body.dark-theme .metric-card div[style*="font-size: 14px; color: #666"] {
-            color: var(--text-muted) !important;
+            color: #e2e8f0 !important;
         }
 
         body.dark-theme .metric-card div[style*="font-size: 11px; color: #888"] {
-            color: var(--text-muted) !important;
+            color: #cbd5e0 !important;
         }
 
         /* Contadores específicos con colores hardcodeados */
@@ -766,13 +925,14 @@
             color: var(--warning-color) !important;
         }
 
-        /* Cards de gradiente para tareas */
+        /* Cards de gradiente para tareas - Actualizados con nuevos colores elegantes */
         body.dark-theme div[style*="background: linear-gradient(135deg, #667eea"],
         body.dark-theme div[style*="background: linear-gradient(135deg, #f093fb"],
         body.dark-theme div[style*="background: linear-gradient(135deg, #4facfe"],
         body.dark-theme div[style*="background: linear-gradient(135deg, #a8edea"] {
-            background: var(--bg-tertiary) !important;
-            border: 1px solid var(--border-color) !important;
+            color: #ffffff !important;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
         }
 
         /* Parámetros de OLT */
@@ -800,13 +960,14 @@
             color: var(--warning-color) !important;
         }
 
-        /* Fondos de tarjetas de métricas específicas */
+        /* Fondos de tarjetas de métricas específicas - Mantener estilos originales mejorados */
         body.dark-theme div[style*="background: linear-gradient(145deg, #e3f2fd"],
         body.dark-theme div[style*="background: linear-gradient(145deg, #f3e5f5"],
         body.dark-theme div[style*="background: linear-gradient(145deg, #e8f5e8"],
         body.dark-theme div[style*="background: linear-gradient(145deg, #fff3e0"] {
-            background: var(--bg-tertiary) !important;
-            border: 1px solid var(--border-color) !important;
+            color: #ffffff !important;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
         }
 
         /* ===== ESTILOS DROPDOWN USUARIO TEMA OSCURO ===== */
@@ -993,14 +1154,25 @@
             color: #2e7d32 !important;
         }
 
-        /* Selector más específico para las tarjetas del dashboard */
-        body.dark-theme .metric-card[style*="background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%)"],
-        body.dark-theme .metric-card[style*="background: linear-gradient(145deg, #f3e5f5 0%, #e1bee7 100%)"],
-        body.dark-theme .metric-card[style*="background: linear-gradient(145deg, #e8f5e8 0%, #c8e6c9 100%)"],
+        /* Selector más específico para las tarjetas del dashboard - Mantener gradientes originales */
+        body.dark-theme .metric-card[style*="background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%)"] {
+            background: linear-gradient(145deg, #1e3a5f 0%, #2d4a7a 100%) !important;
+            color: #ffffff !important;
+        }
+        
+        body.dark-theme .metric-card[style*="background: linear-gradient(145deg, #f3e5f5 0%, #e1bee7 100%)"] {
+            background: linear-gradient(145deg, #4a1e5f 0%, #6d2a7a 100%) !important;
+            color: #ffffff !important;
+        }
+        
+        body.dark-theme .metric-card[style*="background: linear-gradient(145deg, #e8f5e8 0%, #c8e6c9 100%)"] {
+            background: linear-gradient(145deg, #2d4a2d 0%, #4a6d4a 100%) !important;
+            color: #ffffff !important;
+        }
+        
         body.dark-theme .metric-card[style*="background: linear-gradient(145deg, #fff3e0 0%, #ffcc02 30%)"] {
-            background: var(--bg-tertiary) !important;
-            border: 2px solid var(--border-color) !important;
-            box-shadow: var(--shadow) !important;
+            background: linear-gradient(145deg, #5f4a1e 0%, #7a6d2a 100%) !important;
+            color: #ffffff !important;
         }
 
         /* Asegurar que todos los elementos con estilos inline se adapten */
