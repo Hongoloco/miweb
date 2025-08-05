@@ -171,9 +171,39 @@
 
         /* ===== SECCIONES Y TÍTULOS ===== */
         body.dark-theme .section-title {
-            background: rgba(77, 171, 247, 0.15) !important;
+            background: rgba(77, 171, 247, 0.35) !important;
             color: var(--primary-color) !important;
             border-left-color: var(--primary-color) !important;
+            border: 1px solid rgba(77, 171, 247, 0.3) !important;
+        }
+
+        /* ===== GRADIENTES DE LOADING EN MODO OSCURO ===== */
+        body.dark-theme .loading-skeleton::before,
+        body.dark-theme .skeleton-loader::before,
+        body.dark-theme [style*="linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent)"]::before {
+            background: linear-gradient(90deg, transparent, rgba(135, 206, 250, 0.3), transparent) !important;
+        }
+
+        /* ===== NOTIFICACIONES Y ALERTAS EN MODO OSCURO ===== */
+        body.dark-theme .notification-close:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: var(--text-primary) !important;
+        }
+
+        body.dark-theme .notification-progress {
+            background: linear-gradient(90deg, rgba(77, 171, 247, 0.5), rgba(0, 0, 0, 0.3)) !important;
+        }
+
+        /* ===== ELEMENTOS CON TRANSPARENCIAS PROBLEMÁTICAS ===== */
+        body.dark-theme .vlan-id {
+            background: rgba(77, 171, 247, 0.2) !important;
+            color: var(--primary-color) !important;
+        }
+
+        body.dark-theme .form-grupo input {
+            background: rgba(77, 171, 247, 0.15) !important;
+            border-color: rgba(77, 171, 247, 0.3) !important;
+            color: var(--text-primary) !important;
         }
 
         body.dark-theme .olt-block {
@@ -698,14 +728,22 @@
 
         body.dark-theme .user-dropdown {
             border-top-color: var(--border-color) !important;
+            background: var(--bg-secondary) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 6px !important;
+            padding: 4px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
         }
 
         body.dark-theme .user-dropdown-item {
             color: var(--text-primary) !important;
+            background: transparent !important;
+            border-radius: 4px !important;
         }
 
         body.dark-theme .user-dropdown-item:hover {
-            background: var(--hover-bg) !important;
+            background: rgba(77, 171, 247, 0.2) !important;
+            color: var(--primary-color) !important;
         }
 
         body.dark-theme #userDisplay {
@@ -1384,10 +1422,11 @@
             flex-direction: row !important;
             align-items: center !important;
             gap: 8px;
-            background: rgba(0, 123, 191, 0.1);
+            background: rgba(0, 123, 191, 0.25);
             padding: 8px 12px;
             border-radius: 6px;
             border-left: 4px solid var(--azul-antel);
+            border: 1px solid rgba(0, 123, 191, 0.2);
         }
         
         .section-title span:first-child {
