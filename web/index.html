@@ -4078,6 +4078,10 @@
                 <span>👤</span>
                 <span>Mi Perfil</span>
             </div>
+            <div class="user-dropdown-item" id="databaseInfo" title="Información de base de datos">
+                <span>💾</span>
+                <span id="databaseTypeDisplay">BD: Principal</span>
+            </div>
             <div class="user-dropdown-item" onclick="toggleTheme()" title="Cambiar tema">
                 <span>🌙</span>
                 <span>Tema</span>
@@ -5377,9 +5381,20 @@
                     document.getElementById('userDisplay').textContent = `👤 ${data.user.nombre_completo || data.user.username}`;
                     document.getElementById('userInfo').classList.add('show');
                     
+                    // Mostrar tipo de base de datos
+                    const dbTypeDisplay = document.getElementById('databaseTypeDisplay');
+                    if (data.databaseType === 'principal') {
+                        dbTypeDisplay.textContent = '💾 BD: Principal (Admin)';
+                        dbTypeDisplay.style.color = '#4dabf7';
+                    } else {
+                        dbTypeDisplay.textContent = '💾 BD: Privada (Usuario)';
+                        dbTypeDisplay.style.color = '#51cf66';
+                    }
+                    
                     // Guardar sesión
                     sessionStorage.setItem('authenticated', 'true');
                     sessionStorage.setItem('user', JSON.stringify(data.user));
+                    sessionStorage.setItem('databaseType', data.databaseType || 'privada');
                     
                     // Siempre ir a la pestaña "inicio" al hacer login
                     showTab('inicio');
@@ -5480,6 +5495,7 @@
         function verificarSesion() {
             const authenticated = sessionStorage.getItem('authenticated');
             const userJson = sessionStorage.getItem('user');
+            const databaseType = sessionStorage.getItem('databaseType');
             
             if (authenticated === 'true' && userJson) {
                 try {
@@ -5495,13 +5511,24 @@
                         
                         // Solo mostrar notificación si no se ha mostrado antes en esta sesión
                         if (!sessionStorage.getItem('bienvenidaMostrada')) {
-                            mostrarNotificacionToast(`Bienvenido de vuelta, ${usuarioActual.nombre_completo || usuarioActual.username}`, 'info', 3000);
+                            const dbInfo = databaseType === 'principal' ? ' (BD Principal)' : ' (BD Privada)';
+                            mostrarNotificacionToast(`Bienvenido de vuelta, ${usuarioActual.nombre_completo || usuarioActual.username}${dbInfo}`, 'info', 4000);
                             sessionStorage.setItem('bienvenidaMostrada', 'true');
                         }
                     }, 300);
                     
                     document.getElementById('userDisplay').textContent = `👤 ${usuarioActual.nombre_completo || usuarioActual.username}`;
                     document.getElementById('userInfo').classList.add('show');
+                    
+                    // Restaurar información de tipo de base de datos
+                    const dbTypeDisplay = document.getElementById('databaseTypeDisplay');
+                    if (databaseType === 'principal') {
+                        dbTypeDisplay.textContent = '💾 BD: Principal (Admin)';
+                        dbTypeDisplay.style.color = '#4dabf7';
+                    } else {
+                        dbTypeDisplay.textContent = '💾 BD: Privada (Usuario)';
+                        dbTypeDisplay.style.color = '#51cf66';
+                    }
                     
                     // Mostrar sección de gestión solo para admin
                     if (usuarioActual.rol === 'admin') {
@@ -11393,6 +11420,14 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
 
         // Función para cargar la preferencia de tema al iniciar
         function loadThemePreference() {
+            // FORZAR TEMA OSCURO SIEMPRE AL INICIAR - Requerimiento del usuario
+            document.body.classList.add('dark-theme');
+            localStorage.setItem('darkMode', 'true');
+            updateThemeButton('☀️');
+            console.log('🌙 Tema oscuro FORZADO al iniciar - configuración por defecto');
+            
+            // Comentado el código original para preservar funcionalidad de alternancia
+            /*
             const isDarkMode = localStorage.getItem('darkMode') === 'true';
             const isElegantDark = localStorage.getItem('elegantDarkMode') === 'true';
             
@@ -11409,6 +11444,7 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                 updateThemeButton('🌙');
                 console.log('☀️ Tema claro cargado desde preferencias');
             }
+            */
             
             // Aplicar estilos específicos y preservación de emojis
             setTimeout(() => {

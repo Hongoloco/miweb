@@ -6,9 +6,14 @@ const bcrypt = require('bcrypt');
 const session = require('express-session');
 const path = require('path');
 const { runDatabaseMigrations } = require('./database-migrations');
+const UserDatabaseManager = require('./user-database-manager');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Inicializar gestor de bases de datos por usuario
+const dbManager = new UserDatabaseManager();
+console.log('🔧 Gestor de bases de datos por usuario inicializado');
 
 // Variables para SSE y notificaciones
 let sseClients = new Set();
@@ -61,7 +66,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Conexión a la base de datos
+// Conexión a la base de datos principal (solo para inicialización)
 const dbPath = path.join(__dirname, 'olt_system.db');
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
@@ -83,6 +88,17 @@ const db = new sqlite3.Database(dbPath, (err) => {
         }, 3000);
     }
 });
+
+// ===== FUNCIÓN HELPER PARA OBTENER BASE DE DATOS POR USUARIO =====
+function getUserDatabase(req) {
+    if (!req.session || !req.session.user) {
+        console.log('⚠️ Sesión no válida - usando BD principal');
+        return dbManager.getMainDatabase();
+    }
+    
+    const user = req.session.user;
+    return dbManager.getUserDatabase(user.username, user.rol);
+}
 
 // ===== INICIALIZACIÓN AUTOMÁTICA DE LA BASE DE DATOS =====
 function initializeDatabase() {
@@ -507,7 +523,10 @@ app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
     const clientIP = req.ip || req.connection.remoteAddress;
 
-    db.get(`SELECT * FROM usuarios WHERE username = ? AND activo = 1`, [username], (err, user) => {
+    // Para login siempre usar la BD principal
+    const mainDb = dbManager.getMainDatabase();
+
+    mainDb.get(`SELECT * FROM usuarios WHERE username = ? AND activo = 1`, [username], (err, user) => {
         if (err) {
             console.error('Error en login:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
@@ -518,8 +537,8 @@ app.post('/api/login', (req, res) => {
             return res.status(401).json({ success: false, message: 'Credenciales incorrectas' });
         }
 
-        // Actualizar último acceso
-        db.run(`UPDATE usuarios SET ultimo_acceso = CURRENT_TIMESTAMP WHERE id = ?`, [user.id]);
+        // Actualizar último acceso en BD principal
+        mainDb.run(`UPDATE usuarios SET ultimo_acceso = CURRENT_TIMESTAMP WHERE id = ?`, [user.id]);
         
         // Guardar usuario en la sesión
         req.session.user = {
@@ -529,6 +548,12 @@ app.post('/api/login', (req, res) => {
             email: user.email,
             rol: user.rol
         };
+        
+        // Si es un usuario técnico, asegurar que tenga su BD privada
+        if (user.rol === 'tecnico') {
+            console.log(`🔧 Inicializando BD privada para usuario técnico: ${username}`);
+            dbManager.getUserDatabase(username, user.rol);
+        }
         
         logActivity(user.id, 'login_exitoso', `Usuario: ${username}`, clientIP);
 
@@ -541,7 +566,8 @@ app.post('/api/login', (req, res) => {
                 nombre_completo: user.nombre_completo,
                 email: user.email,
                 rol: user.rol
-            }
+            },
+            databaseType: user.rol === 'admin' ? 'principal' : 'privada'
         });
     });
 });
@@ -566,9 +592,19 @@ app.post('/api/logout', (req, res) => {
 
 // ===== RUTAS DE USUARIOS =====
 
-// Obtener todos los usuarios
+// Obtener todos los usuarios (solo admin)
 app.get('/api/usuarios', (req, res) => {
-    db.all(`SELECT id, username, nombre_completo, email, rol, activo, fecha_creacion, ultimo_acceso 
+    const usuarioActual = req.session && req.session.user;
+    
+    // Solo el admin puede ver todos los usuarios
+    if (!usuarioActual || usuarioActual.rol !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Acceso denegado - Solo admin puede ver usuarios' });
+    }
+    
+    // Admin siempre usa la BD principal
+    const mainDb = dbManager.getMainDatabase();
+    
+    mainDb.all(`SELECT id, username, nombre_completo, email, rol, activo, fecha_creacion, ultimo_acceso 
             FROM usuarios ORDER BY rol, username`, (err, usuarios) => {
         if (err) {
             console.error('Error al obtener usuarios:', err);
@@ -981,18 +1017,19 @@ app.get('/api/tareas', (req, res) => {
         return res.status(401).json({ success: false, message: 'No autorizado' });
     }
     
-    let query = `SELECT t.*, c.color as categoria_color, c.icono as categoria_icono,
-                 u.username as usuario_asignado_username, u.nombre_completo as usuario_asignado_nombre
+    // Usar la base de datos específica del usuario
+    const userDb = getUserDatabase(req);
+    
+    let query = `SELECT t.*, c.color as categoria_color, c.icono as categoria_icono
                  FROM tareas t 
                  LEFT JOIN categorias_tareas c ON t.categoria = c.nombre
-                 LEFT JOIN usuarios u ON t.usuario_id = u.id
-                 WHERE t.activa = 1`;
+                 WHERE 1=1`;
     let params = [];
     
-    // Si no es admin, solo puede ver sus propias tareas
+    // Los usuarios técnicos solo ven sus propias tareas en su BD privada
+    // El admin ve todas las tareas en la BD principal
     if (usuarioActual.rol !== 'admin') {
-        query += ` AND t.usuario_id = ?`;
-        params.push(usuarioActual.id);
+        console.log(`📊 Usuario técnico ${usuarioActual.username} accediendo a su BD privada`);
     }
     
     if (estado) {
@@ -1005,12 +1042,6 @@ app.get('/api/tareas', (req, res) => {
         params.push(categoria);
     }
     
-    // Si se especifica usuario_id y el usuario actual es admin, filtrar por ese usuario
-    if (usuario_id && usuarioActual.rol === 'admin') {
-        query += ` AND t.usuario_id = ?`;
-        params.push(usuario_id);
-    }
-    
     query += ` ORDER BY 
         CASE t.prioridad 
             WHEN 'urgente' THEN 1 
@@ -1020,7 +1051,7 @@ app.get('/api/tareas', (req, res) => {
         END,
         t.fecha_creacion DESC`;
     
-    db.all(query, params, (err, tareas) => {
+    userDb.all(query, params, (err, tareas) => {
         if (err) {
             console.error('Error al obtener tareas:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
@@ -1120,27 +1151,20 @@ app.post('/api/tareas', (req, res) => {
         return res.status(400).json({ success: false, message: 'El título es obligatorio' });
     }
     
-    // Determinar usuario asignado según el rol
-    let usuarioAsignado;
-    if (usuarioActual.rol === 'admin') {
-        // Admin puede asignar a cualquier usuario o dejarlo sin asignar
-        usuarioAsignado = usuario_id || usuarioActual.id;
-    } else {
-        // Técnicos solo pueden crear tareas asignadas a ellos mismos
-        usuarioAsignado = usuarioActual.id;
-    }
+    // Usar la base de datos específica del usuario
+    const userDb = getUserDatabase(req);
     
-    db.run(`INSERT INTO tareas (titulo, descripcion, estado, prioridad, categoria, usuario_id) 
-            VALUES (?, ?, ?, ?, ?, ?)`,
+    userDb.run(`INSERT INTO tareas (titulo, descripcion, estado, prioridad, categoria) 
+            VALUES (?, ?, ?, ?, ?)`,
         [titulo, descripcion || '', estado || 'pendiente', prioridad || 'media', 
-         categoria || 'General', usuarioAsignado],
+         categoria || 'General'],
         function(err) {
             if (err) {
                 console.error('Error al crear tarea:', err);
                 return res.status(500).json({ success: false, message: 'Error del servidor' });
             }
             
-            logActivity(usuarioActual.id, 'crear_tarea', `Tarea: ${titulo}`, req.ip);
+            console.log(`✅ Tarea creada en BD de usuario: ${usuarioActual.username}`);
             
             res.json({
                 success: true,
@@ -1568,19 +1592,16 @@ app.delete('/api/olts/:id', (req, res) => {
 app.get('/api/comandos/:olt_id', (req, res) => {
     const oltId = req.params.olt_id;
     
-    db.all(`SELECT * FROM comandos WHERE olt_id = ? AND activo = 1 ORDER BY orden, nombre`, [oltId], (err, comandos) => {
+    // Usar la base de datos específica del usuario
+    const userDb = getUserDatabase(req);
+    
+    userDb.all(`SELECT * FROM comandos WHERE olt_id = ? AND activo = 1 ORDER BY orden_display, nombre`, [oltId], (err, comandos) => {
         if (err) {
             console.error('Error al obtener comandos:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
         }
         
-        // Parsear los comandos JSON
-        const comandosFormateados = comandos.map(cmd => ({
-            ...cmd,
-            comandos: JSON.parse(cmd.comandos_json)
-        }));
-        
-        res.json({ success: true, comandos: comandosFormateados });
+        res.json({ success: true, comandos: comandos });
     });
 });
 
@@ -2696,7 +2717,76 @@ app.listen(PORT, () => {
 
 // Manejo de cierre del servidor
 process.on('SIGINT', () => {
+// ===== ENDPOINTS ADMINISTRATIVOS PARA GESTIÓN DE BASES DE DATOS =====
+
+// Estadísticas de bases de datos (solo admin)
+app.get('/api/admin/database-stats', (req, res) => {
+    const usuarioActual = req.session && req.session.user;
+    
+    if (!usuarioActual || usuarioActual.rol !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Acceso denegado - Solo admin' });
+    }
+    
+    dbManager.getDatabaseStats()
+        .then(stats => {
+            res.json({ success: true, stats });
+        })
+        .catch(error => {
+            console.error('Error obteniendo estadísticas:', error);
+            res.status(500).json({ success: false, message: 'Error del servidor' });
+        });
+});
+
+// Listar usuarios con información de sus bases de datos (solo admin)
+app.get('/api/admin/users-databases', (req, res) => {
+    const usuarioActual = req.session && req.session.user;
+    
+    if (!usuarioActual || usuarioActual.rol !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Acceso denegado - Solo admin' });
+    }
+    
+    // Obtener lista de usuarios de la BD principal
+    const mainDb = dbManager.getMainDatabase();
+    mainDb.all(`SELECT id, username, nombre_completo, rol, activo, fecha_creacion 
+                FROM usuarios WHERE activo = 1 ORDER BY rol, username`, (err, usuarios) => {
+        if (err) {
+            console.error('Error obteniendo usuarios:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+        
+        // Obtener estadísticas de BD para cada usuario
+        dbManager.getDatabaseStats()
+            .then(dbStats => {
+                const usuariosConBD = usuarios.map(user => {
+                    const userDbInfo = dbStats.userDatabases.find(db => db.username === user.username);
+                    return {
+                        ...user,
+                        hasPrivateDatabase: !!userDbInfo,
+                        databaseSize: userDbInfo ? userDbInfo.size : 0,
+                        lastActivity: userDbInfo ? userDbInfo.lastModified : null
+                    };
+                });
+                
+                res.json({ 
+                    success: true, 
+                    usuarios: usuariosConBD,
+                    stats: dbStats
+                });
+            })
+            .catch(error => {
+                console.error('Error obteniendo estadísticas BD:', error);
+                res.json({ success: true, usuarios: usuarios });
+            });
+    });
+});
+
+// ===== CIERRE DEL SERVIDOR =====
+
     console.log('\n🔒 Cerrando servidor...');
+    
+    // Cerrar todas las conexiones de bases de datos
+    dbManager.closeAllConnections();
+    
     db.close((err) => {
         if (err) {
             console.error('Error al cerrar base de datos:', err.message);
