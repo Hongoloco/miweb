@@ -95,7 +95,7 @@ npm run init-db    # Reinicializar BD
 
 ## 🐛 Solución de problemas
 
-### Credenciales incorrectas
+### Credenciales incorrectasnpm run init-db 
 ```bash
 cd web && node init-database.js
 ```
