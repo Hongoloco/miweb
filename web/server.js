@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
 const path = require('path');
+const { runDatabaseMigrations } = require('./database-migrations');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -67,14 +68,437 @@ const db = new sqlite3.Database(dbPath, (err) => {
         console.error('❌ Error al conectar con la base de datos:', err.message);
     } else {
         console.log('🔗 Conectado a la base de datos SQLite');
+        // Verificar y crear tablas automáticamente
+        initializeDatabase();
+        
+        // Ejecutar migraciones después de la inicialización
+        setTimeout(async () => {
+            try {
+                console.log('🔄 Ejecutando migraciones de base de datos...');
+                await runDatabaseMigrations();
+                console.log('✅ Migraciones completadas');
+            } catch (error) {
+                console.error('❌ Error en migraciones:', error);
+            }
+        }, 3000);
     }
 });
+
+// ===== INICIALIZACIÓN AUTOMÁTICA DE LA BASE DE DATOS =====
+function initializeDatabase() {
+    console.log('🔧 Verificando estructura de la base de datos...');
+    
+    db.serialize(() => {
+        // Tabla de categorías de tareas
+        db.run(`CREATE TABLE IF NOT EXISTS categorias_tareas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT UNIQUE NOT NULL,
+            color TEXT,
+            icono TEXT,
+            activa INTEGER DEFAULT 1,
+            fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`, (err) => {
+            if (err) console.error('Error creando tabla categorias_tareas:', err);
+            else console.log('✅ Tabla categorias_tareas verificada');
+        });
+
+        // Tabla de tareas
+        db.run(`CREATE TABLE IF NOT EXISTS tareas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            titulo TEXT NOT NULL,
+            descripcion TEXT,
+            estado TEXT DEFAULT 'pendiente',
+            prioridad TEXT DEFAULT 'media',
+            categoria_id INTEGER,
+            asignado_a INTEGER,
+            fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+            fecha_vencimiento DATETIME,
+            fecha_completada DATETIME,
+            tiempo_estimado INTEGER,
+            tiempo_real INTEGER,
+            etiquetas TEXT,
+            archivos_adjuntos TEXT,
+            comentarios TEXT,
+            FOREIGN KEY (categoria_id) REFERENCES categorias_tareas(id),
+            FOREIGN KEY (asignado_a) REFERENCES usuarios(id)
+        )`, (err) => {
+            if (err) console.error('Error creando tabla tareas:', err);
+            else console.log('✅ Tabla tareas verificada');
+        });
+
+        // Tabla de usuarios
+        db.run(`CREATE TABLE IF NOT EXISTS usuarios (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            nombre_completo TEXT,
+            email TEXT UNIQUE,
+            rol TEXT DEFAULT 'usuario',
+            activo INTEGER DEFAULT 1,
+            fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+            ultimo_acceso DATETIME,
+            configuraciones TEXT
+        )`, (err) => {
+            if (err) console.error('Error creando tabla usuarios:', err);
+            else console.log('✅ Tabla usuarios verificada');
+        });
+
+        // Tabla de comandos OLT
+        db.run(`CREATE TABLE IF NOT EXISTS comandos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT NOT NULL,
+            comando TEXT NOT NULL,
+            descripcion TEXT,
+            categoria TEXT DEFAULT 'general',
+            parametros TEXT,
+            ejemplo TEXT,
+            activo INTEGER DEFAULT 1,
+            fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+            creado_por INTEGER,
+            FOREIGN KEY (creado_por) REFERENCES usuarios(id)
+        )`, (err) => {
+            if (err) console.error('Error creando tabla comandos:', err);
+            else console.log('✅ Tabla comandos verificada');
+        });
+
+        // Tabla de OLTs
+        db.run(`CREATE TABLE IF NOT EXISTS olts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT NOT NULL,
+            ip TEXT UNIQUE NOT NULL,
+            modelo TEXT,
+            ubicacion TEXT,
+            estado TEXT DEFAULT 'activo',
+            puerto_ssh INTEGER DEFAULT 22,
+            usuario_ssh TEXT,
+            notas TEXT,
+            fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+            ultima_conexion DATETIME
+        )`, (err) => {
+            if (err) console.error('Error creando tabla olts:', err);
+            else console.log('✅ Tabla olts verificada');
+        });
+
+        // Tabla de logs de actividad
+        db.run(`CREATE TABLE IF NOT EXISTS logs_actividad (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario_id INTEGER,
+            accion TEXT NOT NULL,
+            detalles TEXT,
+            ip_address TEXT,
+            fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+        )`, (err) => {
+            if (err) console.error('Error creando tabla logs_actividad:', err);
+            else console.log('✅ Tabla logs_actividad verificada');
+        });
+
+        // Tabla de configuraciones del sistema
+        db.run(`CREATE TABLE IF NOT EXISTS configuraciones (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            clave TEXT UNIQUE NOT NULL,
+            valor TEXT,
+            descripcion TEXT,
+            tipo TEXT DEFAULT 'texto',
+            fecha_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`, (err) => {
+            if (err) console.error('Error creando tabla configuraciones:', err);
+            else console.log('✅ Tabla configuraciones verificada');
+        });
+
+        // Tabla de modelos ACS
+        db.run(`CREATE TABLE IF NOT EXISTS modelos_acs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT UNIQUE NOT NULL,
+            descripcion TEXT,
+            comandos_compatibles TEXT,
+            parametros_especiales TEXT,
+            activo INTEGER DEFAULT 1,
+            fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`, (err) => {
+            if (err) console.error('Error creando tabla modelos_acs:', err);
+            else console.log('✅ Tabla modelos_acs verificada');
+        });
+
+        // Tabla de reportes y análisis
+        db.run(`CREATE TABLE IF NOT EXISTS reportes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tipo TEXT NOT NULL,
+            titulo TEXT NOT NULL,
+            datos TEXT,
+            fecha_generacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+            generado_por INTEGER,
+            FOREIGN KEY (generado_por) REFERENCES usuarios(id)
+        )`, (err) => {
+            if (err) console.error('Error creando tabla reportes:', err);
+            else console.log('✅ Tabla reportes verificada');
+        });
+
+        // Insertar datos iniciales
+        insertInitialData();
+    });
+}
+
+// Insertar datos iniciales si no existen
+function insertInitialData() {
+    // Categorías de tareas por defecto
+    const categorias = [
+        { nombre: 'Mantenimiento', color: '#1976d2', icono: 'build' },
+        { nombre: 'Soporte', color: '#388e3c', icono: 'support_agent' },
+        { nombre: 'Mejora', color: '#fbc02d', icono: 'trending_up' },
+        { nombre: 'Urgente', color: '#d32f2f', icono: 'priority_high' },
+        { nombre: 'Configuración', color: '#7b1fa2', icono: 'settings' }
+    ];
+
+    categorias.forEach(cat => {
+        db.run(`INSERT OR IGNORE INTO categorias_tareas (nombre, color, icono) VALUES (?, ?, ?)`, 
+               [cat.nombre, cat.color, cat.icono]);
+    });
+
+    // Usuario administrador por defecto (solo si no existe)
+    db.get(`SELECT id FROM usuarios WHERE username = 'admin'`, (err, row) => {
+        if (!row) {
+            const adminPassword = bcrypt.hashSync('admin123', 10);
+            db.run(`INSERT INTO usuarios (username, password_hash, nombre_completo, email, rol) 
+                    VALUES (?, ?, ?, ?, ?)`, 
+                   ['admin', adminPassword, 'Administrador del Sistema', 'admin@localhost', 'administrador'],
+                   (err) => {
+                       if (err) console.error('Error creando usuario admin:', err);
+                       else console.log('👤 Usuario administrador creado (admin/admin123)');
+                   });
+        }
+    });
+
+    // Configuraciones por defecto
+    const configuraciones = [
+        { clave: 'tema_por_defecto', valor: 'claro', descripcion: 'Tema visual por defecto' },
+        { clave: 'notificaciones_habilitadas', valor: 'true', descripcion: 'Notificaciones del sistema' },
+        { clave: 'backup_automatico', valor: 'true', descripcion: 'Backup automático de datos' },
+        { clave: 'version_sistema', valor: '3.0.0', descripcion: 'Versión actual del sistema' }
+    ];
+
+    configuraciones.forEach(config => {
+        db.run(`INSERT OR IGNORE INTO configuraciones (clave, valor, descripcion) VALUES (?, ?, ?)`, 
+               [config.clave, config.valor, config.descripcion]);
+    });
+
+    console.log('📊 Datos iniciales verificados e insertados');
+}
+
+// ===== FUNCIÓN DE VERIFICACIÓN DE INTEGRIDAD DE LA BD =====
+function checkDatabaseIntegrity() {
+    console.log('🔍 Verificando integridad de la base de datos...');
+    
+    // Verificar que las tablas principales existen
+    const requiredTables = [
+        'usuarios', 'tareas', 'categorias_tareas', 'comandos', 
+        'olts', 'logs_actividad', 'configuraciones', 'modelos_acs', 'reportes'
+    ];
+    
+    let tablesChecked = 0;
+    const totalTables = requiredTables.length;
+    
+    requiredTables.forEach(tableName => {
+        db.get(`SELECT name FROM sqlite_master WHERE type='table' AND name=?`, [tableName], (err, row) => {
+            tablesChecked++;
+            if (err) {
+                console.error(`❌ Error verificando tabla ${tableName}:`, err);
+            } else if (!row) {
+                console.warn(`⚠️  Tabla ${tableName} no encontrada, será creada automáticamente`);
+            } else {
+                console.log(`✅ Tabla ${tableName} existe`);
+            }
+            
+            // Cuando se hayan verificado todas las tablas
+            if (tablesChecked === totalTables) {
+                console.log('🎯 Verificación de integridad completada');
+                
+                // Ejecutar mantenimiento de base de datos
+                performDatabaseMaintenance();
+            }
+        });
+    });
+}
+
+// ===== MANTENIMIENTO AUTOMÁTICO DE LA BASE DE DATOS =====
+function performDatabaseMaintenance() {
+    console.log('🧹 Ejecutando mantenimiento de base de datos...');
+    
+    // Limpiar logs antiguos (más de 90 días)
+    db.run(`DELETE FROM logs_actividad WHERE fecha < datetime('now', '-90 days')`, (err) => {
+        if (err) {
+            console.error('Error limpiando logs antiguos:', err);
+        } else {
+            console.log('🗑️  Logs antiguos limpiados');
+        }
+    });
+    
+    // Optimizar base de datos
+    db.run(`VACUUM`, (err) => {
+        if (err) {
+            console.error('Error optimizando base de datos:', err);
+        } else {
+            console.log('⚡ Base de datos optimizada');
+        }
+    });
+    
+    // Analizar estadísticas
+    db.run(`ANALYZE`, (err) => {
+        if (err) {
+            console.error('Error analizando estadísticas:', err);
+        } else {
+            console.log('📈 Estadísticas de base de datos actualizadas');
+        }
+    });
+    
+    console.log('✨ Mantenimiento de base de datos completado');
+}
+
+// Ejecutar verificación de integridad después de la inicialización
+setTimeout(() => {
+    checkDatabaseIntegrity();
+}, 2000); // Esperar 2 segundos para que se complete la inicialización
 
 // Función para registrar actividad
 function logActivity(userId, accion, detalles, ip) {
     db.run(`INSERT INTO logs_actividad (usuario_id, accion, detalles, ip_address) 
             VALUES (?, ?, ?, ?)`, [userId, accion, detalles, ip]);
 }
+
+// ===== RUTAS DE SISTEMA Y BASE DE DATOS =====
+
+// Estado de la base de datos
+app.get('/api/database/status', (req, res) => {
+    const status = {
+        connected: true,
+        timestamp: new Date().toISOString(),
+        tables: {},
+        statistics: {}
+    };
+
+    const requiredTables = [
+        'usuarios', 'tareas', 'categorias_tareas', 'comandos', 
+        'olts', 'logs_actividad', 'configuraciones', 'modelos_acs', 'reportes'
+    ];
+
+    let completedChecks = 0;
+    
+    requiredTables.forEach(tableName => {
+        // Verificar existencia de tabla
+        db.get(`SELECT name FROM sqlite_master WHERE type='table' AND name=?`, [tableName], (err, row) => {
+            if (err) {
+                status.tables[tableName] = { exists: false, error: err.message };
+            } else {
+                status.tables[tableName] = { exists: !!row };
+                
+                // Si la tabla existe, obtener estadísticas
+                if (row) {
+                    db.get(`SELECT COUNT(*) as count FROM ${tableName}`, (err, countRow) => {
+                        if (!err && countRow) {
+                            status.tables[tableName].count = countRow.count;
+                        }
+                        
+                        completedChecks++;
+                        if (completedChecks === requiredTables.length) {
+                            // Estadísticas generales
+                            db.get(`SELECT 
+                                (SELECT COUNT(*) FROM usuarios WHERE activo = 1) as usuarios_activos,
+                                (SELECT COUNT(*) FROM tareas WHERE estado != 'completada') as tareas_pendientes,
+                                (SELECT COUNT(*) FROM logs_actividad WHERE fecha > datetime('now', '-24 hours')) as actividad_24h
+                            `, (err, stats) => {
+                                if (!err && stats) {
+                                    status.statistics = stats;
+                                }
+                                res.json(status);
+                            });
+                        }
+                    });
+                } else {
+                    completedChecks++;
+                    if (completedChecks === requiredTables.length) {
+                        res.json(status);
+                    }
+                }
+            }
+        });
+    });
+});
+
+// Reinicializar base de datos (solo para desarrollo)
+app.post('/api/database/reinitialize', (req, res) => {
+    if (process.env.NODE_ENV === 'production') {
+        return res.status(403).json({ 
+            success: false, 
+            message: 'Operación no permitida en producción' 
+        });
+    }
+
+    console.log('🔄 Reinicializando base de datos...');
+    
+    try {
+        initializeDatabase();
+        res.json({ 
+            success: true, 
+            message: 'Base de datos reinicializada correctamente',
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Error reinicializando base de datos:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error al reinicializar base de datos',
+            error: error.message
+        });
+    }
+});
+
+// Ejecutar mantenimiento manual
+app.post('/api/database/maintenance', (req, res) => {
+    console.log('🧹 Ejecutando mantenimiento manual de base de datos...');
+    
+    try {
+        performDatabaseMaintenance();
+        res.json({ 
+            success: true, 
+            message: 'Mantenimiento ejecutado correctamente',
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Error en mantenimiento:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error en mantenimiento de base de datos',
+            error: error.message
+        });
+    }
+});
+
+// Backup de base de datos
+app.get('/api/database/backup', (req, res) => {
+    const backupData = {
+        timestamp: new Date().toISOString(),
+        version: '3.0.0',
+        tables: {}
+    };
+
+    const tables = ['usuarios', 'tareas', 'categorias_tareas', 'comandos', 'configuraciones'];
+    let completedTables = 0;
+
+    tables.forEach(tableName => {
+        db.all(`SELECT * FROM ${tableName}`, (err, rows) => {
+            if (!err) {
+                backupData.tables[tableName] = rows;
+            }
+            
+            completedTables++;
+            if (completedTables === tables.length) {
+                res.setHeader('Content-Type', 'application/json');
+                res.setHeader('Content-Disposition', `attachment; filename="backup_${Date.now()}.json"`);
+                res.json(backupData);
+            }
+        });
+    });
+});
 
 // ===== RUTAS DE AUTENTICACIÓN =====
 

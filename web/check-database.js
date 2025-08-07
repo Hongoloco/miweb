@@ -1,108 +1,156 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-// Conectar a la base de datos
+/**
+ * Script para verificar el estado y la integridad de la base de datos
+ */
+
 const dbPath = path.join(__dirname, 'olt_system.db');
-const db = new sqlite3.Database(dbPath);
 
-console.log('🔍 Verificando integridad de datos...');
-console.log('');
+function checkDatabaseHealth() {
+    console.log('🏥 Verificando salud de la base de datos...\n');
+    
+    const db = new sqlite3.Database(dbPath, (err) => {
+        if (err) {
+            console.error('❌ Error conectando a la base de datos:', err.message);
+            process.exit(1);
+        }
+    });
 
-// Verificar OLTs
-db.get(`SELECT COUNT(*) as count FROM olts`, (err, result) => {
-    if (err) {
-        console.error('❌ Error verificando OLTs:', err);
-        return;
-    }
-    
-    console.log(`📡 OLTs en la base de datos: ${result.count}`);
-    
-    if (result.count === 0) {
-        console.log('⚠️ ¡ALERTA! No hay OLTs en la base de datos');
-        console.log('💡 Ejecuta: node restore-zte-commands.js');
-        console.log('💡 O bien: node restore-from-backup.js');
-    } else {
-        // Mostrar detalles de OLTs
-        db.all(`SELECT id, nombre, modelo FROM olts`, (err, olts) => {
-            if (!err) {
-                olts.forEach(olt => {
-                    console.log(`   - ${olt.nombre} (${olt.modelo})`);
-                });
-            }
+    // 1. Verificar tablas existentes
+    console.log('📋 Tablas en la base de datos:');
+    db.all(`SELECT name FROM sqlite_master WHERE type='table' ORDER BY name`, (err, tables) => {
+        if (err) {
+            console.error('Error obteniendo tablas:', err);
+            return;
+        }
+
+        tables.forEach(table => {
+            console.log(`  ✅ ${table.name}`);
         });
-    }
-});
+        console.log('');
 
-// Verificar comandos
-db.get(`SELECT COUNT(*) as count FROM comandos`, (err, result) => {
-    if (err) {
-        console.error('❌ Error verificando comandos:', err);
-        return;
-    }
-    
-    console.log(`⚙️ Comandos en la base de datos: ${result.count}`);
-    
-    if (result.count === 0) {
-        console.log('⚠️ ¡ALERTA! No hay comandos en la base de datos');
-        console.log('💡 Ejecuta: node restore-zte-commands.js');
-        console.log('💡 O bien: node restore-from-backup.js');
-    } else {
-        // Mostrar distribución por OLT
-        db.all(`SELECT o.nombre as olt_nombre, COUNT(c.id) as comandos_count
-                FROM olts o 
-                LEFT JOIN comandos c ON o.id = c.olt_id 
-                GROUP BY o.id, o.nombre`, (err, stats) => {
-            if (!err) {
-                stats.forEach(stat => {
-                    console.log(`   - ${stat.olt_nombre}: ${stat.comandos_count} comandos`);
-                });
+        // 2. Verificar integridad de datos
+        console.log('🔍 Verificando integridad de datos:');
+        
+        const checks = [
+            {
+                name: 'Usuarios activos',
+                query: `SELECT COUNT(*) as count FROM usuarios WHERE activo = 1`,
+                check: (result) => result.count > 0 ? '✅' : '⚠️'
+            },
+            {
+                name: 'Categorías de tareas',
+                query: `SELECT COUNT(*) as count FROM categorias_tareas WHERE activa = 1`,
+                check: (result) => result.count > 0 ? '✅' : '⚠️'
+            },
+            {
+                name: 'Comandos disponibles',
+                query: `SELECT COUNT(*) as count FROM comandos WHERE activo = 1`,
+                check: (result) => result.count >= 0 ? '✅' : '❌'
+            },
+            {
+                name: 'Configuraciones del sistema',
+                query: `SELECT COUNT(*) as count FROM configuraciones`,
+                check: (result) => result.count > 0 ? '✅' : '⚠️'
             }
+        ];
+
+        let completedChecks = 0;
+        
+        checks.forEach(check => {
+            db.get(check.query, (err, result) => {
+                if (err) {
+                    console.log(`  ❌ ${check.name}: Error - ${err.message}`);
+                } else {
+                    const status = check.check(result);
+                    console.log(`  ${status} ${check.name}: ${result.count} registros`);
+                }
+                
+                completedChecks++;
+                
+                if (completedChecks === checks.length) {
+                    // 3. Estadísticas generales
+                    console.log('\n📊 Estadísticas generales:');
+                    
+                    db.get(`SELECT 
+                        (SELECT COUNT(*) FROM usuarios) as total_usuarios,
+                        (SELECT COUNT(*) FROM usuarios WHERE activo = 1) as usuarios_activos,
+                        (SELECT COUNT(*) FROM tareas) as total_tareas,
+                        (SELECT COUNT(*) FROM tareas WHERE estado = 'pendiente') as tareas_pendientes,
+                        (SELECT COUNT(*) FROM tareas WHERE estado = 'completada') as tareas_completadas,
+                        (SELECT COUNT(*) FROM logs_actividad) as total_logs,
+                        (SELECT COUNT(*) FROM comandos) as total_comandos,
+                        (SELECT COUNT(*) FROM olts) as total_olts
+                    `, (err, stats) => {
+                        if (err) {
+                            console.error('Error obteniendo estadísticas:', err);
+                        } else {
+                            console.log(`  👥 Usuarios: ${stats.usuarios_activos}/${stats.total_usuarios} activos`);
+                            console.log(`  📋 Tareas: ${stats.tareas_pendientes} pendientes, ${stats.tareas_completadas} completadas (${stats.total_tareas} total)`);
+                            console.log(`  📡 OLTs configurados: ${stats.total_olts}`);
+                            console.log(`  💻 Comandos disponibles: ${stats.total_comandos}`);
+                            console.log(`  📜 Registros de actividad: ${stats.total_logs}`);
+                        }
+                        
+                        // 4. Verificar migraciones si existe la tabla
+                        db.get(`SELECT name FROM sqlite_master WHERE type='table' AND name='schema_migrations'`, (err, migrationTable) => {
+                            if (migrationTable) {
+                                console.log('\n🔄 Estado de migraciones:');
+                                db.all(`SELECT version, migration_name, success, executed_at 
+                                        FROM schema_migrations 
+                                        ORDER BY executed_at DESC LIMIT 10`, (err, migrations) => {
+                                    if (err) {
+                                        console.error('Error obteniendo migraciones:', err);
+                                    } else {
+                                        migrations.forEach(migration => {
+                                            const status = migration.success ? '✅' : '❌';
+                                            const date = new Date(migration.executed_at).toLocaleString();
+                                            console.log(`  ${status} ${migration.migration_name} (v${migration.version}) - ${date}`);
+                                        });
+                                    }
+                                    
+                                    finishCheck();
+                                });
+                            } else {
+                                console.log('\n⚠️  Tabla de migraciones no encontrada');
+                                finishCheck();
+                            }
+                        });
+                    });
+                }
+            });
         });
-    }
-});
+    });
 
-// Verificar usuarios
-db.get(`SELECT COUNT(*) as count FROM usuarios WHERE activo = 1`, (err, result) => {
-    if (err) {
-        console.error('❌ Error verificando usuarios:', err);
-        return;
-    }
-    
-    console.log(`👥 Usuarios activos: ${result.count}`);
-    
-    if (result.count === 0) {
-        console.log('⚠️ ¡ALERTA! No hay usuarios activos en la base de datos');
-        console.log('💡 Ejecuta: node init-database.js');
-    }
-});
-
-// Verificar estructura de tablas
-const expectedTables = ['usuarios', 'olts', 'comandos', 'logs_actividad', 'roles', 'tareas', 'categorias_tareas'];
-
-db.all(`SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'`, (err, tables) => {
-    if (err) {
-        console.error('❌ Error verificando tablas:', err);
+    function finishCheck() {
+        console.log('\n✨ Verificación de salud completada');
+        
+        // Verificar tamaño del archivo de base de datos
+        const fs = require('fs');
+        try {
+            const stats = fs.statSync(dbPath);
+            const fileSizeInBytes = stats.size;
+            const fileSizeInMB = fileSizeInBytes / (1024 * 1024);
+            
+            console.log(`💾 Tamaño de la base de datos: ${fileSizeInMB.toFixed(2)} MB`);
+            
+            if (fileSizeInMB > 100) {
+                console.log('⚠️  La base de datos es grande, considera ejecutar mantenimiento');
+            }
+        } catch (error) {
+            console.error('Error obteniendo tamaño del archivo:', error.message);
+        }
+        
         db.close();
-        return;
     }
-    
-    const existingTables = tables.map(t => t.name);
-    const missingTables = expectedTables.filter(table => !existingTables.includes(table));
-    
-    console.log(`🗃️ Tablas en la base de datos: ${existingTables.length}`);
-    
-    if (missingTables.length > 0) {
-        console.log('⚠️ ¡ALERTA! Faltan tablas:');
-        missingTables.forEach(table => {
-            console.log(`   - ${table}`);
-        });
-        console.log('💡 Ejecuta: node init-database.js');
-    } else {
-        console.log('✅ Todas las tablas esperadas están presentes');
-    }
-    
-    console.log('');
-    console.log('🏁 Verificación completada');
-    
-    db.close();
-});
+}
+
+// Ejecutar verificación si es llamado directamente
+if (require.main === module) {
+    checkDatabaseHealth();
+}
+
+module.exports = {
+    checkDatabaseHealth
+};
