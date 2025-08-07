@@ -4928,7 +4928,6 @@
                         </div>
                         <div class="button-group">
                             <button class="btn btn-primary" onclick="cargarUsuarios()">🔄 Recargar Lista</button>
-                            <button class="btn btn-info" onclick="probarAPIUsuarios()" style="background: #17a2b8;">🔍 Test API</button>
                         </div>
                     </div>
 
@@ -8680,35 +8679,6 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                 document.getElementById(tab.dataset.tab).classList.add('active');
             });
         });
-
-        // ===== FUNCIONES DE PRUEBA PARA USUARIOS =====
-        
-        async function probarAPIUsuarios() {
-            console.log('🔍 Probando API de usuarios...');
-            
-            try {
-                console.log('1. Probando GET /api/usuarios...');
-                const response = await fetch('/api/usuarios');
-                console.log('2. Response:', response.status, response.ok);
-                
-                const data = await response.json();
-                console.log('3. Data:', data);
-                
-                if (data.success) {
-                    console.log('✅ API usuarios OK, usuarios encontrados:', data.usuarios.length);
-                    mostrarMensajeUsuario(`✅ API usuarios OK: ${data.usuarios.length} usuario(s) encontrado(s)`, 'success');
-                    return data.usuarios;
-                } else {
-                    console.log('❌ Error en data:', data);
-                    mostrarMensajeUsuario(`❌ Error en API: ${data.message}`, 'error');
-                    return null;
-                }
-            } catch (error) {
-                console.error('💥 Error en prueba API usuarios:', error);
-                mostrarMensajeUsuario(`❌ Error de conexión: ${error.message}`, 'error');
-                return null;
-            }
-        }
 
         // ===== GESTIÓN DE USUARIOS MEJORADA =====
         let usuarioEditando = null;
