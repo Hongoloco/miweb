@@ -71,7 +71,7 @@ class UserDatabaseManager {
         if (!this.databaseConnections.has(dbKey)) {
             const userDbPath = path.join(this.userDbDirectory, `${username}_olt_system.db`);
             
-            console.log(`📊 Creando/conectando BD para usuario: ${username}`);
+            console.log(`📊 Creando/conectando BD LIMPIA para usuario: ${username}`);
             console.log(`📁 Ruta: ${userDbPath}`);
             
             const db = new sqlite3.Database(userDbPath, (err) => {
@@ -79,7 +79,7 @@ class UserDatabaseManager {
                     console.error(`❌ Error conectando BD usuario ${username}:`, err.message);
                 } else {
                     console.log(`✅ BD para ${username} conectada`);
-                    // Inicializar esquema para nuevo usuario
+                    // Inicializar esquema LIMPIO para nuevo usuario
                     this.initializeUserDatabase(db, username);
                 }
             });
@@ -91,136 +91,170 @@ class UserDatabaseManager {
     }
 
     /**
+     * FUERZA la recreación de una base de datos de usuario (para limpiar datos)
+     * @param {string} username - Nombre del usuario
+     */
+    resetUserDatabase(username) {
+        console.log(`🗑️ RESETEANDO BD para usuario: ${username}`);
+        
+        const dbKey = `user_${username}`;
+        const userDbPath = path.join(this.userDbDirectory, `${username}_olt_system.db`);
+        
+        // Cerrar conexión existente si la hay
+        if (this.databaseConnections.has(dbKey)) {
+            const existingDb = this.databaseConnections.get(dbKey);
+            existingDb.close();
+            this.databaseConnections.delete(dbKey);
+        }
+        
+        // Eliminar archivo de BD existente
+        try {
+            if (fs.existsSync(userDbPath)) {
+                fs.unlinkSync(userDbPath);
+                console.log(`🗑️ BD anterior de ${username} eliminada`);
+            }
+        } catch (error) {
+            console.error(`❌ Error eliminando BD de ${username}:`, error);
+        }
+        
+        // Crear nueva BD limpia
+        return this.getTechnicianDatabase(username);
+    }
+
+    /**
      * Inicializa el esquema de base de datos para un nuevo usuario
      * @param {sqlite3.Database} db - Conexión a la base de datos del usuario
      * @param {string} username - Nombre del usuario
      */
     initializeUserDatabase(db, username) {
-        console.log(`🔧 Inicializando esquema para usuario: ${username}`);
+        console.log(`🔧 Inicializando esquema LIMPIO para usuario: ${username}`);
         
-        // Crear todas las tablas necesarias para el usuario
-        const tables = [
-            // Tabla de tareas
-            `CREATE TABLE IF NOT EXISTS tareas (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                titulo TEXT NOT NULL,
-                descripcion TEXT,
-                categoria_id INTEGER,
-                estado TEXT DEFAULT 'pendiente',
-                prioridad TEXT DEFAULT 'media',
-                fecha_vencimiento DATE,
-                creado_por INTEGER,
-                asignado_a INTEGER,
-                fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-                fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-                tiempo_estimado INTEGER DEFAULT 0,
-                tiempo_real INTEGER DEFAULT 0,
-                fecha_inicio DATETIME,
-                fecha_fin DATETIME,
-                etiquetas TEXT,
-                archivos_adjuntos TEXT,
-                comentarios TEXT,
-                FOREIGN KEY (categoria_id) REFERENCES categorias_tareas(id)
-            )`,
+        // Verificar si ya está inicializada
+        db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='configuraciones'", (err, row) => {
+            if (row) {
+                console.log(`⏭️ BD de ${username} ya está inicializada`);
+                return;
+            }
+            
+            // Crear todas las tablas necesarias para el usuario - ESQUEMA LIMPIO
+            const tables = [
+                // Tabla de tareas - LIMPIA
+                `CREATE TABLE IF NOT EXISTS tareas (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    titulo TEXT NOT NULL,
+                    descripcion TEXT,
+                    categoria TEXT DEFAULT 'General',
+                    estado TEXT DEFAULT 'pendiente',
+                    prioridad TEXT DEFAULT 'media',
+                    fecha_vencimiento DATE,
+                    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    tiempo_estimado INTEGER DEFAULT 0,
+                    tiempo_real INTEGER DEFAULT 0,
+                    fecha_inicio DATETIME,
+                    fecha_fin DATETIME,
+                    etiquetas TEXT,
+                    archivos_adjuntos TEXT,
+                    comentarios TEXT
+                )`,
 
-            // Tabla de categorías de tareas
-            `CREATE TABLE IF NOT EXISTS categorias_tareas (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                nombre TEXT NOT NULL UNIQUE,
-                descripcion TEXT,
-                color TEXT DEFAULT '#007bff',
-                fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
-            )`,
+                // Tabla de categorías de tareas - LIMPIA
+                `CREATE TABLE IF NOT EXISTS categorias_tareas (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nombre TEXT NOT NULL UNIQUE,
+                    descripcion TEXT,
+                    color TEXT DEFAULT '#007bff',
+                    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
+                )`,
 
-            // Tabla de comandos
-            `CREATE TABLE IF NOT EXISTS comandos (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                nombre TEXT NOT NULL,
-                comando TEXT NOT NULL,
-                descripcion TEXT,
-                categoria TEXT DEFAULT 'general',
-                parametros TEXT,
-                fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-                creado_por INTEGER,
-                activo INTEGER DEFAULT 1,
-                orden_display INTEGER DEFAULT 0,
-                tipo_comando TEXT DEFAULT 'manual'
-            )`,
+                // Tabla de comandos - LIMPIA
+                `CREATE TABLE IF NOT EXISTS comandos (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nombre TEXT NOT NULL,
+                    comando TEXT NOT NULL,
+                    descripcion TEXT,
+                    categoria TEXT DEFAULT 'general',
+                    parametros TEXT,
+                    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    activo INTEGER DEFAULT 1,
+                    orden_display INTEGER DEFAULT 0,
+                    tipo_comando TEXT DEFAULT 'manual',
+                    olt_id INTEGER
+                )`,
 
-            // Tabla de OLTs
-            `CREATE TABLE IF NOT EXISTS olts (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                nombre TEXT NOT NULL,
-                ip TEXT NOT NULL,
-                puerto INTEGER DEFAULT 23,
-                modelo TEXT,
-                ubicacion TEXT,
-                activo INTEGER DEFAULT 1,
-                fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-                ultima_conexion DATETIME,
-                configuracion TEXT
-            )`,
+                // Tabla de OLTs - LIMPIA
+                `CREATE TABLE IF NOT EXISTS olts (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nombre TEXT NOT NULL,
+                    ip TEXT NOT NULL,
+                    puerto INTEGER DEFAULT 23,
+                    modelo TEXT,
+                    ubicacion TEXT,
+                    activo INTEGER DEFAULT 1,
+                    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    ultima_conexion DATETIME,
+                    configuracion TEXT
+                )`,
 
-            // Tabla de logs de actividad
-            `CREATE TABLE IF NOT EXISTS logs_actividad (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                usuario_id INTEGER,
-                accion TEXT NOT NULL,
-                detalles TEXT,
-                ip_address TEXT,
-                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                modulo TEXT,
-                resultado TEXT
-            )`,
+                // Tabla de logs de actividad - LIMPIA
+                `CREATE TABLE IF NOT EXISTS logs_actividad (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    usuario_id INTEGER,
+                    accion TEXT NOT NULL,
+                    detalles TEXT,
+                    ip_address TEXT,
+                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    modulo TEXT,
+                    resultado TEXT
+                )`,
 
-            // Tabla de configuraciones
-            `CREATE TABLE IF NOT EXISTS configuraciones (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                clave TEXT UNIQUE NOT NULL,
-                valor TEXT,
-                descripcion TEXT,
-                fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP
-            )`,
+                // Tabla de configuraciones - LIMPIA
+                `CREATE TABLE IF NOT EXISTS configuraciones (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    clave TEXT UNIQUE NOT NULL,
+                    valor TEXT,
+                    descripcion TEXT,
+                    fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP
+                )`,
 
-            // Tabla de modelos ACS
-            `CREATE TABLE IF NOT EXISTS modelos_acs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                nombre TEXT NOT NULL,
-                marca TEXT,
-                configuracion TEXT,
-                fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-                activo INTEGER DEFAULT 1
-            )`,
+                // Tabla de modelos ACS - LIMPIA
+                `CREATE TABLE IF NOT EXISTS modelos_acs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nombre TEXT NOT NULL,
+                    marca TEXT,
+                    configuracion TEXT,
+                    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    activo INTEGER DEFAULT 1
+                )`,
 
-            // Tabla de reportes
-            `CREATE TABLE IF NOT EXISTS reportes (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                nombre TEXT NOT NULL,
-                tipo TEXT,
-                filtros TEXT,
-                configuracion TEXT,
-                fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-                creado_por INTEGER,
-                publico INTEGER DEFAULT 0
-            )`,
+                // Tabla de reportes - LIMPIA
+                `CREATE TABLE IF NOT EXISTS reportes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nombre TEXT NOT NULL,
+                    tipo TEXT,
+                    filtros TEXT,
+                    configuracion TEXT,
+                    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    publico INTEGER DEFAULT 0
+                )`,
 
-            // Tabla de notificaciones
-            `CREATE TABLE IF NOT EXISTS notificaciones (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                usuario_id INTEGER,
-                titulo TEXT NOT NULL,
-                mensaje TEXT,
-                tipo TEXT DEFAULT 'info',
-                leida INTEGER DEFAULT 0,
-                fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-                fecha_leida DATETIME,
-                accion_url TEXT,
-                metadata TEXT
-            )`
-        ];
+                // Tabla de notificaciones - LIMPIA
+                `CREATE TABLE IF NOT EXISTS notificaciones (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    titulo TEXT NOT NULL,
+                    mensaje TEXT,
+                    tipo TEXT DEFAULT 'info',
+                    leida INTEGER DEFAULT 0,
+                    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    fecha_leida DATETIME,
+                    accion_url TEXT,
+                    metadata TEXT
+                )`
+            ];
 
-        // Ejecutar creación de tablas secuencialmente
-        this.createTablesSequentially(db, tables, 0, username);
+            // Ejecutar creación de tablas secuencialmente
+            this.createTablesSequentially(db, tables, 0, username);
+        });
     }
 
     /**
@@ -244,22 +278,24 @@ class UserDatabaseManager {
     }
 
     /**
-     * Inserta datos por defecto para un nuevo usuario
+     * Inserta datos por defecto MÍNIMOS para un nuevo usuario
      */
     insertDefaultData(db, username) {
-        console.log(`📊 Insertando datos por defecto para: ${username}`);
+        console.log(`📊 Insertando datos MÍNIMOS por defecto para: ${username}`);
 
-        // Categorías de tareas por defecto
+        // Solo categorías básicas de tareas - NO datos de OLT ni comandos
         const defaultCategories = [
             ['OLT', 'Tareas relacionadas con equipos OLT', '#ff6b6b'],
-            ['IMS', 'Gestión de abonados IMS', '#4ecdc4'],
+            ['IMS', 'Gestión de abonados IMS', '#4ecdc4'], 
             ['ACS', 'Configuración de equipos ACS', '#45b7d1'],
             ['Mantenimiento', 'Tareas de mantenimiento general', '#f9ca24'],
-            ['Soporte', 'Atención al cliente y soporte', '#6c5ce7']
+            ['Soporte', 'Atención al cliente y soporte', '#6c5ce7'],
+            ['General', 'Tareas generales', '#007bff']
         ];
 
         db.run('BEGIN TRANSACTION');
 
+        // Insertar solo categorías básicas
         defaultCategories.forEach(([nombre, descripcion, color]) => {
             db.run(
                 'INSERT OR IGNORE INTO categorias_tareas (nombre, descripcion, color) VALUES (?, ?, ?)',
@@ -267,12 +303,14 @@ class UserDatabaseManager {
             );
         });
 
-        // Configuraciones por defecto
+        // Configuraciones mínimas por defecto
         const defaultConfigs = [
             ['usuario_owner', username, 'Propietario de esta base de datos'],
             ['fecha_creacion', new Date().toISOString(), 'Fecha de creación de la BD'],
             ['version_schema', '3.1.0', 'Versión del esquema de base de datos'],
-            ['tema_predeterminado', 'dark', 'Tema por defecto del usuario']
+            ['tema_predeterminado', 'dark', 'Tema por defecto del usuario'],
+            ['primera_vez', 'true', 'Indicador de primera vez del usuario'],
+            ['bd_tipo', 'privada', 'Tipo de base de datos (privada para usuarios técnicos)']
         ];
 
         defaultConfigs.forEach(([clave, valor, descripcion]) => {
@@ -286,7 +324,7 @@ class UserDatabaseManager {
             if (err) {
                 console.error(`❌ Error insertando datos por defecto para ${username}:`, err);
             } else {
-                console.log(`✅ Datos por defecto insertados para: ${username}`);
+                console.log(`✅ BD LIMPIA creada para: ${username} - Sin datos de OLT existentes`);
             }
         });
     }

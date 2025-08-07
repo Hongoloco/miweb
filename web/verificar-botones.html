@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Botones de Eliminar</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .paso { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #007bff; }
+        .resultado { padding: 10px; margin: 5px 0; border-radius: 4px; }
+        .exito { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        #resultados { margin-top: 20px; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Verificar Botones de Eliminar</h1>
+    
+    <div class="paso">
+        <h3>📋 Diagnóstico del Problema</h3>
+        <p>Este script verificará por qué no aparecen los botones de eliminar en la gestión de usuarios.</p>
+        <button onclick="verificarEstado()">🚀 Verificar Estado</button>
+        <button onclick="forzarLogin()">🔐 Forzar Login</button>
+        <button onclick="mostrarSeccionUsuarios()">👥 Mostrar Sección Usuarios</button>
+        <button onclick="cargarUsuariosForzado()">🔄 Cargar Usuarios</button>
+    </div>
+    
+    <div id="resultados"></div>
+    
+    <script>
+        function log(mensaje, tipo = 'info') {
+            const resultados = document.getElementById('resultados');
+            const div = document.createElement('div');
+            div.className = `resultado ${tipo}`;
+            div.innerHTML = mensaje;
+            resultados.appendChild(div);
+        }
+        
+        function limpiar() {
+            document.getElementById('resultados').innerHTML = '';
+        }
+        
+        async function verificarEstado() {
+            limpiar();
+            log('🔍 Verificando estado del sistema...', 'info');
+            
+            // 1. Verificar autenticación
+            try {
+                const response = await fetch('/api/usuarios');
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('✅ Usuario autenticado correctamente', 'exito');
+                    log(`👥 Usuarios disponibles: ${data.usuarios.length}`, 'info');
+                    
+                    // Mostrar cada usuario y si debería tener botón
+                    data.usuarios.forEach(u => {
+                        const debeTener = u.username !== 'alito';
+                        log(`• ${u.username} (${u.rol}) - Botón eliminar: ${debeTener ? '✅ SÍ' : '❌ NO (protegido)'}`, 'info');
+                    });
+                    
+                } else {
+                    log(`❌ No autenticado: ${data.message}`, 'error');
+                    log('💡 Solución: Ejecuta "Forzar Login" primero', 'info');
+                    return;
+                }
+            } catch (error) {
+                log(`❌ Error verificando autenticación: ${error.message}`, 'error');
+                return;
+            }
+            
+            // 2. Verificar elementos DOM
+            log('🔍 Verificando elementos del DOM...', 'info');
+            
+            const elementos = [
+                { id: 'user-management-section', nombre: 'Sección gestión usuarios' },
+                { id: 'users-grid', nombre: 'Grid de usuarios' },
+                { id: 'confirmModal', nombre: 'Modal de confirmación' }
+            ];
+            
+            elementos.forEach(elem => {
+                const el = document.getElementById(elem.id);
+                if (el) {
+                    const visible = el.style.display !== 'none' && !el.hidden;
+                    log(`✅ ${elem.nombre}: Existe ${visible ? '(visible)' : '(oculto)'}`, visible ? 'exito' : 'info');
+                } else {
+                    log(`❌ ${elem.nombre}: NO EXISTE`, 'error');
+                }
+            });
+            
+            // 3. Verificar contenido del grid
+            const usersGrid = document.getElementById('users-grid');
+            if (usersGrid) {
+                const botones = usersGrid.querySelectorAll('button[onclick*="eliminarUsuario"]');
+                log(`🗑️ Botones de eliminar encontrados: ${botones.length}`, botones.length > 0 ? 'exito' : 'error');
+                
+                if (botones.length === 0) {
+                    log(`📄 Contenido actual del grid: "${usersGrid.innerHTML.substring(0, 100)}..."`, 'info');
+                }
+            }
+        }
+        
+        async function forzarLogin() {
+            limpiar();
+            log('🔐 Forzando login como admin...', 'info');
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: 'alito',
+                        password: 'admin123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    log(`✅ Login exitoso: ${data.user.username} (${data.user.rol})`, 'exito');
+                    log('🔄 Esperando y verificando sección de usuarios...', 'info');
+                    
+                    // Esperar y verificar si la sección se muestra
+                    setTimeout(() => {
+                        const userSection = document.getElementById('user-management-section');
+                        if (userSection) {
+                            userSection.style.display = 'block';
+                            log('✅ Sección de usuarios forzada a visible', 'exito');
+                        }
+                    }, 500);
+                    
+                } else {
+                    log(`❌ Login falló: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Error en login: ${error.message}`, 'error');
+            }
+        }
+        
+        async function mostrarSeccionUsuarios() {
+            limpiar();
+            log('👥 Forzando mostrar sección de usuarios...', 'info');
+            
+            const userSection = document.getElementById('user-management-section');
+            if (userSection) {
+                userSection.style.display = 'block';
+                log('✅ Sección de usuarios mostrada', 'exito');
+                
+                // Verificar si existe el contenedor de usuarios
+                const usersGrid = document.getElementById('users-grid');
+                if (usersGrid) {
+                    log('✅ Grid de usuarios encontrado', 'exito');
+                } else {
+                    log('❌ Grid de usuarios NO encontrado', 'error');
+                }
+            } else {
+                log('❌ Sección de usuarios NO encontrada en el DOM', 'error');
+                log('💡 Puede que no estés en la página principal del sistema', 'info');
+            }
+        }
+        
+        async function cargarUsuariosForzado() {
+            limpiar();
+            log('🔄 Cargando usuarios de forma forzada...', 'info');
+            
+            try {
+                // 1. Obtener usuarios del API
+                const response = await fetch('/api/usuarios');
+                const data = await response.json();
+                
+                if (!data.success) {
+                    log(`❌ Error obteniendo usuarios: ${data.message}`, 'error');
+                    return;
+                }
+                
+                log(`✅ Usuarios obtenidos del API: ${data.usuarios.length}`, 'exito');
+                
+                // 2. Buscar el grid de usuarios
+                const usersGrid = document.getElementById('users-grid');
+                if (!usersGrid) {
+                    log('❌ Grid de usuarios no encontrado - creando uno temporal', 'error');
+                    
+                    // Crear un grid temporal para mostrar
+                    const tempGrid = document.createElement('div');
+                    tempGrid.innerHTML = '<h3>👥 Usuarios Cargados Forzadamente:</h3>';
+                    document.body.appendChild(tempGrid);
+                    
+                    data.usuarios.forEach(u => {
+                        const div = document.createElement('div');
+                        div.style.cssText = 'border: 1px solid #ccc; padding: 10px; margin: 5px; border-radius: 4px;';
+                        div.innerHTML = `
+                            <strong>${u.username}</strong> (${u.rol}) 
+                            ${u.username !== 'alito' ? 
+                                '<button onclick="alert(\'Eliminar usuario: ' + u.username + '\')" style="background: #dc3545; color: white; border: none; padding: 5px 10px; margin-left: 10px; border-radius: 3px;">🗑️ Eliminar</button>' 
+                                : '<span style="color: #666;">(Protegido)</span>'}
+                        `;
+                        tempGrid.appendChild(div);
+                    });
+                    
+                    log('✅ Grid temporal creado con botones de eliminar', 'exito');
+                    return;
+                }
+                
+                // 3. Generar HTML para usuarios
+                const getRolIcon = (rol) => {
+                    switch(rol) {
+                        case 'admin': return '👑';
+                        case 'administrador': return '👑';
+                        case 'tecnico': return '🔧';
+                        default: return '👤';
+                    }
+                };
+                
+                const html = data.usuarios.map(usuario => `
+                    <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; color: #0066cc; margin-bottom: 5px;">
+                                ${getRolIcon(usuario.rol)} ${usuario.username}
+                                <span style="color: #28a745; margin-left: 8px;">✅</span>
+                            </div>
+                            <div style="font-size: 13px; color: #666;">
+                                📧 ${usuario.email || 'Sin email'} • 🏷️ ${usuario.rol} • 🆔 ${usuario.id}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                            <button onclick="alert('Editar usuario: ${usuario.username}')" 
+                                    style="font-size: 12px; padding: 6px 12px; background: #17a2b8; color: white; border: none; border-radius: 4px;">
+                                ✏️ Editar
+                            </button>
+                            ${usuario.username !== 'alito' ? `
+                                <button onclick="alert('Eliminar usuario: ${usuario.username} (ID: ${usuario.id})')" 
+                                        style="font-size: 12px; padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 4px;">
+                                    🗑️ Eliminar
+                                </button>
+                            ` : `
+                                <span style="font-size: 11px; color: #999; padding: 6px;">👑 Admin principal</span>
+                            `}
+                        </div>
+                    </div>
+                `).join('');
+                
+                usersGrid.innerHTML = html;
+                
+                const botones = usersGrid.querySelectorAll('button[onclick*="Eliminar"]');
+                log(`✅ HTML generado correctamente - ${botones.length} botones de eliminar creados`, 'exito');
+                
+            } catch (error) {
+                log(`❌ Error cargando usuarios: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

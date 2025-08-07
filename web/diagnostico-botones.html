@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Botones Eliminar</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .test-container { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px 0; }
+        .resultado { padding: 10px; margin: 5px 0; border-radius: 4px; }
+        .exito { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        .test-grid { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnóstico: Botones de Eliminar</h1>
+    
+    <div class="test-container">
+        <h3>Paso 1: Verificar Autenticación</h3>
+        <button onclick="verificarLogin()">🔐 Verificar Login</button>
+        <div id="login-result"></div>
+    </div>
+    
+    <div class="test-container">
+        <h3>Paso 2: Obtener Usuarios desde API</h3>
+        <button onclick="obtenerUsuarios()">👥 Obtener Usuarios</button>
+        <div id="usuarios-result"></div>
+    </div>
+    
+    <div class="test-container">
+        <h3>Paso 3: Probar Función mostrarUsuarios()</h3>
+        <button onclick="probarMostrarUsuarios()">🎨 Generar HTML</button>
+        <div id="mostrar-result"></div>
+        <div id="test-grid" class="test-grid" style="display: none;"></div>
+    </div>
+    
+    <div class="test-container">
+        <h3>Paso 4: Verificar en Aplicación Principal</h3>
+        <button onclick="abrirGestionUsuarios()">🌐 Abrir Gestión Usuarios</button>
+        <p>Esto abrirá la aplicación principal en una nueva pestaña</p>
+    </div>
+    
+    <script>
+        function log(containerId, mensaje, tipo = 'info') {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = `resultado ${tipo}`;
+            div.innerHTML = mensaje;
+            container.appendChild(div);
+        }
+        
+        function clearLog(containerId) {
+            document.getElementById(containerId).innerHTML = '';
+        }
+        
+        async function verificarLogin() {
+            clearLog('login-result');
+            log('login-result', '🔍 Verificando estado de autenticación...', 'info');
+            
+            try {
+                const response = await fetch('/api/usuarios');
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('login-result', `✅ Usuario autenticado: ${data.usuarios.length} usuarios encontrados`, 'exito');
+                } else {
+                    log('login-result', `❌ No autenticado: ${data.message}`, 'error');
+                    log('login-result', '🔑 Intentando login automático...', 'info');
+                    
+                    // Intentar login automático
+                    const loginResponse = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: 'alito', password: 'admin123' })
+                    });
+                    
+                    const loginData = await loginResponse.json();
+                    if (loginData.success) {
+                        log('login-result', `✅ Login exitoso: ${loginData.user.username} (${loginData.user.rol})`, 'exito');
+                    } else {
+                        log('login-result', `❌ Login falló: ${loginData.message}`, 'error');
+                    }
+                }
+            } catch (error) {
+                log('login-result', `❌ Error verificando login: ${error.message}`, 'error');
+            }
+        }
+        
+        let usuariosGlobales = [];
+        
+        async function obtenerUsuarios() {
+            clearLog('usuarios-result');
+            log('usuarios-result', '📥 Obteniendo usuarios desde API...', 'info');
+            
+            try {
+                const response = await fetch('/api/usuarios');
+                const data = await response.json();
+                
+                if (data.success) {
+                    usuariosGlobales = data.usuarios;
+                    log('usuarios-result', `✅ ${data.usuarios.length} usuarios obtenidos:`, 'exito');
+                    
+                    data.usuarios.forEach(u => {
+                        const puedeEliminar = u.username !== 'alito';
+                        log('usuarios-result', 
+                            `• ID: ${u.id} | ${u.username} (${u.rol}) | Eliminar: ${puedeEliminar ? '✅ SÍ' : '❌ NO (protegido)'}`, 
+                            'info'
+                        );
+                    });
+                    
+                    const eliminables = data.usuarios.filter(u => u.username !== 'alito').length;
+                    log('usuarios-result', `🎯 Total usuarios eliminables: ${eliminables}`, 'exito');
+                    
+                } else {
+                    log('usuarios-result', `❌ Error obteniendo usuarios: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log('usuarios-result', `❌ Error de conexión: ${error.message}`, 'error');
+            }
+        }
+        
+        function probarMostrarUsuarios() {
+            clearLog('mostrar-result');
+            
+            if (usuariosGlobales.length === 0) {
+                log('mostrar-result', '⚠️ Primero ejecuta "Obtener Usuarios"', 'error');
+                return;
+            }
+            
+            log('mostrar-result', '🎨 Generando HTML con función mostrarUsuarios()...', 'info');
+            
+            try {
+                // Función getRolIcon
+                function getRolIcon(rol) {
+                    switch(rol) {
+                        case 'admin': 
+                        case 'administrador': 
+                            return '👑';
+                        case 'tecnico': 
+                            return '🔧';
+                        default: 
+                            return '👤';
+                    }
+                }
+                
+                // Generar HTML exactamente como en la aplicación
+                const html = usuariosGlobales.map(usuario => `
+                    <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; color: var(--azul-antel, #0066cc); margin-bottom: 5px;">
+                                ${getRolIcon(usuario.rol)} ${usuario.username}
+                                ${usuario.activo ? '<span style="color: #28a745; margin-left: 8px;" title="Usuario activo">✅</span>' : '<span style="color: #dc3545; margin-left: 8px;" title="Usuario inactivo">❌</span>'}
+                            </div>
+                            <div style="font-size: 13px; color: #666; margin-bottom: 3px;">
+                                📧 ${usuario.email || 'Sin email'} • 🏷️ ${usuario.rol || 'usuario'} • 🆔 ${usuario.id}
+                            </div>
+                            <div style="font-size: 12px; color: #888;">
+                                ${usuario.descripcion || 'Sin descripción'}
+                            </div>
+                            <div style="font-size: 11px; color: #999; margin-top: 5px;">
+                                📅 Creado: ${new Date(usuario.fecha_creacion).toLocaleDateString()} • 
+                                🕐 Último acceso: ${usuario.ultimo_acceso ? new Date(usuario.ultimo_acceso).toLocaleDateString() : 'Nunca'}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                            <button class="btn btn-secondary" onclick="alert('Editar usuario: ${usuario.username}')" 
+                                    style="font-size: 12px; padding: 6px 12px; background: #17a2b8; color: white; border: none; border-radius: 4px;">
+                                ✏️ Editar
+                            </button>
+                            ${usuario.username !== 'alito' ? `
+                                <button class="btn btn-danger" onclick="alert('Eliminar usuario: ${usuario.username} (ID: ${usuario.id})')" 
+                                        style="font-size: 12px; padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 4px;">
+                                    🗑️ Eliminar
+                                </button>
+                            ` : `
+                                <span style="font-size: 11px; color: #999; padding: 6px;">👑 Admin principal</span>
+                            `}
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Mostrar en el grid de prueba
+                const testGrid = document.getElementById('test-grid');
+                testGrid.innerHTML = html;
+                testGrid.style.display = 'block';
+                
+                // Contar botones de eliminar generados
+                const botonesEliminar = testGrid.querySelectorAll('button[onclick*="Eliminar"]');
+                log('mostrar-result', `✅ HTML generado correctamente`, 'exito');
+                log('mostrar-result', `🗑️ Botones de eliminar creados: ${botonesEliminar.length}`, 'exito');
+                log('mostrar-result', `📝 Total usuarios mostrados: ${usuariosGlobales.length}`, 'info');
+                
+                if (botonesEliminar.length === 0) {
+                    log('mostrar-result', `⚠️ NO se generaron botones de eliminar - revisar lógica`, 'error');
+                } else {
+                    log('mostrar-result', `✅ Se generaron botones para usuarios: ${Array.from(botonesEliminar).map(btn => btn.onclick.toString().match(/Eliminar usuario: ([^(]+)/)?.[1]).join(', ')}`, 'exito');
+                }
+                
+            } catch (error) {
+                log('mostrar-result', `❌ Error generando HTML: ${error.message}`, 'error');
+            }
+        }
+        
+        function abrirGestionUsuarios() {
+            // Abrir la aplicación principal con enfoque en gestión de usuarios
+            const url = 'http://localhost:3000/#users';
+            window.open(url, '_blank');
+        }
+        
+        // Auto-ejecutar verificación inicial
+        window.addEventListener('load', () => {
+            setTimeout(verificarLogin, 500);
+        });
+    </script>
+</body>
+</html>

@@ -670,11 +670,17 @@ app.post('/api/usuarios', (req, res) => {
                     return res.status(500).json({ success: false, message: 'Error del servidor' });
                 }
 
+                // Si es un técnico, crear inmediatamente su BD limpia
+                if (rol === 'tecnico') {
+                    console.log(`🔧 Creando BD limpia para nuevo técnico: ${username}`);
+                    dbManager.resetUserDatabase(username);
+                }
+
                 logActivity(usuarioActual.id, 'crear_usuario', `Usuario: ${username}, Rol: ${rol}`, req.ip);
                 
                 res.json({
                     success: true,
-                    message: 'Usuario creado correctamente',
+                    message: `Usuario ${rol === 'tecnico' ? 'técnico' : ''} creado correctamente${rol === 'tecnico' ? ' con BD privada limpia' : ''}`,
                     usuario: { id: this.lastID, username, nombre_completo, email, rol }
                 });
             }
@@ -2778,6 +2784,37 @@ app.get('/api/admin/users-databases', (req, res) => {
                 res.json({ success: true, usuarios: usuarios });
             });
     });
+});
+
+// Resetear base de datos de un usuario específico (solo admin)
+app.post('/api/admin/reset-user-database', (req, res) => {
+    const usuarioActual = req.session && req.session.user;
+    const { username } = req.body;
+    
+    if (!usuarioActual || usuarioActual.rol !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Acceso denegado - Solo admin' });
+    }
+    
+    if (!username) {
+        return res.status(400).json({ success: false, message: 'Username requerido' });
+    }
+    
+    try {
+        console.log(`🔄 Admin ${usuarioActual.username} reseteando BD del usuario: ${username}`);
+        
+        // Resetear la base de datos del usuario
+        dbManager.resetUserDatabase(username);
+        
+        res.json({ 
+            success: true, 
+            message: `Base de datos de ${username} reseteada exitosamente`,
+            timestamp: new Date().toISOString()
+        });
+        
+    } catch (error) {
+        console.error('Error reseteando BD de usuario:', error);
+        res.status(500).json({ success: false, message: 'Error del servidor' });
+    }
 });
 
 // ===== CIERRE DEL SERVIDOR =====
