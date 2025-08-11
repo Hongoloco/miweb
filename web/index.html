@@ -5402,23 +5402,15 @@
                     
                     // Mostrar sección de gestión solo para admin
                     console.log('🔍 Usuario logueado:', data.user.username, 'Rol:', data.user.rol);
-                    if (data.user.rol === 'admin') {
-                        console.log('✅ Usuario es admin - mostrando gestión de usuarios');
+                    if (data.user.rol === 'admin' || data.user.rol === 'administrador') {
+                        console.log('✅ Usuario es admin - habilitando gestión de usuarios');
                         const userSection = document.getElementById('user-management-section');
                         if (userSection) {
                             userSection.style.display = 'block';
-                            console.log('✅ Sección de usuarios visible');
+                            console.log('✅ Sección de usuarios visible - cargar usuarios manualmente');
                             
-                            // Forzar carga de usuarios con un pequeño delay
-                            setTimeout(() => {
-                                console.log('🔄 Inicializando módulo de usuarios...');
-                                if (typeof cargarUsuarios === 'function') {
-                                    cargarUsuarios();
-                                    console.log('✅ Función cargarUsuarios ejecutada');
-                                } else {
-                                    console.error('❌ Función cargarUsuarios no disponible');
-                                }
-                            }, 1000);
+                            // NO cargar usuarios automáticamente - esperar clic del usuario
+                            // La función cargarUsuarios() se ejecutará cuando el usuario haga clic en la gestión
                         } else {
                             console.error('❌ Elemento user-management-section no encontrado');
                         }
@@ -6872,22 +6864,31 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                     // Cargar primera OLT si existe
                     if (olts.length > 0) {
                         await cargarOLT(olts[0].id);
+                        // Solo mostrar notificación de éxito si hay OLTs cargadas
+                        if (typeof mostrarNotificacion === 'function') {
+                            mostrarNotificacion(`✅ ${olts.length} OLT(s) cargada(s) correctamente`, 'success', 2000);
+                        }
                     } else {
                         if (comandosContainer) {
                             comandosContainer.innerHTML = `
                                 <div style="text-align: center; padding: 20px; color: #666;">
-                                    <p>📋 No hay OLTs configuradas</p>
-                                    <p style="font-size: 14px;">Agregue una OLT para comenzar</p>
+                                    <div style="font-size: 48px; margin-bottom: 15px;">📋</div>
+                                    <h3 style="color: #007bff; margin-bottom: 10px;">¡Bienvenido!</h3>
+                                    <p>No hay OLTs configuradas aún</p>
+                                    <p style="font-size: 14px; color: #888;">Agregue una OLT para comenzar a trabajar</p>
+                                    <div style="margin-top: 20px;">
+                                        <button class="btn btn-primary" onclick="window.location.reload()" style="margin: 5px;">
+                                            🔄 Actualizar
+                                        </button>
+                                    </div>
                                 </div>
                             `;
                         }
+                        // NO mostrar notificación para usuarios nuevos sin OLTs
+                        console.log('ℹ️ Usuario nuevo - No hay OLTs configuradas (esto es normal)');
                     }
                     
-                    // Mostrar notificación de éxito
-                    if (typeof mostrarNotificacion === 'function') {
-                        mostrarNotificacion(`✅ ${olts.length} OLT(s) cargada(s) correctamente`, 'success', 2000);
-                        console.log(`✅ Carga exitosa: ${olts.length} OLT(s) encontrada(s)`);
-                    }
+                    console.log(`✅ Carga exitosa: ${olts.length} OLT(s) encontrada(s)`);
                     
                 } else {
                     throw new Error(data?.message || 'Respuesta inválida del servidor');
@@ -6896,22 +6897,30 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
             } catch (error) {
                 console.error('💥 Error cargando OLTs:', error);
                 
-                // Mostrar error en UI
+                // Mostrar error en UI de forma amigable
                 if (comandosContainer) {
                     comandosContainer.innerHTML = `
-                        <div style="text-align: center; padding: 20px; color: #dc3545;">
-                            <p>❌ Error al cargar OLTs</p>
-                            <p style="font-size: 14px;">${error.message}</p>
-                            <button class="btn btn-primary" onclick="cargarOLTs()" style="margin-top: 10px;">
-                                🔄 Reintentar
-                            </button>
+                        <div style="text-align: center; padding: 20px; color: #666;">
+                            <div style="font-size: 48px; margin-bottom: 15px;">🔌</div>
+                            <h3 style="color: #007bff; margin-bottom: 10px;">OLTs no disponibles</h3>
+                            <p style="font-size: 14px; color: #888;">El sistema está iniciándose o configurándose</p>
+                            <div style="margin-top: 20px;">
+                                <button class="btn btn-primary" onclick="cargarOLTs()" style="margin: 5px;">
+                                    🔄 Reintentar
+                                </button>
+                            </div>
                         </div>
                     `;
                 }
                 
-                // Mostrar notificación
-                if (typeof mostrarNotificacion === 'function') {
-                    mostrarNotificacion('Error de conexión al cargar OLTs', 'error', 5000);
+                // Solo mostrar notificación si es un error real de conectividad
+                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    if (typeof mostrarNotificacion === 'function') {
+                        mostrarNotificacion('⚠️ Problema de conexión - Reintentando...', 'warning', 3000);
+                    }
+                } else {
+                    // Para otros errores, solo log en consola
+                    console.log('ℹ️ OLTs no configuradas o no disponibles (normal para usuarios nuevos)');
                 }
             } finally {
                 // Resetear flag de carga
@@ -8719,12 +8728,34 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
         // ===== GESTIÓN DE USUARIOS MEJORADA =====
         let usuarioEditando = null;
 
-        // Cargar lista de usuarios
+        // Cargar lista de usuarios - FUNCIÓN PRINCIPAL DE GESTIÓN DE USUARIOS
         async function cargarUsuarios() {
             console.log('🔄 Cargando usuarios...');
             
+            // Verificar autenticación ANTES de hacer la petición
+            const isAuthenticated = sessionStorage.getItem('authenticated') === 'true';
+            const userData = sessionStorage.getItem('user');
+            
+            if (!isAuthenticated || !userData) {
+                console.warn('⚠️ Usuario no autenticado - no se pueden cargar usuarios');
+                mostrarMensajeUsuario('Debe iniciar sesión para ver los usuarios', 'warning');
+                return;
+            }
+            
+            const user = JSON.parse(userData);
+            if (user.rol !== 'admin' && user.rol !== 'administrador') {
+                console.warn('⚠️ Usuario sin permisos de admin - no puede ver usuarios');
+                mostrarMensajeUsuario('Solo los administradores pueden gestionar usuarios', 'warning');
+                return;
+            }
+            
             try {
-                const response = await fetch('/api/usuarios');
+                const response = await fetch('/api/usuarios', {
+                    credentials: 'include', // Incluir cookies de sesión
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
@@ -8740,7 +8771,7 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                 }
             } catch (error) {
                 console.error('💥 Error cargando usuarios:', error);
-                mostrarMensajeUsuario('Error de conexión al cargar usuarios', 'error');
+                mostrarMensajeUsuario(`Error al cargar usuarios: ${error.message}`, 'error');
             }
         }
 
@@ -8786,7 +8817,7 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                                 style="font-size: 12px; padding: 6px 12px; background: #17a2b8; color: white;">
                             ✏️ Editar
                         </button>
-                        ${usuario.username !== 'alito' ? `
+                        ${(usuario.username !== 'admin' && usuario.rol !== 'admin' && usuario.rol !== 'administrador') ? `
                             <button class="btn btn-danger" onclick="eliminarUsuario(${usuario.id}, '${usuario.username}')" 
                                     style="font-size: 12px; padding: 6px 12px; background: #dc3545; color: white;">
                                 🗑️ Eliminar
@@ -8799,14 +8830,27 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
             `).join('');
             
             console.log('✅ Usuarios mostrados en interfaz:', usuarios.length);
+            
+            // Debug: Verificar botones de eliminar
+            const botonesEliminar = container.querySelectorAll('button[onclick*="eliminarUsuario"]');
+            console.log(`🗑️ Botones de eliminar generados: ${botonesEliminar.length}`);
+            
+            usuarios.forEach(usuario => {
+                const puedeEliminar = (usuario.username !== 'admin' && usuario.rol !== 'admin' && usuario.rol !== 'administrador');
+                console.log(`👤 ${usuario.username} (${usuario.rol}) - Puede eliminar: ${puedeEliminar}`);
+            });
         }
 
         // Obtener icono según el rol
         function getRolIcon(rol) {
             switch(rol) {
-                case 'admin': return '👑';
-                case 'tecnico': return '🔧';
-                default: return '👤';
+                case 'admin':
+                case 'administrador':
+                    return '👑';
+                case 'tecnico':
+                    return '🔧';
+                default:
+                    return '👤';
             }
         }
 
@@ -9603,7 +9647,7 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
 
         // Eliminar usuario - con modal estandarizado y notificaciones mejoradas
         function eliminarUsuario(id, username) {
-            if (username === 'alito') {
+            if (username === 'admin') {
                 mostrarAlert('Acción no permitida', '❌ No se puede eliminar el usuario administrador principal', '🚫');
                 return;
             }
@@ -10203,7 +10247,7 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                 if (data.success) {
                     // Cargar usuarios si es admin
                     if (usuarioActual && usuarioActual.rol === 'admin') {
-                        await cargarUsuarios();
+                        await cargarUsuariosParaFiltro();
                         document.getElementById('filtro-usuario-container').style.display = 'block';
                     } else {
                         document.getElementById('filtro-usuario-container').style.display = 'none';
@@ -10211,6 +10255,13 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                     
                     mostrarTareas(data.tareas);
                     await cargarEstadisticasTareas();
+                    
+                    // Solo mostrar notificación si es la primera carga o hay tareas
+                    if (data.tareas && data.tareas.length > 0) {
+                        console.log(`✅ ${data.tareas.length} tarea(s) cargada(s) correctamente`);
+                    } else {
+                        console.log('ℹ️ Usuario nuevo - No hay tareas aún (esto es normal)');
+                    }
                 } else {
                     if (response.status === 401) {
                         console.warn('❌ Error 401 - No autorizado');
@@ -10222,12 +10273,6 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                                     <div style="font-size: 48px; margin-bottom: 15px;">🔐</div>
                                     <h3 style="color: #007bff; margin-bottom: 10px;">Inicio de sesión requerido</h3>
                                     <p>Para gestionar tareas necesitas iniciar sesión</p>
-                                    <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; font-size: 12px; color: #666;">
-                                        <strong>Debug info:</strong><br>
-                                        Status: ${response.status}<br>
-                                        Usuario: ${usuarioActual ? usuarioActual.username : 'null'}<br>
-                                        Session: ${sessionStorage.getItem('authenticated')}
-                                    </div>
                                     <button class="btn btn-primary" onclick="showTab('inicio')" style="margin-top: 15px;">
                                         🔓 Iniciar Sesión
                                     </button>
@@ -10238,30 +10283,55 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                             `;
                         }
                     } else {
-                        mostrarNotificacion('Error al cargar tareas: ' + data.message, 'error');
+                        // Para otros errores, NO mostrar notificación intrusiva
+                        console.warn('⚠️ Error al cargar tareas:', data.message);
+                        const listaTareas = document.getElementById('lista-tareas');
+                        if (listaTareas) {
+                            listaTareas.innerHTML = `
+                                <div style="text-align: center; padding: 40px; color: #666;">
+                                    <div style="font-size: 48px; margin-bottom: 15px;">📋</div>
+                                    <h3 style="color: #007bff; margin-bottom: 10px;">¡Bienvenido!</h3>
+                                    <p>Aún no hay tareas configuradas</p>
+                                    <p style="font-size: 14px; color: #888;">Comienza creando tu primera tarea</p>
+                                    <button class="btn btn-primary" onclick="cargarTareas()" style="margin-top: 15px;">
+                                        🔄 Actualizar
+                                    </button>
+                                </div>
+                            `;
+                        }
                     }
                 }
             } catch (error) {
                 console.error('Error al cargar tareas:', error);
-                // Mostrar mensaje de conexión en lugar de notificación
+                // Mostrar mensaje amigable en lugar de notificación de error
                 const listaTareas = document.getElementById('lista-tareas');
                 if (listaTareas) {
                     listaTareas.innerHTML = `
                         <div style="text-align: center; padding: 40px; color: #666;">
-                            <div style="font-size: 48px; margin-bottom: 15px;">🌐</div>
-                            <h3 style="color: #dc3545; margin-bottom: 10px;">Error de conexión</h3>
-                            <p>Verifique que el servidor esté funcionando</p>
+                            <div style="font-size: 48px; margin-bottom: 15px;">🔌</div>
+                            <h3 style="color: #007bff; margin-bottom: 10px;">Sistema iniciándose</h3>
+                            <p>Conectando con el servidor...</p>
+                            <p style="font-size: 14px; color: #888;">Esto puede tomar unos momentos</p>
                             <button class="btn btn-secondary" onclick="cargarTareas()" style="margin-top: 15px;">
                                 🔄 Reintentar
                             </button>
                         </div>
                     `;
                 }
+                
+                // Solo mostrar notificación si es un error crítico de red
+                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    if (typeof mostrarNotificacion === 'function') {
+                        mostrarNotificacion('⚠️ Problema de conexión - Reintentando...', 'warning', 3000);
+                    }
+                } else {
+                    console.log('ℹ️ Tareas no disponibles (normal para usuarios nuevos)');
+                }
             }
         }
         
         // Cargar lista de usuarios para el filtro (solo admin)
-        async function cargarUsuarios() {
+        async function cargarUsuariosParaFiltro() {
             try {
                 const response = await fetch('/api/usuarios', {
                     credentials: 'include' // Incluir cookies de sesión

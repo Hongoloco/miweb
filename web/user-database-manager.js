@@ -9,7 +9,7 @@ class UserDatabaseManager {
     constructor() {
         this.mainDbPath = path.join(__dirname, 'olt_system.db');
         this.userDbDirectory = path.join(__dirname, 'databases');
-        this.adminUsername = 'alito';
+        this.adminUsername = 'admin';
         this.databaseConnections = new Map();
         
         // Crear directorio para bases de datos de usuarios si no existe
@@ -129,41 +129,46 @@ class UserDatabaseManager {
     initializeUserDatabase(db, username) {
         console.log(`🔧 Inicializando esquema LIMPIO para usuario: ${username}`);
         
-        // Verificar si ya está inicializada
-        db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='configuraciones'", (err, row) => {
+        // Verificar si ya está inicializada - verificando tabla específica
+        db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='categorias_tareas'", (err, row) => {
             if (row) {
                 console.log(`⏭️ BD de ${username} ya está inicializada`);
                 return;
             }
             
+            // FORZAR recreación completa
+            console.log('🔧 Creando esquema completo...');
+            
             // Crear todas las tablas necesarias para el usuario - ESQUEMA LIMPIO
             const tables = [
-                // Tabla de tareas - LIMPIA
+                // Tabla de tareas - SINCRONIZADA CON BD PRINCIPAL
                 `CREATE TABLE IF NOT EXISTS tareas (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     titulo TEXT NOT NULL,
                     descripcion TEXT,
-                    categoria TEXT DEFAULT 'General',
                     estado TEXT DEFAULT 'pendiente',
                     prioridad TEXT DEFAULT 'media',
-                    fecha_vencimiento DATE,
+                    categoria_id INTEGER,
+                    asignado_a INTEGER,
                     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    tiempo_estimado INTEGER DEFAULT 0,
-                    tiempo_real INTEGER DEFAULT 0,
-                    fecha_inicio DATETIME,
-                    fecha_fin DATETIME,
+                    fecha_vencimiento DATETIME,
+                    fecha_completada DATETIME,
+                    tiempo_estimado INTEGER,
+                    tiempo_real INTEGER,
                     etiquetas TEXT,
                     archivos_adjuntos TEXT,
-                    comentarios TEXT
+                    comentarios TEXT,
+                    FOREIGN KEY (categoria_id) REFERENCES categorias_tareas(id),
+                    FOREIGN KEY (asignado_a) REFERENCES usuarios(id)
                 )`,
 
-                // Tabla de categorías de tareas - LIMPIA
+                // Tabla de categorías de tareas - SINCRONIZADA CON BD PRINCIPAL
                 `CREATE TABLE IF NOT EXISTS categorias_tareas (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    nombre TEXT NOT NULL UNIQUE,
-                    descripcion TEXT,
-                    color TEXT DEFAULT '#007bff',
+                    nombre TEXT UNIQUE NOT NULL,
+                    color TEXT,
+                    icono TEXT,
+                    activa INTEGER DEFAULT 1,
                     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
                 )`,
 
@@ -283,23 +288,23 @@ class UserDatabaseManager {
     insertDefaultData(db, username) {
         console.log(`📊 Insertando datos MÍNIMOS por defecto para: ${username}`);
 
-        // Solo categorías básicas de tareas - NO datos de OLT ni comandos
+        // Solo categorías básicas de tareas - SINCRONIZADO CON BD PRINCIPAL
         const defaultCategories = [
-            ['OLT', 'Tareas relacionadas con equipos OLT', '#ff6b6b'],
-            ['IMS', 'Gestión de abonados IMS', '#4ecdc4'], 
-            ['ACS', 'Configuración de equipos ACS', '#45b7d1'],
-            ['Mantenimiento', 'Tareas de mantenimiento general', '#f9ca24'],
-            ['Soporte', 'Atención al cliente y soporte', '#6c5ce7'],
-            ['General', 'Tareas generales', '#007bff']
+            ['OLT', '#ff6b6b', '🖥️'],
+            ['IMS', '#4ecdc4', '📞'], 
+            ['ACS', '#45b7d1', '⚙️'],
+            ['Mantenimiento', '#f9ca24', '🔧'],
+            ['Soporte', '#6c5ce7', '🎧'],
+            ['General', '#007bff', '📋']
         ];
 
         db.run('BEGIN TRANSACTION');
 
-        // Insertar solo categorías básicas
-        defaultCategories.forEach(([nombre, descripcion, color]) => {
+        // Insertar solo categorías básicas con esquema correcto (sin descripcion)
+        defaultCategories.forEach(([nombre, color, icono]) => {
             db.run(
-                'INSERT OR IGNORE INTO categorias_tareas (nombre, descripcion, color) VALUES (?, ?, ?)',
-                [nombre, descripcion, color]
+                'INSERT OR IGNORE INTO categorias_tareas (nombre, color, icono, activa) VALUES (?, ?, ?, 1)',
+                [nombre, color, icono]
             );
         });
 

@@ -100,6 +100,11 @@ function getUserDatabase(req) {
     return dbManager.getUserDatabase(user.username, user.rol);
 }
 
+// ===== FUNCIÓN HELPER PARA VERIFICAR SI ES ADMINISTRADOR =====
+function isAdmin(user) {
+    return user && (user.rol === 'admin' || user.rol === 'administrador');
+}
+
 // ===== INICIALIZACIÓN AUTOMÁTICA DE LA BASE DE DATOS =====
 function initializeDatabase() {
     console.log('🔧 Verificando estructura de la base de datos...');
@@ -597,7 +602,7 @@ app.get('/api/usuarios', (req, res) => {
     const usuarioActual = req.session && req.session.user;
     
     // Solo el admin puede ver todos los usuarios
-    if (!usuarioActual || usuarioActual.rol !== 'admin') {
+    if (!isAdmin(usuarioActual)) {
         return res.status(403).json({ success: false, message: 'Acceso denegado - Solo admin puede ver usuarios' });
     }
     
@@ -639,7 +644,7 @@ app.post('/api/usuarios', (req, res) => {
     const usuarioActual = req.session && req.session.user;
     
     // Solo admin puede crear usuarios
-    if (!usuarioActual || usuarioActual.rol !== 'admin') {
+    if (!isAdmin(usuarioActual)) {
         return res.status(403).json({ success: false, message: 'Solo administradores pueden crear usuarios' });
     }
     
@@ -760,7 +765,7 @@ app.delete('/api/usuarios/:id', (req, res) => {
     const usuarioActual = req.session && req.session.user;
     
     // Solo admin puede eliminar usuarios
-    if (!usuarioActual || usuarioActual.rol !== 'admin') {
+    if (!isAdmin(usuarioActual)) {
         return res.status(403).json({ success: false, message: 'Solo administradores pueden eliminar usuarios' });
     }
 
@@ -775,8 +780,8 @@ app.delete('/api/usuarios/:id', (req, res) => {
             return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
         }
 
-        if (usuario.username === 'alito') {
-            return res.status(403).json({ success: false, message: 'No se puede eliminar el usuario alito' });
+        if (usuario.username === 'admin') {
+            return res.status(403).json({ success: false, message: 'No se puede eliminar el usuario administrador principal' });
         }
 
         db.run(`DELETE FROM usuarios WHERE id = ?`, [userId], function(err) {
@@ -1026,16 +1031,22 @@ app.get('/api/tareas', (req, res) => {
     // Usar la base de datos específica del usuario
     const userDb = getUserDatabase(req);
     
-    let query = `SELECT t.*, c.color as categoria_color, c.icono as categoria_icono
+    // Consulta SQL mejorada que maneja columnas opcionales
+    let query = `SELECT t.*, 
+                        COALESCE(c.color, '#007bff') as categoria_color,
+                        COALESCE(c.icono, '📋') as categoria_icono,
+                        COALESCE(c.nombre, 'Sin categoría') as categoria_nombre
                  FROM tareas t 
-                 LEFT JOIN categorias_tareas c ON t.categoria = c.nombre
-                 WHERE 1=1`;
+                 LEFT JOIN categorias_tareas c ON t.categoria_id = c.id
+                 WHERE t.estado != 'eliminada'`;
     let params = [];
     
     // Los usuarios técnicos solo ven sus propias tareas en su BD privada
     // El admin ve todas las tareas en la BD principal
-    if (usuarioActual.rol !== 'admin') {
+    if (usuarioActual.rol !== 'admin' && usuarioActual.rol !== 'administrador') {
         console.log(`📊 Usuario técnico ${usuarioActual.username} accediendo a su BD privada`);
+    } else {
+        console.log(`👑 Usuario admin - usando base de datos principal`);
     }
     
     if (estado) {
@@ -1044,7 +1055,7 @@ app.get('/api/tareas', (req, res) => {
     }
     
     if (categoria) {
-        query += ` AND t.categoria = ?`;
+        query += ` AND c.nombre = ?`;
         params.push(categoria);
     }
     
@@ -1059,7 +1070,10 @@ app.get('/api/tareas', (req, res) => {
     
     userDb.all(query, params, (err, tareas) => {
         if (err) {
-            console.error('Error al obtener tareas:', err);
+            console.error('❌ Error al obtener tareas:', err);
+            console.error('🔍 Query:', query);
+            console.error('🔍 Params:', params);
+            console.error('🔍 Usuario:', usuarioActual.username);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
         }
         res.json({ success: true, tareas });
@@ -1075,20 +1089,23 @@ app.get('/api/tareas/estadisticas', (req, res) => {
         return res.status(401).json({ success: false, message: 'No autorizado' });
     }
     
-    let whereClause = 'WHERE t.activa = 1';
+    // Usar la base de datos específica del usuario
+    const userDb = getUserDatabase(req);
+    
+    let whereClause = 'WHERE t.estado != "eliminada"';
     let params = [];
     
     // Si no es admin, solo puede ver estadísticas de sus propias tareas
-    if (usuarioActual.rol !== 'admin') {
-        whereClause += ' AND t.usuario_id = ?';
+    if (usuarioActual.rol !== 'admin' && usuarioActual.rol !== 'administrador') {
+        whereClause += ' AND t.asignado_a = ?';
         params.push(usuarioActual.id);
     } else if (usuario_id) {
         // Si es admin y especifica un usuario, filtrar por ese usuario
-        whereClause += ' AND t.usuario_id = ?';
+        whereClause += ' AND t.asignado_a = ?';
         params.push(usuario_id);
     }
     
-    db.get(`SELECT 
+    userDb.get(`SELECT 
         COUNT(*) as total,
         SUM(CASE WHEN estado = 'pendiente' THEN 1 ELSE 0 END) as pendientes,
         SUM(CASE WHEN estado = 'activa' THEN 1 ELSE 0 END) as activas,
@@ -1110,12 +1127,12 @@ app.get('/api/tareas/:id', (req, res) => {
     const tareaId = req.params.id;
     
     // Obtener tarea
-    db.get(`SELECT t.*, c.color as categoria_color, c.icono as categoria_icono,
+    db.get(`SELECT t.*, c.color as categoria_color, c.nombre as categoria_nombre,
             u.username as usuario_asignado_username, u.nombre_completo as usuario_asignado_nombre
             FROM tareas t 
-            LEFT JOIN categorias_tareas c ON t.categoria = c.nombre
-            LEFT JOIN usuarios u ON t.usuario_id = u.id
-            WHERE t.id = ? AND t.activa = 1`, [tareaId], (err, tarea) => {
+            LEFT JOIN categorias_tareas c ON t.categoria_id = c.id
+            LEFT JOIN usuarios u ON t.asignado_a = u.id
+            WHERE t.id = ? AND t.estado != 'eliminada'`, [tareaId], (err, tarea) => {
         if (err) {
             console.error('Error al obtener tarea:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
@@ -1304,12 +1321,17 @@ app.post('/api/tareas/:id/notas', (req, res) => {
 
 // Obtener categorías de tareas
 app.get('/api/categorias-tareas', (req, res) => {
-    db.all(`SELECT * FROM categorias_tareas WHERE activa = 1 ORDER BY nombre`, (err, categorias) => {
+    const usuarioActual = req.session && req.session.user;
+    const userDb = getUserDatabase(req);
+    
+    userDb.all(`SELECT * FROM categorias_tareas WHERE activa = 1 ORDER BY nombre`, (err, categorias) => {
         if (err) {
             console.error('Error al obtener categorías:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
         }
-        res.json({ success: true, categorias });
+        
+        console.log(`📂 Usuario ${usuarioActual?.username} cargó ${categorias.length} categorías`);
+        res.json(categorias);
     });
 });
 
@@ -1421,12 +1443,38 @@ app.delete('/api/comandos-ims/:id', (req, res) => {
 
 // Obtener todas las OLTs
 app.get('/api/olts', (req, res) => {
-    db.all(`SELECT * FROM olts WHERE estado = 'activa' ORDER BY fecha_creacion`, (err, rows) => {
-        if (err) {
-            console.error('Error al obtener OLTs:', err);
+    const usuarioActual = req.session && req.session.user;
+    const userDb = getUserDatabase(req);
+    
+    // Verificar primero la estructura de la tabla para determinar el campo correcto
+    userDb.all(`PRAGMA table_info(olts)`, (pragmaErr, columns) => {
+        if (pragmaErr) {
+            console.error('Error verificando estructura de olts:', pragmaErr);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
         }
-        res.json({ success: true, olts: rows });
+        
+        // Determinar si existe 'estado' o 'activo'
+        const hasEstado = columns.some(col => col.name === 'estado');
+        const hasActivo = columns.some(col => col.name === 'activo');
+        
+        let query;
+        if (hasEstado) {
+            query = `SELECT * FROM olts WHERE estado = 'activo' ORDER BY fecha_creacion DESC`;
+        } else if (hasActivo) {
+            query = `SELECT * FROM olts WHERE activo = 1 ORDER BY fecha_creacion DESC`;
+        } else {
+            query = `SELECT * FROM olts ORDER BY fecha_creacion DESC`;
+        }
+        
+        userDb.all(query, (err, rows) => {
+            if (err) {
+                console.error('Error al obtener OLTs:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+            
+            console.log(`📊 Usuario ${usuarioActual?.username} cargó ${rows.length} OLTs`);
+            res.json({ success: true, olts: rows });
+        });
     });
 });
 
@@ -1593,6 +1641,22 @@ app.delete('/api/olts/:id', (req, res) => {
 });
 
 // ===== RUTAS DE COMANDOS =====
+
+// Obtener todos los comandos
+app.get('/api/comandos', (req, res) => {
+    const usuarioActual = req.session && req.session.user;
+    const userDb = getUserDatabase(req);
+    
+    userDb.all(`SELECT * FROM comandos WHERE activo = 1 ORDER BY orden_display, nombre`, (err, comandos) => {
+        if (err) {
+            console.error('Error al obtener comandos:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+        
+        console.log(`📋 Usuario ${usuarioActual?.username} cargó ${comandos.length} comandos`);
+        res.json(comandos);
+    });
+});
 
 // Obtener comandos por OLT ID
 app.get('/api/comandos/:olt_id', (req, res) => {
