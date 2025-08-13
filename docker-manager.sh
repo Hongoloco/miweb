@@ -35,6 +35,15 @@ show_help() {
 
 # Función para iniciar la aplicación
 start_app() {
+  # Verificar que Docker esté funcionando
+  if [ -f "./verificar-docker.sh" ]; then
+    ./verificar-docker.sh
+    if [ $? -ne 0 ]; then
+      echo -e "${RED}Docker no está funcionando correctamente. Abortando.${NC}"
+      exit 1
+    fi
+  fi
+  
   echo -e "${BLUE}Iniciando aplicación en Docker...${NC}"
   if docker compose ps -q | grep -q .; then
     echo -e "${YELLOW}La aplicación ya está en ejecución${NC}"
@@ -43,8 +52,6 @@ start_app() {
     docker compose up -d
     echo -e "${GREEN}Aplicación iniciada correctamente${NC}"
     echo -e "${YELLOW}Accede a:${NC} http://localhost:3000"
-    echo -e "${YELLOW}Usuario:${NC} alito"
-    echo -e "${YELLOW}Contraseña:${NC} vinilo28"
   fi
 }
 

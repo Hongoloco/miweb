@@ -44,8 +44,6 @@ Para detenerla:
 Una vez iniciada la aplicación, accede a:
 
 - **URL**: http://localhost:3000
-- **Usuario**: alito
-- **Contraseña**: vinilo28
 
 ## Detalles técnicos
 
@@ -60,4 +58,4 @@ La aplicación se configura automáticamente al iniciar el contenedor, ejecutand
 
 1. Inicializa la base de datos
 2. Restaura la OLT ZTE C600 con sus comandos
-3. Configura el usuario alito con la contraseña vinilo28
+3. Configura el usuario del sistema

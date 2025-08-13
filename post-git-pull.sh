@@ -87,30 +87,12 @@ else
     echo "✅ OLT ZTE C600 ya existe en la base de datos"
 fi
 
-# 3. Asegurarse que alito tenga la contraseña correcta (vinilo28)
-echo "🔐 Verificando contraseña del usuario alito..."
-if [ -f "actualizar-password-vinilo28.js" ]; then
-    node actualizar-password-vinilo28.js
+# 3. Asegurarse que el usuario del sistema tenga la configuración correcta
+echo "🔐 Verificando usuario del sistema..."
+if [ -f "../actualizar-usuario-aser.js" ]; then
+    node ../actualizar-usuario-aser.js
 else
-    echo "⚠️ Script actualizar-password-vinilo28.js no encontrado"
-    # Actualizar manualmente si el script no está disponible
-    node -e "
-        const sqlite3 = require('sqlite3').verbose();
-        const bcrypt = require('bcrypt');
-        const db = new sqlite3.Database('olt_system.db');
-        
-        const nuevaContrasena = 'vinilo28';
-        const hashedPassword = bcrypt.hashSync(nuevaContrasena, 10);
-        
-        db.run('UPDATE usuarios SET password_hash = ? WHERE username = ?', 
-            [hashedPassword, 'alito'], 
-            function(err) {
-                if (err) console.error('❌ Error:', err);
-                else console.log('   ✅ Contraseña de alito actualizada a: vinilo28');
-                db.close();
-            }
-        );
-    "
+    echo "⚠️ Script actualizar-usuario-aser.js no encontrado"
 fi
 
 # 4. Verificar que todo está correcto
@@ -119,11 +101,10 @@ sqlite3 olt_system.db "
     SELECT 'Usuarios: ' || COUNT(*) FROM usuarios;
     SELECT 'OLTs: ' || COUNT(*) FROM olts;
     SELECT 'Comandos: ' || COUNT(*) FROM comandos;
-    SELECT 'Usuario alito: ' || COUNT(*) FROM usuarios WHERE username='alito';
+    SELECT 'Usuario del sistema: ' || COUNT(*) FROM usuarios WHERE username='aser';
 "
 
 echo ""
 echo "✅ Restauración post-git-pull completada"
-echo "🔐 Credenciales: usuario=alito, contraseña=vinilo28"
 echo ""
 echo "📡 Para iniciar el servidor: npm start"
