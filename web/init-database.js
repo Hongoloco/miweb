@@ -113,7 +113,7 @@ db.serialize(() => {
         ip_address TEXT,
         modelo TEXT DEFAULT 'ZTE C600',
         ubicacion TEXT,
-        estado TEXT DEFAULT 'activa',
+        estado TEXT DEFAULT 'activo',
         fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
         fecha_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
