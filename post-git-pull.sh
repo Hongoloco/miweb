@@ -7,6 +7,12 @@
 echo "🔄 Ejecutando script post-git-pull..."
 echo "============================================"
 
+# Verificar y actualizar docker-compose si es necesario
+if [ -f "$(dirname "$0")/actualizar-docker-compose.sh" ]; then
+    echo "🐳 Verificando Docker Compose..."
+    bash "$(dirname "$0")/actualizar-docker-compose.sh"
+fi
+
 # Cambiar al directorio web
 cd "$(dirname "$0")/web" || exit 1
 
