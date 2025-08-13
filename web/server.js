@@ -130,18 +130,13 @@ function initializeDatabase() {
             descripcion TEXT,
             estado TEXT DEFAULT 'pendiente',
             prioridad TEXT DEFAULT 'media',
-            categoria_id INTEGER,
-            asignado_a INTEGER,
+            categoria TEXT,
+            usuario_id INTEGER,
+            activa INTEGER DEFAULT 1,
             fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-            fecha_vencimiento DATETIME,
-            fecha_completada DATETIME,
-            tiempo_estimado INTEGER,
-            tiempo_real INTEGER,
-            etiquetas TEXT,
-            archivos_adjuntos TEXT,
-            comentarios TEXT,
-            FOREIGN KEY (categoria_id) REFERENCES categorias_tareas(id),
-            FOREIGN KEY (asignado_a) REFERENCES usuarios(id)
+            fecha_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+            FOREIGN KEY (categoria) REFERENCES categorias_tareas(nombre)
         )`, (err) => {
             if (err) console.error('Error creando tabla tareas:', err);
             else console.log('✅ Tabla tareas verificada');
@@ -1037,7 +1032,7 @@ app.get('/api/tareas', (req, res) => {
                         COALESCE(c.icono, '📋') as categoria_icono,
                         COALESCE(c.nombre, 'Sin categoría') as categoria_nombre
                  FROM tareas t 
-                 LEFT JOIN categorias_tareas c ON t.categoria_id = c.id
+                 LEFT JOIN categorias_tareas c ON t.categoria = c.nombre
                  WHERE t.estado != 'eliminada'`;
     let params = [];
     
@@ -1130,7 +1125,7 @@ app.get('/api/tareas/:id', (req, res) => {
     db.get(`SELECT t.*, c.color as categoria_color, c.nombre as categoria_nombre,
             u.username as usuario_asignado_username, u.nombre_completo as usuario_asignado_nombre
             FROM tareas t 
-            LEFT JOIN categorias_tareas c ON t.categoria_id = c.id
+            LEFT JOIN categorias_tareas c ON t.categoria = c.nombre
             LEFT JOIN usuarios u ON t.asignado_a = u.id
             WHERE t.id = ? AND t.estado != 'eliminada'`, [tareaId], (err, tarea) => {
         if (err) {

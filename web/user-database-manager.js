@@ -148,18 +148,13 @@ class UserDatabaseManager {
                     descripcion TEXT,
                     estado TEXT DEFAULT 'pendiente',
                     prioridad TEXT DEFAULT 'media',
-                    categoria_id INTEGER,
-                    asignado_a INTEGER,
+                    categoria TEXT,
+                    usuario_id INTEGER,
+                    activa INTEGER DEFAULT 1,
                     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    fecha_vencimiento DATETIME,
-                    fecha_completada DATETIME,
-                    tiempo_estimado INTEGER,
-                    tiempo_real INTEGER,
-                    etiquetas TEXT,
-                    archivos_adjuntos TEXT,
-                    comentarios TEXT,
-                    FOREIGN KEY (categoria_id) REFERENCES categorias_tareas(id),
-                    FOREIGN KEY (asignado_a) REFERENCES usuarios(id)
+                    fecha_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+                    FOREIGN KEY (categoria) REFERENCES categorias_tareas(nombre)
                 )`,
 
                 // Tabla de categorías de tareas - SINCRONIZADA CON BD PRINCIPAL
