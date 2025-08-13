@@ -36,11 +36,11 @@ show_help() {
 # Función para iniciar la aplicación
 start_app() {
   echo -e "${BLUE}Iniciando aplicación en Docker...${NC}"
-  if docker-compose ps -q | grep -q .; then
+  if docker compose ps -q | grep -q .; then
     echo -e "${YELLOW}La aplicación ya está en ejecución${NC}"
     echo -e "${YELLOW}Accede a:${NC} http://localhost:3000"
   else
-    docker-compose up -d
+    docker compose up -d
     echo -e "${GREEN}Aplicación iniciada correctamente${NC}"
     echo -e "${YELLOW}Accede a:${NC} http://localhost:3000"
     echo -e "${YELLOW}Usuario:${NC} alito"
@@ -51,16 +51,16 @@ start_app() {
 # Función para detener la aplicación
 stop_app() {
   echo -e "${BLUE}Deteniendo la aplicación...${NC}"
-  docker-compose down
+  docker compose down
   echo -e "${GREEN}Aplicación detenida${NC}"
 }
 
 # Función para reconstruir la imagen
 build_app() {
   echo -e "${BLUE}Reconstruyendo la aplicación desde cero...${NC}"
-  docker-compose down
-  docker-compose build --no-cache
-  docker-compose up -d
+  docker compose down
+  docker compose build --no-cache
+  docker compose up -d
   echo -e "${GREEN}Aplicación reconstruida y reiniciada${NC}"
   echo -e "${YELLOW}Accede a:${NC} http://localhost:3000"
 }
@@ -68,19 +68,19 @@ build_app() {
 # Función para ver los logs
 show_logs() {
   echo -e "${BLUE}Mostrando logs de la aplicación:${NC}"
-  docker-compose logs -f
+  docker compose logs -f
 }
 
 # Función para abrir shell
 open_shell() {
   echo -e "${BLUE}Abriendo terminal bash en el contenedor...${NC}"
-  docker-compose exec olt-manager bash
+  docker compose exec olt-manager bash
 }
 
 # Función para verificar estado
 check_status() {
   echo -e "${BLUE}Estado del contenedor:${NC}"
-  docker-compose ps
+  docker compose ps
 }
 
 # Función para actualizar desde git y reiniciar
@@ -88,9 +88,9 @@ update_app() {
   echo -e "${BLUE}Actualizando desde git...${NC}"
   git pull
   echo -e "${BLUE}Reconstruyendo la aplicación...${NC}"
-  docker-compose down
-  docker-compose build
-  docker-compose up -d
+  docker compose down
+  docker compose build
+  docker compose up -d
   echo -e "${GREEN}Aplicación actualizada y reiniciada${NC}"
 }
 

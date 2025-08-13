@@ -4,8 +4,7 @@ Este directorio contiene la configuración necesaria para ejecutar la aplicació
 
 ## Requisitos
 
-- Docker
-- Docker Compose
+- Docker (versión 18.09 o superior, con Docker Compose V2 incluido)
 
 ## Estructura
 
