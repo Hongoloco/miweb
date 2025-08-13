@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  olt-manager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: olt-manager
+    ports:
+      - "3000:3000"  # Expone el puerto de la aplicación web
+    volumes:
+      - ./:/app      # Monta el directorio actual en /app dentro del contenedor
+    environment:
+      - NODE_ENV=production
+      - TZ=America/Montevideo  # Zona horaria de Uruguay
+    restart: unless-stopped
+    command: >
+      bash -c "cd /app && 
+              chmod +x ./post-git-pull.sh && 
+              ./post-git-pull.sh && 
+              cd web && 
+              npm start"
