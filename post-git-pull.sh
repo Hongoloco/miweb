@@ -2,10 +2,15 @@
 
 # Script para ejecutar después de git pull
 # Restaura la base de datos con la OLT ZTE C600 y sus comandos
-# Mantiene la contraseña vinilo28 para el usuario alito
+# Fuerza actualización de archivos para evitar problemas de cache
 
-echo "🔄 Ejecutando script post-git-pull..."
-echo "============================================"
+echo "🔄 Ejecutando script post-git-pull MEJORADO..."
+echo "=============================================="
+
+# PASO 1: Limpiar cache forzando actualización de archivos
+echo "🧹 Forzando actualización de archivos para evitar cache..."
+find "$(dirname "$0")/web" -name "*.html" -exec touch {} \;
+find "$(dirname "$0")/web" -name "*.js" -exec touch {} \;
 
 # Verificar y actualizar docker-compose si es necesario
 if [ -f "$(dirname "$0")/actualizar-docker-compose.sh" ]; then
