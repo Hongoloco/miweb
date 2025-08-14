@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# 🔍 ACCESO DIRECTO AL VERIFICADOR DE AISLAMIENTO
+# Permite verificar el aislamiento desde cualquier directorio
+
+echo "🔍 VERIFICADOR DE AISLAMIENTO - Acceso Directo"
+echo "============================================="
+
+cd "$(dirname "$0")/web" || {
+    echo "❌ Error: No se puede acceder al directorio web"
+    exit 1
+}
+
+if [ ! -f "verificar-aislamiento.js" ]; then
+    echo "❌ Error: verificar-aislamiento.js no encontrado"
+    exit 1
+fi
+
+echo "📂 Directorio de trabajo: $(pwd)"
+echo "▶️ Ejecutando: node verificar-aislamiento.js"
+echo ""
+
+node verificar-aislamiento.js

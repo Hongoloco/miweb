@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# 👤 ACCESO DIRECTO AL CREADOR DE USUARIOS
+# Permite crear usuarios desde cualquier directorio
+
+echo "👤 CREADOR DE USUARIOS - Acceso Directo"
+echo "======================================"
+
+cd "$(dirname "$0")/web" || {
+    echo "❌ Error: No se puede acceder al directorio web"
+    exit 1
+}
+
+if [ ! -f "crear-usuario-completo.js" ]; then
+    echo "❌ Error: crear-usuario-completo.js no encontrado"
+    exit 1
+fi
+
+echo "📂 Directorio de trabajo: $(pwd)"
+echo "▶️ Ejecutando: node crear-usuario-completo.js $*"
+echo ""
+
+node crear-usuario-completo.js "$@"

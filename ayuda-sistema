@@ -1,0 +1,81 @@
+#!/bin/bash
+
+# 📖 GUÍA DE USO DEL SISTEMA DE USUARIOS Y BACKUP
+# Muestra todos los comandos disponibles
+
+echo "📖 SISTEMA DE USUARIOS Y BACKUP - GUÍA DE USO"
+echo "=============================================="
+echo ""
+
+echo "🎯 COMANDOS PRINCIPALES (desde directorio raíz /workspaces/miweb):"
+echo ""
+
+echo "👤 GESTIÓN DE USUARIOS:"
+echo "   ./crear-usuario <usuario> <password> [rol] [email]"
+echo "   ./limpiar-usuario <usuario>"
+echo "   ./verificar-aislamiento"
+echo ""
+
+echo "💾 GESTIÓN DE BACKUP:"
+echo "   ./backup-manager backup [descripcion]"
+echo "   ./backup-manager backup-user <usuario>"
+echo "   ./backup-manager listar"
+echo "   ./backup-manager restaurar <ruta>"
+echo "   ./backup-manager auto"
+echo ""
+
+echo "🔧 CONFIGURACIÓN DEL SISTEMA:"
+echo "   ./configurar-sistema-completo.sh"
+echo ""
+
+echo "📋 EJEMPLOS PRÁCTICOS:"
+echo ""
+
+echo "1️⃣ Crear usuario con interfaz limpia:"
+echo "   ./crear-usuario maria 123456 tecnico maria@antel.com.uy"
+echo ""
+
+echo "2️⃣ Verificar que el aislamiento funciona:"
+echo "   ./verificar-aislamiento"
+echo ""
+
+echo "3️⃣ Hacer backup del sistema:"
+echo "   ./backup-manager backup 'Backup antes de cambios'"
+echo ""
+
+echo "4️⃣ Ver backups disponibles:"
+echo "   ./backup-manager listar"
+echo ""
+
+echo "5️⃣ Limpiar usuario que tiene datos mezclados:"
+echo "   ./limpiar-usuario usuario_existente"
+echo ""
+
+echo "6️⃣ Activar backups automáticos:"
+echo "   ./backup-manager auto"
+echo ""
+
+echo "⚠️ COMANDOS ALTERNATIVOS (desde directorio web/):"
+echo ""
+echo "Si prefieres trabajar desde el directorio web/:"
+echo "   cd web"
+echo "   node crear-usuario-completo.js <usuario> <password> [rol] [email]"
+echo "   node backup-manager.js backup [descripcion]"
+echo "   node verificar-aislamiento.js"
+echo "   node limpiar-usuario.js <usuario>"
+echo ""
+
+echo "✅ BENEFICIOS GARANTIZADOS:"
+echo "   🎯 Cada usuario nuevo = Interfaz COMPLETAMENTE LIMPIA"
+echo "   🔒 Datos totalmente aislados entre usuarios"
+echo "   💾 Backup automático programado"
+echo "   🛠️ Herramientas fáciles de usar"
+echo ""
+
+echo "📞 EN CASO DE PROBLEMAS:"
+echo "   1. ./verificar-aislamiento (para ver el estado)"
+echo "   2. ./backup-manager listar (para ver backups)"
+echo "   3. ./backup-manager restaurar <ruta> (para restaurar)"
+echo ""
+
+echo "🎉 ¡SISTEMA LISTO PARA USAR!"

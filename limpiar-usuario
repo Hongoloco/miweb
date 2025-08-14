@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# 🧹 ACCESO DIRECTO AL LIMPIADOR DE USUARIOS
+# Permite limpiar usuarios desde cualquier directorio
+
+echo "🧹 LIMPIADOR DE USUARIOS - Acceso Directo"
+echo "========================================"
+
+cd "$(dirname "$0")/web" || {
+    echo "❌ Error: No se puede acceder al directorio web"
+    exit 1
+}
+
+if [ ! -f "limpiar-usuario.js" ]; then
+    echo "❌ Error: limpiar-usuario.js no encontrado"
+    exit 1
+fi
+
+echo "📂 Directorio de trabajo: $(pwd)"
+echo "▶️ Ejecutando: node limpiar-usuario.js $*"
+echo ""
+
+node limpiar-usuario.js "$@"

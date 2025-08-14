@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# 🚀 ACCESO DIRECTO AL BACKUP MANAGER
+# Este script permite ejecutar backup-manager.js desde cualquier directorio
+
+echo "🚀 BACKUP MANAGER - Acceso Directo"
+echo "=================================="
+
+# Cambiar al directorio web donde están los scripts
+cd "$(dirname "$0")/web" || {
+    echo "❌ Error: No se puede acceder al directorio web"
+    exit 1
+}
+
+# Verificar que backup-manager.js existe
+if [ ! -f "backup-manager.js" ]; then
+    echo "❌ Error: backup-manager.js no encontrado en $(pwd)"
+    exit 1
+fi
+
+# Ejecutar backup-manager con todos los argumentos pasados
+echo "📂 Directorio de trabajo: $(pwd)"
+echo "▶️ Ejecutando: node backup-manager.js $*"
+echo ""
+
+node backup-manager.js "$@"
