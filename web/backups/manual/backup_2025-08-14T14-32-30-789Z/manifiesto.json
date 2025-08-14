@@ -1,0 +1,22 @@
+{
+  "timestamp": "2025-08-14T14-32-30-789Z",
+  "tipo": "manual",
+  "descripcion": "Primer backup del sistema configurado",
+  "archivos": [
+    "olt_system.db",
+    "databases/tecnico_prueba_olt_system.db",
+    "server.js",
+    "user-database-manager.js",
+    "package.json"
+  ],
+  "usuarios": [
+    "tecnico_prueba"
+  ],
+  "exito": true,
+  "errores": [],
+  "fecha_creacion": "2025-08-14T14:32:30.804Z",
+  "ruta_backup": "/workspaces/miweb/web/backups/manual/backup_2025-08-14T14-32-30-789Z",
+  "version": "3.1.0",
+  "total_usuarios": 1,
+  "total_archivos": 5
+}
