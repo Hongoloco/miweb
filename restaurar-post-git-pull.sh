@@ -1,93 +1,27 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Script de restauración completa despu    echo "🔄 Ahora reinicia tu servidor:"
-    echo ""
-    echo "🔍 Detectando gestor de procesos..."
-    
-    # Verificar diferentes opciones de reinicio
-    if command -v pm2 &> /dev/null; then
-        echo "   ✅ PM2 detectado: pm2 restart all"
-        echo "   💡 Ejecuta: pm2 restart all"
-    elif command -v systemctl &> /dev/null; then
-        echo "   ✅ Systemd detectado"
-        echo "   💡 Ejecuta uno de estos:"
-        echo "      sudo systemctl restart miweb"
-        echo "      sudo systemctl restart tu-servicio-web"
-    elif pgrep -f "node server.js" &> /dev/null; then
-        echo "   ✅ Proceso Node.js detectado"
-        echo "   💡 Ejecuta:"
-        echo "      pkill -f 'node server.js'"
-        echo "      cd web && node server.js"
-    else
-        echo "   ⚠️  No se detectó gestor de procesos"
-        echo "   💡 Opciones para reiniciar:"
-        echo "      1. Si usas screen/tmux:"
-        echo "         - Mata la sesión actual"
-        echo "         - cd web && node server.js"
-        echo "      2. Si usas nohup:"
-        echo "         - pkill -f 'node server.js'"
-        echo "         - nohup node server.js > server.log 2>&1 &"
-        echo "      3. Reinicio manual:"
-        echo "         - cd web && node server.js"
-    fi
-    
-    echo ""
-    echo "🚀 Después del reinicio, accede con: alito/vinilo28" git pull
-# Ejecutar este script en tu servidor después de hacer git pull
+set -euo pipefail
+IFS=$'\n\t'
 
-echo "� Iniciando restauración post git pull..."
+cd "$(dirname "$0")"
 
-# 1. Ir al directorio web
-cd web || { echo "❌ Error: No se encuentra directorio web"; exit 1; }
+echo "🔄 Restauración post git pull (wrapper)"
 
-# 2. Verificar que existen los scripts necesarios
-if [ ! -f "restaurar-alito-zte.js" ]; then
-    echo "❌ Error: No se encuentra restaurar-alito-zte.js"
-    echo "💡 Ejecuta: git pull origin main"
-    exit 1
-fi
+chmod +x ./post-git-pull.sh || true
+POST_GIT_PULL_RESTORE_ALITO=${POST_GIT_PULL_RESTORE_ALITO:-0} \
+    ./post-git-pull.sh
 
-if [ ! -f "fix-orden-column.js" ]; then
-    echo "❌ Error: No se encuentra fix-orden-column.js"
-    echo "💡 Ejecuta: git pull origin main"
-    exit 1
-fi
-
-# 3. Instalar dependencias (por si hay nuevas)
-echo "📦 Instalando dependencias..."
-cd ..
-npm install
-cd web
-
-# 4. Corregir problema de columna 'orden'
-echo "🔧 Corrigiendo estructura de base de datos..."
-node fix-orden-column.js
-
-if [ $? -ne 0 ]; then
-    echo "❌ Error corrigiendo base de datos"
-    exit 1
-fi
-
-# 5. Restaurar comandos ZTE C600 para alito
-echo "� Restaurando usuario alito y comandos ZTE C600..."
-node restaurar-alito-zte.js
-
-if [ $? -eq 0 ]; then
-    echo "✅ Restauración completada exitosamente"
-    echo ""
-    echo "📋 Datos restaurados:"
-    echo "   • ✅ Base de datos corregida (columna orden)"
-    echo "   • ✅ Usuario: alito"
-    echo "   • ✅ Contraseña: vinilo28"
-    echo "   • ✅ OLT: ZTE C600"
-    echo "   • ✅ Comandos: 10 comandos ZTE C600"
-    echo ""
-    echo "� Ahora reinicia tu servidor:"
-    echo "   • Si usas PM2: pm2 restart all"
-    echo "   • Si usas node: pkill -f 'node server.js' && node server.js"
-    echo ""
-    echo "🚀 Luego accede con: alito/vinilo28"
+echo ""
+echo "🔁 Reinicio sugerido (elige según tu entorno):"
+if command -v pm2 &> /dev/null; then
+    echo "  • pm2 restart all"
+elif command -v systemctl &> /dev/null; then
+    echo "  • sudo systemctl restart miweb   # o tu servicio"
+elif pgrep -f "node .*server\\.js" &> /dev/null; then
+    echo "  • pkill -f 'node .*server\\.js' && cd web && npm start"
 else
-    echo "❌ Error en la restauración"
-    exit 1
+    echo "  • cd web && npm start"
 fi
+
+echo ""
+echo "✅ Listo. Si necesitas restaurar alito, ejecuta: POST_GIT_PULL_RESTORE_ALITO=1 ./restaurar-post-git-pull.sh"
