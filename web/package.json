@@ -4,7 +4,8 @@
   "description": "Desarrollo de Servicios Residenciales - Sistema Integral",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+  "start": "node server.js",
+  "start-free-port": "ALLOW_PORT_FALLBACK=1 node server.js",
     "init-db": "node init-database.js",
     "dev": "nodemon server.js",
     "migrate": "node database-migrations.js",
