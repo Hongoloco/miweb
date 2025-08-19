@@ -39,19 +39,19 @@ app.use(session({
     }
 }));
 
-app.use(express.static('public'));
+// app.use(express.static('public')); // Deshabilitado: carpeta no existe
 
 // Servir archivos estáticos adicionales
 app.use('/dashboard-charts.js', express.static(path.join(__dirname, 'dashboard-charts.js')));
 app.use('/notification-system.js', express.static(path.join(__dirname, 'notification-system.js')));
 app.use('/reports-analytics.js', express.static(path.join(__dirname, 'reports-analytics.js')));
 app.use('/sw-notifications.js', express.static(path.join(__dirname, 'sw-notifications.js')));
-app.use('/theme-system.js', express.static(path.join(__dirname, 'theme-system.js')));
+// app.use('/theme-system.js', express.static(path.join(__dirname, 'theme-system.js'))); // Archivo no presente
 app.use('/automation-system.js', express.static(path.join(__dirname, 'automation-system.js')));
 app.use('/elegant-dark-mode.js', express.static(path.join(__dirname, 'elegant-dark-mode.js')));
-app.use('/test-dark-mode.js', express.static(path.join(__dirname, 'test-dark-mode.js')));
+// app.use('/test-dark-mode.js', express.static(path.join(__dirname, 'test-dark-mode.js'))); // Archivo no presente
 app.use('/force-commands-dark.js', express.static(path.join(__dirname, 'force-commands-dark.js')));
-app.use('/diagnostico-tareas.js', express.static(path.join(__dirname, 'diagnostico-tareas.js')));
+// app.use('/diagnostico-tareas.js', express.static(path.join(__dirname, 'diagnostico-tareas.js'))); // Archivo no presente
 app.use('/fix-tareas-login.js', express.static(path.join(__dirname, 'fix-tareas-login.js')));
 app.use('/adaptive-colors.js', express.static(path.join(__dirname, 'adaptive-colors.js')));
 app.use('/sw.js', express.static(path.join(__dirname, 'sw.js')));
@@ -567,7 +567,7 @@ app.post('/api/login', (req, res) => {
                 email: user.email,
                 rol: user.rol
             },
-            databaseType: user.rol === 'admin' ? 'principal' : 'privada'
+            databaseType: (isAdmin({ rol: user.rol }) ? 'principal' : 'privada')
         });
     });
 });
@@ -1033,7 +1033,7 @@ app.get('/api/tareas', (req, res) => {
                         COALESCE(c.nombre, 'Sin categoría') as categoria_nombre
                  FROM tareas t 
                  LEFT JOIN categorias_tareas c ON t.categoria = c.nombre
-                 WHERE t.estado != 'eliminada'`;
+                 WHERE t.estado != 'eliminada' AND t.activa = 1`;
     let params = [];
     
     // Los usuarios técnicos solo ven sus propias tareas en su BD privada
@@ -1087,16 +1087,13 @@ app.get('/api/tareas/estadisticas', (req, res) => {
     // Usar la base de datos específica del usuario
     const userDb = getUserDatabase(req);
     
-    let whereClause = 'WHERE t.estado != "eliminada"';
+    let whereClause = 'WHERE t.estado != "eliminada" AND t.activa = 1';
     let params = [];
     
-    // Si no es admin, solo puede ver estadísticas de sus propias tareas
-    if (usuarioActual.rol !== 'admin' && usuarioActual.rol !== 'administrador') {
-        whereClause += ' AND t.asignado_a = ?';
-        params.push(usuarioActual.id);
-    } else if (usuario_id) {
-        // Si es admin y especifica un usuario, filtrar por ese usuario
-        whereClause += ' AND t.asignado_a = ?';
+    // En BDs privadas (usuarios no admin) no filtramos por usuario: toda la BD ya es del usuario
+    // Si es admin y especifica un usuario, filtramos por usuario_id en la BD principal
+    if (isAdmin(usuarioActual) && usuario_id) {
+        whereClause += ' AND t.usuario_id = ?';
         params.push(usuario_id);
     }
     
@@ -1120,14 +1117,14 @@ app.get('/api/tareas/estadisticas', (req, res) => {
 // Obtener una tarea específica con sus notas
 app.get('/api/tareas/:id', (req, res) => {
     const tareaId = req.params.id;
-    
-    // Obtener tarea
-    db.get(`SELECT t.*, c.color as categoria_color, c.nombre as categoria_nombre,
-            u.username as usuario_asignado_username, u.nombre_completo as usuario_asignado_nombre
+    const usuarioActual = req.session && req.session.user;
+    const userDb = getUserDatabase(req);
+
+    // Obtener tarea (join sólo con categorias para compatibilidad con BDs privadas)
+    userDb.get(`SELECT t.*, c.color as categoria_color, c.nombre as categoria_nombre
             FROM tareas t 
             LEFT JOIN categorias_tareas c ON t.categoria = c.nombre
-            LEFT JOIN usuarios u ON t.asignado_a = u.id
-            WHERE t.id = ? AND t.estado != 'eliminada'`, [tareaId], (err, tarea) => {
+            WHERE t.id = ? AND t.estado != 'eliminada' AND t.activa = 1`, [tareaId], (err, tarea) => {
         if (err) {
             console.error('Error al obtener tarea:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
@@ -1137,10 +1134,9 @@ app.get('/api/tareas/:id', (req, res) => {
             return res.status(404).json({ success: false, message: 'Tarea no encontrada' });
         }
         
-        // Obtener notas de la tarea
-        db.all(`SELECT n.*, u.username 
+        // Obtener notas de la tarea (sin join a usuarios para compatibilidad con BDs privadas)
+        userDb.all(`SELECT n.*
                 FROM tareas_notas n 
-                LEFT JOIN usuarios u ON n.usuario_id = u.id
                 WHERE n.tarea_id = ? 
                 ORDER BY n.fecha_creacion DESC`, [tareaId], (err, notas) => {
             if (err) {
@@ -1198,6 +1194,7 @@ app.put('/api/tareas/:id', (req, res) => {
     const tareaId = req.params.id;
     const { titulo, descripcion, estado, prioridad, categoria, usuario_id, editor_id } = req.body;
     const usuarioActual = req.session && req.session.user;
+    const userDb = getUserDatabase(req);
     
     if (!usuarioActual) {
         return res.status(401).json({ success: false, message: 'No autorizado' });
@@ -1220,16 +1217,12 @@ app.put('/api/tareas/:id', (req, res) => {
         params.push(usuario_id);
     }
     
-    // Si no es admin, solo puede editar sus propias tareas
-    if (usuarioActual.rol !== 'admin') {
-        whereClause += ` AND usuario_id = ?`;
-        params.push(tareaId);
-        params.push(usuarioActual.id);
-    } else {
-        params.push(tareaId);
-    }
+    // En BDs privadas no es necesario forzar filtro por usuario_id; en admin (BD principal) se mantiene por id de tarea
+    params.push(tareaId);
     
-    db.run(updateQuery + whereClause, params, function(err) {
+    // En BDs privadas no forzamos filtro por usuario_id; en admin (BD principal) se mantiene
+    const finalQuery = updateQuery + whereClause;
+    userDb.run(finalQuery, params, function(err) {
         if (err) {
             console.error('Error al actualizar tarea:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
@@ -1253,8 +1246,9 @@ app.put('/api/tareas/:id', (req, res) => {
 app.delete('/api/tareas/:id', (req, res) => {
     const tareaId = req.params.id;
     const { eliminador_id } = req.body;
+    const userDb = getUserDatabase(req);
     
-    db.run(`UPDATE tareas SET activa = 0 WHERE id = ?`, [tareaId], function(err) {
+    userDb.run(`UPDATE tareas SET activa = 0 WHERE id = ?`, [tareaId], function(err) {
         if (err) {
             console.error('Error al eliminar tarea:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
@@ -1270,34 +1264,19 @@ app.delete('/api/tareas/:id', (req, res) => {
     });
 });
 
-// Obtener todos los usuarios (solo para admin)
-app.get('/api/usuarios', (req, res) => {
-    const usuarioActual = req.session && req.session.user;
-    
-    if (!usuarioActual || usuarioActual.rol !== 'admin') {
-        return res.status(403).json({ success: false, message: 'Acceso denegado. Solo administradores.' });
-    }
-    
-    db.all(`SELECT id, username, nombre_completo, rol, activo, fecha_creacion 
-            FROM usuarios WHERE activo = 1 ORDER BY username`, [], (err, usuarios) => {
-        if (err) {
-            console.error('Error al obtener usuarios:', err);
-            return res.status(500).json({ success: false, message: 'Error del servidor' });
-        }
-        res.json({ success: true, usuarios });
-    });
-});
+// (Eliminada ruta duplicada de /api/usuarios con validación distinta)
 
 // Agregar nota a tarea
 app.post('/api/tareas/:id/notas', (req, res) => {
     const tareaId = req.params.id;
     const { nota, tipo, usuario_id } = req.body;
+    const userDb = getUserDatabase(req);
     
     if (!nota) {
         return res.status(400).json({ success: false, message: 'La nota es obligatoria' });
     }
     
-    db.run(`INSERT INTO tareas_notas (tarea_id, nota, tipo, usuario_id) VALUES (?, ?, ?, ?)`,
+    userDb.run(`INSERT INTO tareas_notas (tarea_id, nota, tipo, usuario_id) VALUES (?, ?, ?, ?)`,
         [tareaId, nota, tipo || 'comentario', usuario_id],
         function(err) {
             if (err) {
@@ -1326,7 +1305,7 @@ app.get('/api/categorias-tareas', (req, res) => {
         }
         
         console.log(`📂 Usuario ${usuarioActual?.username} cargó ${categorias.length} categorías`);
-        res.json(categorias);
+        res.json({ success: true, categorias });
     });
 });
 
@@ -1476,8 +1455,9 @@ app.get('/api/olts', (req, res) => {
 // Obtener una OLT específica con sus comandos
 app.get('/api/olts/:id', (req, res) => {
     const oltId = req.params.id;
+    const userDb = getUserDatabase(req);
     
-    db.get(`SELECT * FROM olts WHERE id = ?`, [oltId], (err, olt) => {
+    userDb.get(`SELECT * FROM olts WHERE id = ?`, [oltId], (err, olt) => {
         if (err) {
             console.error('Error al obtener OLT:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
@@ -1487,19 +1467,25 @@ app.get('/api/olts/:id', (req, res) => {
             return res.status(404).json({ success: false, message: 'OLT no encontrada' });
         }
 
-        // Obtener comandos de la OLT
-        db.all(`SELECT * FROM comandos WHERE olt_id = ? AND activo = 1 ORDER BY orden, id`, 
-               [oltId], (err, comandos) => {
+        // Obtener comandos de la OLT (compatible con ambos esquemas)
+        userDb.all(`SELECT *, COALESCE(orden_display, orden, 0) as orden_final 
+                    FROM comandos 
+                    WHERE olt_id = ? AND activo = 1 
+                    ORDER BY orden_final, nombre`, [oltId], (err, comandos) => {
             if (err) {
                 console.error('Error al obtener comandos:', err);
                 return res.status(500).json({ success: false, message: 'Error del servidor' });
             }
 
-            // Convertir comandos_json de string a array
-            const comandosFormateados = comandos.map(cmd => ({
-                ...cmd,
-                comandos: JSON.parse(cmd.comandos_json)
-            }));
+            const comandosFormateados = comandos.map(cmd => {
+                let parsed = [];
+                if (cmd.comandos_json) {
+                    try { parsed = JSON.parse(cmd.comandos_json || '[]'); } catch (e) { parsed = []; }
+                } else if (cmd.comando) {
+                    parsed = [cmd.comando];
+                }
+                return { ...cmd, comandos: parsed };
+            });
 
             res.json({
                 success: true,
@@ -1642,7 +1628,7 @@ app.get('/api/comandos', (req, res) => {
     const usuarioActual = req.session && req.session.user;
     const userDb = getUserDatabase(req);
     
-    userDb.all(`SELECT * FROM comandos WHERE activo = 1 ORDER BY orden_display, nombre`, (err, comandos) => {
+    userDb.all(`SELECT * FROM comandos WHERE activo = 1 ORDER BY COALESCE(orden_display, orden, 0), nombre`, (err, comandos) => {
         if (err) {
             console.error('Error al obtener comandos:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
@@ -1660,7 +1646,7 @@ app.get('/api/comandos/:olt_id', (req, res) => {
     // Usar la base de datos específica del usuario
     const userDb = getUserDatabase(req);
     
-    userDb.all(`SELECT * FROM comandos WHERE olt_id = ? AND activo = 1 ORDER BY orden_display, nombre`, [oltId], (err, comandos) => {
+    userDb.all(`SELECT * FROM comandos WHERE olt_id = ? AND activo = 1 ORDER BY COALESCE(orden_display, orden, 0), nombre`, [oltId], (err, comandos) => {
         if (err) {
             console.error('Error al obtener comandos:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
@@ -1672,39 +1658,77 @@ app.get('/api/comandos/:olt_id', (req, res) => {
 
 // Crear nuevo comando
 app.post('/api/comandos', (req, res) => {
-    const { olt_id, nombre, descripcion, comandos, categoria } = req.body;
+    const { olt_id, nombre, descripcion, comandos, comando, categoria } = req.body;
+    const userDb = getUserDatabase(req);
 
-    db.run(`INSERT INTO comandos (olt_id, nombre, descripcion, comandos_json, categoria) 
-            VALUES (?, ?, ?, ?, ?)`,
-        [olt_id, nombre, descripcion, JSON.stringify(comandos), categoria || 'general'],
-        function(err) {
+    // Detectar columnas disponibles
+    userDb.all(`PRAGMA table_info(comandos)`, (pragmaErr, cols) => {
+        if (pragmaErr) {
+            console.error('Error detectando esquema comandos:', pragmaErr);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+
+        const hasComandosJson = cols.some(c => c.name === 'comandos_json');
+        const hasComando = cols.some(c => c.name === 'comando');
+
+        let sql;
+        let params;
+
+        if (hasComandosJson) {
+            sql = `INSERT INTO comandos (olt_id, nombre, descripcion, comandos_json, categoria) VALUES (?, ?, ?, ?, ?)`;
+            params = [olt_id, nombre, descripcion || '', JSON.stringify(comandos || []), categoria || 'general'];
+        } else if (hasComando) {
+            const cmdStr = Array.isArray(comandos) ? comandos.join('\n') : (comando || '');
+            sql = `INSERT INTO comandos (olt_id, nombre, descripcion, comando, categoria) VALUES (?, ?, ?, ?, ?)`;
+            params = [olt_id, nombre, descripcion || '', cmdStr, categoria || 'general'];
+        } else {
+            sql = `INSERT INTO comandos (olt_id, nombre, descripcion, categoria) VALUES (?, ?, ?, ?)`;
+            params = [olt_id, nombre, descripcion || '', categoria || 'general'];
+        }
+
+        userDb.run(sql, params, function(err) {
             if (err) {
                 console.error('Error al crear comando:', err);
                 return res.status(500).json({ success: false, message: 'Error del servidor' });
             }
 
             logActivity(req.body.userId, 'crear_comando', `Comando: ${nombre} en OLT: ${olt_id}`, req.ip);
-            
-            res.json({
-                success: true,
-                message: 'Comando creado correctamente',
-                comando_id: this.lastID
-            });
-        }
-    );
+            res.json({ success: true, message: 'Comando creado correctamente', comando_id: this.lastID });
+        });
+    });
 });
 
 // Actualizar comando
 app.put('/api/comandos/:id', (req, res) => {
     const comandoId = req.params.id;
-    const { nombre, descripcion, comandos, categoria } = req.body;
+    const { nombre, descripcion, comandos, comando, categoria } = req.body;
+    const userDb = getUserDatabase(req);
 
-    db.run(`UPDATE comandos SET 
-                nombre = ?, descripcion = ?, comandos_json = ?, categoria = ?,
-                fecha_modificacion = CURRENT_TIMESTAMP 
-            WHERE id = ?`,
-        [nombre, descripcion, JSON.stringify(comandos), categoria, comandoId],
-        function(err) {
+    userDb.all(`PRAGMA table_info(comandos)`, (pragmaErr, cols) => {
+        if (pragmaErr) {
+            console.error('Error detectando esquema comandos:', pragmaErr);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+
+        const hasComandosJson = cols.some(c => c.name === 'comandos_json');
+        const hasComando = cols.some(c => c.name === 'comando');
+
+        let sql;
+        let params;
+
+        if (hasComandosJson) {
+            sql = `UPDATE comandos SET nombre = ?, descripcion = ?, comandos_json = ?, categoria = ?, fecha_modificacion = CURRENT_TIMESTAMP WHERE id = ?`;
+            params = [nombre, descripcion || '', JSON.stringify(comandos || []), categoria || 'general', comandoId];
+        } else if (hasComando) {
+            const cmdStr = Array.isArray(comandos) ? comandos.join('\n') : (comando || '');
+            sql = `UPDATE comandos SET nombre = ?, descripcion = ?, comando = ?, categoria = ?, fecha_modificacion = CURRENT_TIMESTAMP WHERE id = ?`;
+            params = [nombre, descripcion || '', cmdStr, categoria || 'general', comandoId];
+        } else {
+            sql = `UPDATE comandos SET nombre = ?, descripcion = ?, categoria = ?, fecha_modificacion = CURRENT_TIMESTAMP WHERE id = ?`;
+            params = [nombre, descripcion || '', categoria || 'general', comandoId];
+        }
+
+        userDb.run(sql, params, function(err) {
             if (err) {
                 console.error('Error al actualizar comando:', err);
                 return res.status(500).json({ success: false, message: 'Error del servidor' });
@@ -1715,49 +1739,43 @@ app.put('/api/comandos/:id', (req, res) => {
             }
 
             logActivity(req.body.userId, 'actualizar_comando', `Comando ID: ${comandoId}`, req.ip);
-            
             res.json({ success: true, message: 'Comando actualizado correctamente' });
-        }
-    );
+        });
+    });
 });
 
 // Eliminar comando
 app.delete('/api/comandos/:id', (req, res) => {
     const comandoId = req.params.id;
     const { userId } = req.body;
+    const userDb = getUserDatabase(req);
 
-    // Primero obtener información del comando para el log
-    db.get(`SELECT c.nombre, o.nombre as olt_nombre 
-            FROM comandos c 
-            JOIN olts o ON c.olt_id = o.id 
-            WHERE c.id = ?`, [comandoId], (err, comando) => {
-        
+    // Obtener info básica del comando
+    userDb.get(`SELECT id, nombre, olt_id FROM comandos WHERE id = ?`, [comandoId], (err, cmd) => {
         if (err) {
             console.error('Error al obtener comando:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
         }
-
-        if (!comando) {
+        if (!cmd) {
             return res.status(404).json({ success: false, message: 'Comando no encontrado' });
         }
 
-        // Eliminar el comando completamente de la base de datos
-        db.run(`DELETE FROM comandos WHERE id = ?`, [comandoId], function(err) {
-            if (err) {
-                console.error('Error al eliminar comando:', err);
-                return res.status(500).json({ success: false, message: 'Error del servidor' });
-            }
+        // Intentar obtener nombre de la OLT (si existe la tabla/relación)
+        userDb.get(`SELECT nombre FROM olts WHERE id = ?`, [cmd.olt_id], (oltErr, olt) => {
+            const oltNombre = (!oltErr && olt) ? olt.nombre : 'N/D';
 
-            if (this.changes === 0) {
-                return res.status(404).json({ success: false, message: 'Comando no encontrado' });
-            }
+            userDb.run(`DELETE FROM comandos WHERE id = ?`, [comandoId], function(err) {
+                if (err) {
+                    console.error('Error al eliminar comando:', err);
+                    return res.status(500).json({ success: false, message: 'Error del servidor' });
+                }
 
-            logActivity(userId, 'eliminar_comando', `Comando: ${comando.nombre} de OLT: ${comando.olt_nombre}`, req.ip);
-            
-            res.json({ 
-                success: true, 
-                message: 'Comando eliminado correctamente',
-                comando_eliminado: comando.nombre
+                if (this.changes === 0) {
+                    return res.status(404).json({ success: false, message: 'Comando no encontrado' });
+                }
+
+                logActivity(userId, 'eliminar_comando', `Comando: ${cmd.nombre} de OLT: ${oltNombre}`, req.ip);
+                res.json({ success: true, message: 'Comando eliminado correctamente', comando_eliminado: cmd.nombre });
             });
         });
     });
@@ -1948,7 +1966,7 @@ app.get('/api/comandos/buscar', (req, res) => {
         SELECT c.*, o.nombre as olt_nombre 
         FROM comandos c 
         JOIN olts o ON c.olt_id = o.id 
-        WHERE c.activo = 1 AND o.estado = 'activa' AND 
+    WHERE c.activo = 1 AND o.estado = 'activo' AND 
               (c.nombre LIKE ? OR c.descripcion LIKE ? OR c.comandos_json LIKE ?)
         ORDER BY c.nombre
     `;
@@ -2663,7 +2681,7 @@ async function generateTaskReport(filters = {}) {
 
 async function generateUserReport(filters = {}) {
     return new Promise((resolve, reject) => {
-        let query = 'SELECT id, username, rol, email, activo, created_at FROM usuarios WHERE 1=1';
+    let query = 'SELECT id, username, rol, email, activo, fecha_creacion FROM usuarios WHERE 1=1';
         const params = [];
         
         if (filters.rol) {
@@ -2725,19 +2743,7 @@ function groupBy(array, key) {
     }, {});
 }
 
-// ===== RUTAS PARA CATEGORÍAS DE TAREAS =====
-
-// Obtener categorías de tareas disponibles
-app.get('/api/categorias-tareas', (req, res) => {
-    db.all('SELECT * FROM task_categories ORDER BY nombre', (err, rows) => {
-        if (err) {
-            console.error('Error obteniendo categorías:', err);
-            res.status(500).json({ success: false, message: 'Error obteniendo categorías' });
-        } else {
-            res.json({ success: true, categorias: rows });
-        }
-    });
-});
+// (Eliminada duplicación de /api/categorias-tareas con tabla task_categories inexistente)
 
 // ===== INTERCEPTORES PARA NOTIFICACIONES AUTOMÁTICAS =====
 
@@ -2773,22 +2779,20 @@ app.use('/api/tareas', (req, res, next) => {
 });
 
 app.listen(PORT, () => {
-    console.log('�🚀 Servidor iniciado en puerto', PORT);
+    console.log('🚀 Servidor iniciado en puerto', PORT);
     console.log('🌐 Acceder a: http://localhost:' + PORT);
     console.log('📊 Base de datos: ' + dbPath);
     console.log('📡 SSE habilitado para notificaciones en tiempo real');
     console.log('📊 Analytics y reportes habilitados');
 });
 
-// Manejo de cierre del servidor
-process.on('SIGINT', () => {
 // ===== ENDPOINTS ADMINISTRATIVOS PARA GESTIÓN DE BASES DE DATOS =====
 
 // Estadísticas de bases de datos (solo admin)
 app.get('/api/admin/database-stats', (req, res) => {
     const usuarioActual = req.session && req.session.user;
     
-    if (!usuarioActual || usuarioActual.rol !== 'admin') {
+    if (!usuarioActual || !isAdmin(usuarioActual)) {
         return res.status(403).json({ success: false, message: 'Acceso denegado - Solo admin' });
     }
     
@@ -2806,7 +2810,7 @@ app.get('/api/admin/database-stats', (req, res) => {
 app.get('/api/admin/users-databases', (req, res) => {
     const usuarioActual = req.session && req.session.user;
     
-    if (!usuarioActual || usuarioActual.rol !== 'admin') {
+    if (!usuarioActual || !isAdmin(usuarioActual)) {
         return res.status(403).json({ success: false, message: 'Acceso denegado - Solo admin' });
     }
     
@@ -2850,7 +2854,7 @@ app.post('/api/admin/reset-user-database', (req, res) => {
     const usuarioActual = req.session && req.session.user;
     const { username } = req.body;
     
-    if (!usuarioActual || usuarioActual.rol !== 'admin') {
+    if (!usuarioActual || !isAdmin(usuarioActual)) {
         return res.status(403).json({ success: false, message: 'Acceso denegado - Solo admin' });
     }
     
@@ -2878,6 +2882,8 @@ app.post('/api/admin/reset-user-database', (req, res) => {
 
 // ===== CIERRE DEL SERVIDOR =====
 
+// Manejo de cierre del servidor
+process.on('SIGINT', () => {
     console.log('\n🔒 Cerrando servidor...');
     
     // Cerrar todas las conexiones de bases de datos

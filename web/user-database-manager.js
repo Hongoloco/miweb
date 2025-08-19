@@ -157,6 +157,16 @@ class UserDatabaseManager {
                     FOREIGN KEY (categoria) REFERENCES categorias_tareas(nombre)
                 )`,
 
+                // Tabla de notas/comentarios de tareas
+                `CREATE TABLE IF NOT EXISTS tareas_notas (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    tarea_id INTEGER,
+                    nota TEXT NOT NULL,
+                    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    usuario_id INTEGER,
+                    tipo TEXT DEFAULT 'comentario'
+                )`,
+
                 // Tabla de categorías de tareas - SINCRONIZADA CON BD PRINCIPAL
                 `CREATE TABLE IF NOT EXISTS categorias_tareas (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -165,6 +175,16 @@ class UserDatabaseManager {
                     icono TEXT,
                     activa INTEGER DEFAULT 1,
                     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
+                )`,
+
+                // Tabla de notas/comentarios de tareas
+                `CREATE TABLE IF NOT EXISTS tareas_notas (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    tarea_id INTEGER,
+                    nota TEXT NOT NULL,
+                    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    usuario_id INTEGER,
+                    tipo TEXT DEFAULT 'comentario'
                 )`,
 
                 // Tabla de comandos - LIMPIA

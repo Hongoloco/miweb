@@ -10,7 +10,8 @@
     "migrate": "node database-migrations.js",
     "db-status": "node check-database.js",
     "db-health": "node check-database.js",
-    "reset-db": "rm -f olt_system.db && node init-database.js && node database-migrations.js"
+  "reset-db": "rm -f olt_system.db && node init-database.js && node database-migrations.js",
+  "restaurar-alito-zte": "node restaurar-alito-zte.js"
   },
   "keywords": [
     "olt",
