@@ -60,3 +60,13 @@ IMPORTACION-EXITOSA.md
 # Archivos locales no seguidos del usuario
 servidor-actual.tar.gz
 temp-analisis/
+
+# Estructura de proyecto
+PROJECT_STRUCTURE.md
+
+# Archivos temporales de reorganización
+temp-*
+*.tmp
+*.temp
+-H
+

@@ -5,9 +5,9 @@
   "main": "web/server.js",
   "homepage": "./",
   "scripts": {
-  "start": "cd web && npm start",
-  "start-free-port": "cd web && npm run start-free-port",
-  "fix-linux-start": "bash ./fix-linux-start.sh --install-tools --start",
+    "start": "cd web && npm start",
+    "start-free-port": "cd web && npm run start-free-port",
+    "fix-linux-start": "bash ./scripts/fix-linux-start.sh --install-tools --start",
     "dev": "cd web && npm run dev",
     "init-db": "cd web && npm run init-db",
     "web": "cd web && npm start",
