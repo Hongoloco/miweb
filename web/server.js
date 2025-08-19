@@ -1749,31 +1749,42 @@ app.get('/api/olts/:id', (req, res) => {
         }
 
         // Obtener comandos de la OLT (compatible con ambos esquemas)
-        userDb.all(`SELECT *, COALESCE(orden_display, orden, 0) as orden_final 
-                    FROM comandos 
-                    WHERE olt_id = ? AND activo = 1 
-                    ORDER BY orden_final, nombre`, [oltId], (err, comandos) => {
-            if (err) {
-                console.error('Error al obtener comandos:', err);
+        userDb.all(`PRAGMA table_info(comandos)`, (pragmaErr, cols) => {
+            if (pragmaErr) {
+                console.error('Error detectando esquema de comandos:', pragmaErr);
                 return res.status(500).json({ success: false, message: 'Error del servidor' });
             }
 
-            const comandosFormateados = comandos.map(cmd => {
-                let parsed = [];
-                if (cmd.comandos_json) {
-                    try { parsed = JSON.parse(cmd.comandos_json || '[]'); } catch (e) { parsed = []; }
-                } else if (cmd.comando) {
-                    parsed = [cmd.comando];
-                }
-                return { ...cmd, comandos: parsed };
-            });
+            const hasOrdenDisplay = cols.some(c => c.name === 'orden_display');
+            const hasOrden = cols.some(c => c.name === 'orden');
+            let orderClause = 'nombre';
+            if (hasOrdenDisplay) orderClause = 'orden_display, nombre';
+            else if (hasOrden) orderClause = 'orden, nombre';
 
-            res.json({
-                success: true,
-                olt: {
-                    ...olt,
-                    comandos: comandosFormateados
+            const query = `SELECT * FROM comandos WHERE olt_id = ? AND activo = 1 ORDER BY ${orderClause}`;
+            userDb.all(query, [oltId], (err, comandos) => {
+                if (err) {
+                    console.error('Error al obtener comandos:', err);
+                    return res.status(500).json({ success: false, message: 'Error del servidor' });
                 }
+
+                const comandosFormateados = comandos.map(cmd => {
+                    let parsed = [];
+                    if (cmd.comandos_json) {
+                        try { parsed = JSON.parse(cmd.comandos_json || '[]'); } catch (e) { parsed = []; }
+                    } else if (cmd.comando) {
+                        parsed = [cmd.comando];
+                    }
+                    return { ...cmd, comandos: parsed };
+                });
+
+                res.json({
+                    success: true,
+                    olt: {
+                        ...olt,
+                        comandos: comandosFormateados
+                    }
+                });
             });
         });
     });
@@ -1781,40 +1792,87 @@ app.get('/api/olts/:id', (req, res) => {
 
 // Crear nueva OLT
 app.post('/api/olts', (req, res) => {
-    const { nombre, shelf, slot, port, onu_id, ip_address, ubicacion } = req.body;
+    const { nombre } = req.body;
     const oltId = 'olt-' + Date.now();
+    const userDb = getUserDatabase(req);
 
-    db.run(`INSERT INTO olts (id, nombre, shelf, slot, port, onu_id, ip_address, ubicacion) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [oltId, nombre, shelf || 1, slot || 1, port || 1, onu_id || 1, ip_address, ubicacion],
-        function(err) {
+    userDb.all(`PRAGMA table_info(olts)`, (pragmaErr, cols) => {
+        if (pragmaErr) {
+            console.error('Error detectando esquema de OLTs:', pragmaErr);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+
+        const colNames = cols.map(c => c.name);
+        const hasCol = (c) => colNames.includes(c);
+
+        const payload = req.body;
+        const fields = ['id', 'nombre'];
+        const values = [oltId, nombre];
+
+        if (hasCol('shelf')) { fields.push('shelf'); values.push(payload.shelf || 1); }
+        if (hasCol('slot')) { fields.push('slot'); values.push(payload.slot || 1); }
+        if (hasCol('port')) { fields.push('port'); values.push(payload.port || 1); }
+        if (hasCol('onu_id')) { fields.push('onu_id'); values.push(payload.onu_id ?? payload.onuId ?? 1); }
+        if (hasCol('ip_address')) { fields.push('ip_address'); values.push(payload.ip_address ?? payload.ip ?? null); }
+        if (hasCol('ip')) { fields.push('ip'); values.push(payload.ip ?? payload.ip_address ?? null); }
+        if (hasCol('puerto')) { fields.push('puerto'); values.push(payload.port ?? payload.puerto ?? 23); }
+        if (hasCol('modelo')) { fields.push('modelo'); values.push(payload.modelo ?? 'ZTE C600'); }
+        if (hasCol('ubicacion')) { fields.push('ubicacion'); values.push(payload.ubicacion ?? null); }
+        if (hasCol('estado')) { fields.push('estado'); values.push('activo'); }
+        if (hasCol('activo')) { fields.push('activo'); values.push(1); }
+
+        const placeholders = fields.map(() => '?').join(', ');
+        const query = `INSERT INTO olts (${fields.join(', ')}) VALUES (${placeholders})`;
+
+        userDb.run(query, values, function(err) {
             if (err) {
                 console.error('Error al crear OLT:', err);
                 return res.status(500).json({ success: false, message: 'Error del servidor' });
             }
 
             logActivity(req.body.userId, 'crear_olt', `OLT: ${nombre}`, req.ip);
-            
-            res.json({
-                success: true,
-                message: 'OLT creada correctamente',
-                olt: { id: oltId, nombre, shelf, slot, port, onu_id }
-            });
-        }
-    );
+            res.json({ success: true, message: 'OLT creada correctamente', olt: { id: oltId, nombre } });
+        });
+    });
 });
 
 // Actualizar OLT
 app.put('/api/olts/:id', (req, res) => {
     const oltId = req.params.id;
-    const { nombre, shelf, slot, port, onu_id, ip_address, ubicacion } = req.body;
+    const payload = req.body;
+    const userDb = getUserDatabase(req);
 
-    db.run(`UPDATE olts SET 
-                nombre = ?, shelf = ?, slot = ?, port = ?, onu_id = ?, 
-                ip_address = ?, ubicacion = ?, fecha_modificacion = CURRENT_TIMESTAMP 
-            WHERE id = ?`,
-        [nombre, shelf, slot, port, onu_id, ip_address, ubicacion, oltId],
-        function(err) {
+    userDb.all(`PRAGMA table_info(olts)`, (pragmaErr, cols) => {
+        if (pragmaErr) {
+            console.error('Error detectando esquema de OLTs:', pragmaErr);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+
+        const colNames = cols.map(c => c.name);
+        const hasCol = (c) => colNames.includes(c);
+
+        const fields = [];
+        const values = [];
+
+        if (hasCol('nombre') && payload.nombre !== undefined) { fields.push('nombre = ?'); values.push(payload.nombre); }
+        if (hasCol('shelf') && payload.shelf !== undefined) { fields.push('shelf = ?'); values.push(payload.shelf); }
+        if (hasCol('slot') && payload.slot !== undefined) { fields.push('slot = ?'); values.push(payload.slot); }
+        if (hasCol('port') && payload.port !== undefined) { fields.push('port = ?'); values.push(payload.port); }
+        if (hasCol('puerto') && payload.port !== undefined) { fields.push('puerto = ?'); values.push(payload.port); }
+        if (hasCol('onu_id') && (payload.onu_id !== undefined || payload.onuId !== undefined)) { fields.push('onu_id = ?'); values.push(payload.onu_id ?? payload.onuId); }
+        if (hasCol('ip_address') && (payload.ip_address !== undefined || payload.ip !== undefined)) { fields.push('ip_address = ?'); values.push(payload.ip_address ?? payload.ip); }
+        if (hasCol('ip') && (payload.ip !== undefined || payload.ip_address !== undefined)) { fields.push('ip = ?'); values.push(payload.ip ?? payload.ip_address); }
+        if (hasCol('ubicacion') && payload.ubicacion !== undefined) { fields.push('ubicacion = ?'); values.push(payload.ubicacion); }
+        if (hasCol('fecha_modificacion')) { fields.push('fecha_modificacion = CURRENT_TIMESTAMP'); }
+
+        if (fields.length === 0) {
+            return res.status(400).json({ success: false, message: 'No hay campos válidos para actualizar' });
+        }
+
+        const query = `UPDATE olts SET ${fields.join(', ')} WHERE id = ?`;
+        values.push(oltId);
+
+        userDb.run(query, values, function(err) {
             if (err) {
                 console.error('Error al actualizar OLT:', err);
                 return res.status(500).json({ success: false, message: 'Error del servidor' });
@@ -1824,81 +1882,97 @@ app.put('/api/olts/:id', (req, res) => {
                 return res.status(404).json({ success: false, message: 'OLT no encontrada' });
             }
 
-            logActivity(req.body.userId, 'actualizar_olt', `OLT: ${nombre}`, req.ip);
-            
+            logActivity(req.body.userId, 'actualizar_olt', `OLT: ${payload.nombre || oltId}`, req.ip);
             res.json({ success: true, message: 'OLT actualizada correctamente' });
-        }
-    );
+        });
+    });
 });
 
 // Endpoint específico para actualizar solo parámetros de conexión
 app.patch('/api/olts/:id/parametros', (req, res) => {
     const oltId = req.params.id;
     const { shelf, slot, port, onu_id } = req.body;
+    const userDb = getUserDatabase(req);
 
-    // Construir query dinámicamente solo con los campos proporcionados
-    const fieldsToUpdate = [];
-    const values = [];
-    
-    if (shelf !== undefined) {
-        fieldsToUpdate.push('shelf = ?');
-        values.push(shelf);
-    }
-    if (slot !== undefined) {
-        fieldsToUpdate.push('slot = ?');
-        values.push(slot);
-    }
-    if (port !== undefined) {
-        fieldsToUpdate.push('port = ?');
-        values.push(port);
-    }
-    if (onu_id !== undefined) {
-        fieldsToUpdate.push('onu_id = ?');
-        values.push(onu_id);
-    }
-
-    if (fieldsToUpdate.length === 0) {
-        return res.status(400).json({ success: false, message: 'No hay parámetros para actualizar' });
-    }
-
-    fieldsToUpdate.push('fecha_modificacion = CURRENT_TIMESTAMP');
-    values.push(oltId);
-
-    const query = `UPDATE olts SET ${fieldsToUpdate.join(', ')} WHERE id = ?`;
-
-    db.run(query, values, function(err) {
-        if (err) {
-            console.error('Error al actualizar parámetros de OLT:', err);
+    userDb.all(`PRAGMA table_info(olts)`, (pragmaErr, cols) => {
+        if (pragmaErr) {
+            console.error('Error detectando esquema de OLTs:', pragmaErr);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
         }
 
-        if (this.changes === 0) {
-            return res.status(404).json({ success: false, message: 'OLT no encontrada' });
+        const colNames = cols.map(c => c.name);
+        const hasCol = (c) => colNames.includes(c);
+
+        const fieldsToUpdate = [];
+        const values = [];
+
+        if (shelf !== undefined && hasCol('shelf')) { fieldsToUpdate.push('shelf = ?'); values.push(shelf); }
+        if (slot !== undefined && hasCol('slot')) { fieldsToUpdate.push('slot = ?'); values.push(slot); }
+        if (port !== undefined) {
+            if (hasCol('port')) { fieldsToUpdate.push('port = ?'); values.push(port); }
+            else if (hasCol('puerto')) { fieldsToUpdate.push('puerto = ?'); values.push(port); }
+        }
+        if (onu_id !== undefined && hasCol('onu_id')) { fieldsToUpdate.push('onu_id = ?'); values.push(onu_id); }
+
+        if (fieldsToUpdate.length === 0) {
+            return res.status(400).json({ success: false, message: 'No hay parámetros válidos para actualizar' });
         }
 
-        logActivity(req.body.userId, 'actualizar_parametros_olt', `Parámetros OLT ID: ${oltId}`, req.ip);
-        
-        res.json({ success: true, message: 'Parámetros de conexión actualizados automáticamente' });
+        if (hasCol('fecha_modificacion')) fieldsToUpdate.push('fecha_modificacion = CURRENT_TIMESTAMP');
+        values.push(oltId);
+
+        const query = `UPDATE olts SET ${fieldsToUpdate.join(', ')} WHERE id = ?`;
+
+        userDb.run(query, values, function(err) {
+            if (err) {
+                console.error('Error al actualizar parámetros de OLT:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+
+            if (this.changes === 0) {
+                return res.status(404).json({ success: false, message: 'OLT no encontrada' });
+            }
+
+            logActivity(req.body.userId, 'actualizar_parametros_olt', `Parámetros OLT ID: ${oltId}`, req.ip);
+            
+            res.json({ success: true, message: 'Parámetros de conexión actualizados automáticamente' });
+        });
     });
 });
 
 // Eliminar OLT
 app.delete('/api/olts/:id', (req, res) => {
     const oltId = req.params.id;
+    const userDb = getUserDatabase(req);
 
-    db.run(`UPDATE olts SET estado = 'inactiva' WHERE id = ?`, [oltId], function(err) {
-        if (err) {
-            console.error('Error al eliminar OLT:', err);
+    userDb.all(`PRAGMA table_info(olts)`, (pragmaErr, cols) => {
+        if (pragmaErr) {
+            console.error('Error detectando esquema de OLTs:', pragmaErr);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
         }
 
-        if (this.changes === 0) {
-            return res.status(404).json({ success: false, message: 'OLT no encontrada' });
-        }
+        const hasEstado = cols.some(c => c.name === 'estado');
+        const hasActivo = cols.some(c => c.name === 'activo');
 
-        logActivity(req.body.userId, 'eliminar_olt', `OLT ID: ${oltId}`, req.ip);
-        
-        res.json({ success: true, message: 'OLT eliminada correctamente' });
+        let query, params;
+        if (hasEstado) { query = `UPDATE olts SET estado = 'inactiva' WHERE id = ?`; params = [oltId]; }
+        else if (hasActivo) { query = `UPDATE olts SET activo = 0 WHERE id = ?`; params = [oltId]; }
+        else { query = `DELETE FROM olts WHERE id = ?`; params = [oltId]; }
+
+        userDb.run(query, params, function(err) {
+            if (err) {
+                console.error('Error al eliminar OLT:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+
+            if (this.changes === 0) {
+                return res.status(404).json({ success: false, message: 'OLT no encontrada' });
+            }
+
+            logActivity(req.body.userId, 'eliminar_olt', `OLT ID: ${oltId}`, req.ip);
+            
+            res.json({ success: true, message: 'OLT eliminada correctamente' });
+        });
     });
 });
 
@@ -1908,32 +1982,60 @@ app.delete('/api/olts/:id', (req, res) => {
 app.get('/api/comandos', (req, res) => {
     const usuarioActual = req.session && req.session.user;
     const userDb = getUserDatabase(req);
-    
-    userDb.all(`SELECT * FROM comandos WHERE activo = 1 ORDER BY COALESCE(orden_display, orden, 0), nombre`, (err, comandos) => {
-        if (err) {
-            console.error('Error al obtener comandos:', err);
+
+    userDb.all(`PRAGMA table_info(comandos)`, (pragmaErr, cols) => {
+        if (pragmaErr) {
+            console.error('Error detectando esquema de comandos:', pragmaErr);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
         }
-        
-        console.log(`📋 Usuario ${usuarioActual?.username} cargó ${comandos.length} comandos`);
-        res.json(comandos);
+
+        const hasOrdenDisplay = cols.some(c => c.name === 'orden_display');
+        const hasOrden = cols.some(c => c.name === 'orden');
+        let orderClause = 'nombre';
+        if (hasOrdenDisplay) orderClause = 'orden_display, nombre';
+        else if (hasOrden) orderClause = 'orden, nombre';
+
+        const query = `SELECT * FROM comandos WHERE activo = 1 ORDER BY ${orderClause}`;
+        userDb.all(query, (err, comandos) => {
+            if (err) {
+                console.error('Error al obtener comandos:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+
+            console.log(`📋 Usuario ${usuarioActual?.username} cargó ${comandos.length} comandos`);
+            res.json(comandos);
+        });
     });
 });
 
 // Obtener comandos por OLT ID
 app.get('/api/comandos/:olt_id', (req, res) => {
     const oltId = req.params.olt_id;
-    
+
     // Usar la base de datos específica del usuario
     const userDb = getUserDatabase(req);
-    
-    userDb.all(`SELECT * FROM comandos WHERE olt_id = ? AND activo = 1 ORDER BY COALESCE(orden_display, orden, 0), nombre`, [oltId], (err, comandos) => {
-        if (err) {
-            console.error('Error al obtener comandos:', err);
+
+    userDb.all(`PRAGMA table_info(comandos)`, (pragmaErr, cols) => {
+        if (pragmaErr) {
+            console.error('Error detectando esquema de comandos:', pragmaErr);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
         }
-        
-        res.json({ success: true, comandos: comandos });
+
+        const hasOrdenDisplay = cols.some(c => c.name === 'orden_display');
+        const hasOrden = cols.some(c => c.name === 'orden');
+        let orderClause = 'nombre';
+        if (hasOrdenDisplay) orderClause = 'orden_display, nombre';
+        else if (hasOrden) orderClause = 'orden, nombre';
+
+        const query = `SELECT * FROM comandos WHERE olt_id = ? AND activo = 1 ORDER BY ${orderClause}`;
+        userDb.all(query, [oltId], (err, comandos) => {
+            if (err) {
+                console.error('Error al obtener comandos:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
+
+            res.json({ success: true, comandos });
+        });
     });
 });
 
