@@ -6987,13 +6987,29 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                 if (data.success) {
                     const olt = data.olt;
                     
+                    // Parsear configuración desde JSON
+                    let config = {};
+                    try {
+                        if (olt.configuracion) {
+                            config = typeof olt.configuracion === 'string' ? 
+                                JSON.parse(olt.configuracion) : olt.configuracion;
+                        }
+                    } catch (e) {
+                        console.warn('Error parseando configuración de OLT:', e);
+                    }
+                    
                     // Actualizar campos de forma segura
                     const fields = ['shelf', 'slot', 'port', 'onuId'];
                     fields.forEach(field => {
                         const element = document.getElementById(field);
                         if (element) {
-                            const oltField = field === 'onuId' ? 'onu_id' : field;
-                            element.value = olt[oltField] || '';
+                            // Usar valores de configuración o fallback a propiedades directas
+                            let value = config[field];
+                            if (!value) {
+                                const oltField = field === 'onuId' ? 'onu_id' : field;
+                                value = olt[oltField];
+                            }
+                            element.value = value || '';
                         }
                     });
                     
@@ -7066,7 +7082,24 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
         function actualizarDisplayOLT(olt) {
             document.getElementById('olt-nombre-display').textContent = olt.nombre;
             document.getElementById('olt-comandos-count').textContent = olt.comandos ? olt.comandos.length : 0;
-            document.getElementById('olt-params-display').textContent = `${olt.shelf}/${olt.slot}/${olt.port}:${olt.onu_id}`;
+            
+            // Parsear configuración desde JSON
+            let config = {};
+            try {
+                if (olt.configuracion) {
+                    config = typeof olt.configuracion === 'string' ? 
+                        JSON.parse(olt.configuracion) : olt.configuracion;
+                }
+            } catch (e) {
+                console.warn('Error parseando configuración de OLT:', e);
+            }
+            
+            const shelf = config.shelf || olt.shelf || 'undefined';
+            const slot = config.slot || olt.slot || 'undefined';
+            const port = config.port || olt.port || 'undefined';
+            const onuId = config.onuId || olt.onu_id || 'undefined';
+            
+            document.getElementById('olt-params-display').textContent = `${shelf}/${slot}/${port}:${onuId}`;
         }
 
         async function cambiarOLT(oltId) {
@@ -11432,18 +11465,9 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                             if (choiceResult.outcome === 'accepted') {
                                 console.log('📱 PWA instalada');
                             }
-                                        });
-                                    }
-                                },
-                                {
-                                    label: 'Más tarde',
-                                    type: 'secondary',
-                                    callback: () => console.log('Instalación aplazada')
-                                }
-                            ]
-                        }
-                    );
-                }
+                        });
+                    }
+                );
             });
             
             // Detectar cuando la app está instalada

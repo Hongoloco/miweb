@@ -1,0 +1,36 @@
+{
+  "timestamp": "2025-08-19T18:00:23.453Z",
+  "version": "3.0.0",
+  "user": "alito",
+  "data": {
+    "olts": [
+      {
+        "id": 1,
+        "nombre": "OLT Ejemplo",
+        "ip": "192.168.1.1",
+        "puerto": 22,
+        "modelo": "ZTE C600",
+        "ubicacion": "Central",
+        "activo": 1,
+        "fecha_creacion": "2025-08-19 18:00:00",
+        "configuracion": "{\"shelf\":1,\"slot\":1,\"port\":1,\"onuId\":1}"
+      }
+    ],
+    "comandos": [
+      {
+        "id": 1,
+        "nombre": "Comando Ejemplo",
+        "comando": "show version",
+        "descripcion": "Mostrar versión",
+        "categoria": "general",
+        "parametros": "{}",
+        "fecha_creacion": "2025-08-19 18:00:00",
+        "activo": 1,
+        "orden_display": 1,
+        "tipo_comando": "manual",
+        "olt_id": 1,
+        "orden": 1
+      }
+    ]
+  }
+}
