@@ -5093,6 +5093,52 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Nueva sección: Exportar/Importar OLTs y Comandos -->
+                <div class="config-section">
+                    <div style="font-size: 20px; color: var(--verde-antel); margin: 20px 0 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; background: rgba(40, 167, 69, 0.1); padding: 8px 12px; border-radius: 6px; border-left: 4px solid var(--verde-antel);">
+                        💾 Gestión de OLTs y Comandos
+                    </div>
+                    <p>Exporta e importa tus OLTs y comandos para hacer respaldos o migrar configuraciones.</p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <!-- Exportar -->
+                        <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;">
+                            <h4 style="color: #155724; margin-top: 0;">📤 Exportar</h4>
+                            <p style="margin-bottom: 15px; color: #155724;">Descarga todas tus OLTs y comandos en un archivo JSON.</p>
+                            <button class="btn btn-success" onclick="exportarOLTsComandos()" style="width: 100%;">
+                                📤 Exportar OLTs y Comandos
+                            </button>
+                        </div>
+                        
+                        <!-- Importar -->
+                        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                            <h4 style="color: #856404; margin-top: 0;">📥 Importar</h4>
+                            <p style="margin-bottom: 15px; color: #856404;">Sube un archivo JSON para importar OLTs y comandos.</p>
+                            
+                            <div style="margin-bottom: 10px;">
+                                <input type="file" id="import-file" accept=".json" style="width: 100%; padding: 8px; border: 2px solid #ffc107; border-radius: 4px;">
+                            </div>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #856404;">
+                                    <input type="checkbox" id="overwrite-existing">
+                                    🔄 Sobrescribir existentes
+                                </label>
+                            </div>
+                            
+                            <button class="btn btn-warning" onclick="importarOLTsComandos()" style="width: 100%;">
+                                📥 Importar Archivo
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Área de resultados -->
+                    <div id="import-export-results" style="margin-top: 15px; display: none; padding: 15px; border-radius: 8px;">
+                        <h4 style="margin-top: 0;">📊 Resultados</h4>
+                        <div id="import-export-content"></div>
+                    </div>
+                </div>
             </div>
 
             <!-- Contenido Ayuda -->
@@ -8589,6 +8635,141 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                 null,
                 'question'
             );
+        }
+
+        // ===== FUNCIONES DE EXPORTAR/IMPORTAR OLTs Y COMANDOS =====
+        function exportarOLTsComandos() {
+            mostrarConfirmacion(
+                'Exportar OLTs y Comandos',
+                '¿Deseas exportar todas tus OLTs y comandos? Se generará un archivo JSON con toda la información.',
+                async () => {
+                    try {
+                        showInfo('Exportando...', 'Generando archivo de exportación...');
+                        
+                        const response = await fetch(`${API_BASE}/export/olts-commands`);
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            // Crear archivo de descarga
+                            const blob = new Blob([JSON.stringify(data.data, null, 2)], 
+                                { type: 'application/json' });
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            const fecha = new Date().toISOString().split('T')[0];
+                            a.download = `olts_comandos_${usuarioActual.username}_${fecha}.json`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            window.URL.revokeObjectURL(url);
+
+                            mostrarResultadoImportExport('success', 
+                                `Exportación completada: ${data.stats.olts} OLTs, ${data.stats.comandos} comandos`);
+                        } else {
+                            throw new Error(data.message || 'Error en la exportación');
+                        }
+                    } catch (error) {
+                        console.error('Error al exportar:', error);
+                        mostrarResultadoImportExport('error', `Error: ${error.message}`);
+                    }
+                },
+                null,
+                'question'
+            );
+        }
+
+        function importarOLTsComandos() {
+            const fileInput = document.getElementById('import-file');
+            const overwriteCheckbox = document.getElementById('overwrite-existing');
+            
+            if (!fileInput.files.length) {
+                mostrarNotificacion('Selecciona un archivo JSON para importar', 'error', 3000);
+                return;
+            }
+
+            const file = fileInput.files[0];
+            if (!file.name.endsWith('.json')) {
+                mostrarNotificacion('Por favor selecciona un archivo JSON válido', 'error', 3000);
+                return;
+            }
+
+            mostrarConfirmacion(
+                'Importar OLTs y Comandos',
+                `¿Deseas importar las OLTs y comandos desde "${file.name}"?${overwriteCheckbox.checked ? '\n\n⚠️ Se sobrescribirán las OLTs existentes con el mismo nombre.' : ''}`,
+                async () => {
+                    try {
+                        showInfo('Importando...', 'Procesando archivo...');
+                        
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        formData.append('overwrite', overwriteCheckbox.checked);
+
+                        const response = await fetch(`${API_BASE}/import/olts-commands`, {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            const stats = data.stats;
+                            let mensaje = `✅ Importación completada:\n`;
+                            mensaje += `• OLTs importadas: ${stats.olts_importadas}\n`;
+                            mensaje += `• Comandos importados: ${stats.comandos_importados}`;
+                            
+                            if (stats.olts_omitidas > 0) {
+                                mensaje += `\n• OLTs omitidas: ${stats.olts_omitidas}`;
+                            }
+                            if (stats.errores > 0) {
+                                mensaje += `\n• Errores: ${stats.errores}`;
+                            }
+
+                            mostrarResultadoImportExport('success', mensaje);
+                            
+                            // Limpiar el input
+                            fileInput.value = '';
+                            overwriteCheckbox.checked = false;
+                            
+                            // Recargar OLTs si estamos en esa pestaña
+                            if (window.cargarOLTs) {
+                                setTimeout(() => cargarOLTs(), 1000);
+                            }
+                        } else {
+                            throw new Error(data.message || 'Error en la importación');
+                        }
+                    } catch (error) {
+                        console.error('Error al importar:', error);
+                        mostrarResultadoImportExport('error', `Error: ${error.message}`);
+                    }
+                },
+                null,
+                'warning'
+            );
+        }
+
+        function mostrarResultadoImportExport(tipo, mensaje) {
+            const container = document.getElementById('import-export-results');
+            const content = document.getElementById('import-export-content');
+            
+            const color = tipo === 'success' ? '#155724' : '#721c24';
+            const bgColor = tipo === 'success' ? '#d4edda' : '#f8d7da';
+            const icon = tipo === 'success' ? '✅' : '❌';
+            
+            content.innerHTML = `
+                <div style="background: ${bgColor}; color: ${color}; padding: 12px; border-radius: 6px; border-left: 4px solid ${color};">
+                    <div style="font-weight: 600; margin-bottom: 8px;">${icon} ${tipo === 'success' ? 'Operación Exitosa' : 'Error en la Operación'}</div>
+                    <div style="white-space: pre-line; font-family: monospace; font-size: 14px;">${mensaje}</div>
+                </div>
+            `;
+            
+            container.style.display = 'block';
+            
+            // Auto-ocultar después de 10 segundos si es éxito
+            if (tipo === 'success') {
+                setTimeout(() => {
+                    container.style.display = 'none';
+                }, 10000);
+            }
         }
 
         // ===== INICIALIZACIÓN DEL SISTEMA =====

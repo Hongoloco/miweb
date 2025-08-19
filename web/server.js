@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
 const path = require('path');
+const multer = require('multer');
 const { runDatabaseMigrations } = require('./database-migrations');
 const UserDatabaseManager = require('./user-database-manager');
 
@@ -26,6 +27,12 @@ app.use(cors({
 }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Configurar multer para manejo de archivos
+const upload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+});
 
 // Configuración de sesiones
 app.use(session({
@@ -513,6 +520,280 @@ app.get('/api/database/backup', (req, res) => {
                 res.json(backupData);
             }
         });
+    });
+});
+
+// ===== RUTAS DE EXPORTAR/IMPORTAR COMANDOS Y OLTs =====
+
+// Exportar OLTs y comandos del usuario actual
+app.get('/api/export/olts-commands', (req, res) => {
+    const usuarioActual = req.session && req.session.user;
+    
+    if (!usuarioActual) {
+        return res.status(401).json({ success: false, message: 'No autorizado' });
+    }
+    
+    const userDb = getUserDatabase(req);
+    const exportData = {
+        timestamp: new Date().toISOString(),
+        version: '3.0.0',
+        user: usuarioActual.username,
+        data: {}
+    };
+    
+    // Exportar OLTs
+    userDb.all(`SELECT * FROM olts WHERE activo = 1`, (err, olts) => {
+        if (err) {
+            console.error('Error exportando OLTs:', err);
+            return res.status(500).json({ success: false, message: 'Error exportando OLTs' });
+        }
+        
+        exportData.data.olts = olts;
+        
+        // Exportar comandos
+        userDb.all(`SELECT * FROM comandos WHERE activo = 1`, (err, comandos) => {
+            if (err) {
+                console.error('Error exportando comandos:', err);
+                return res.status(500).json({ success: false, message: 'Error exportando comandos' });
+            }
+            
+            exportData.data.comandos = comandos;
+            
+            const filename = `olts-commands-${usuarioActual.username}-${Date.now()}.json`;
+            res.setHeader('Content-Type', 'application/json');
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            res.json(exportData);
+            
+            logActivity(usuarioActual.id, 'exportar_olts_comandos', `Archivo: ${filename}`, req.ip);
+        });
+    });
+});
+
+// Importar OLTs y comandos
+app.post('/api/import/olts-commands', upload.single('file'), (req, res) => {
+    const usuarioActual = req.session && req.session.user;
+    
+    if (!usuarioActual) {
+        return res.status(401).json({ success: false, message: 'No autorizado' });
+    }
+    
+    if (!req.file) {
+        return res.status(400).json({ success: false, message: 'Archivo no proporcionado' });
+    }
+    
+    let importData;
+    try {
+        // Parsear el archivo JSON
+        const fileContent = req.file.buffer.toString('utf8');
+        importData = JSON.parse(fileContent);
+        
+        // Validar estructura del archivo
+        if (!importData.data || !importData.data.olts || !importData.data.comandos) {
+            return res.status(400).json({ success: false, message: 'Estructura de archivo inválida' });
+        }
+    } catch (error) {
+        console.error('Error parseando archivo JSON:', error);
+        return res.status(400).json({ success: false, message: 'Archivo JSON inválido' });
+    }
+    
+    const data = importData.data;
+    const overwrite = req.body.overwrite === 'true';
+    
+    const userDb = getUserDatabase(req);
+    const results = {
+        olts: { created: 0, updated: 0, errors: 0 },
+        comandos: { created: 0, updated: 0, errors: 0 }
+    };
+    
+    // Función para importar OLTs
+    const importOLTs = () => {
+        return new Promise((resolve) => {
+            let processed = 0;
+            const total = data.olts.length;
+            
+            if (total === 0) {
+                resolve();
+                return;
+            }
+            
+            data.olts.forEach(olt => {
+                // Verificar si existe OLT con mismo nombre o IP
+                userDb.get(`SELECT id FROM olts WHERE nombre = ? OR ip = ?`, [olt.nombre, olt.ip], (err, existing) => {
+                    if (err) {
+                        results.olts.errors++;
+                        processed++;
+                        if (processed === total) resolve();
+                        return;
+                    }
+                    
+                    if (existing && !overwrite) {
+                        // Saltar si existe y no se permite sobrescribir
+                        processed++;
+                        if (processed === total) resolve();
+                        return;
+                    }
+                    
+                    if (existing && overwrite) {
+                        // Actualizar OLT existente
+                        userDb.run(`UPDATE olts SET modelo = ?, ubicacion = ?, puerto_ssh = ?, usuario_ssh = ?, notas = ? WHERE id = ?`,
+                            [olt.modelo, olt.ubicacion, olt.puerto_ssh, olt.usuario_ssh, olt.notas, existing.id], (err) => {
+                            if (err) {
+                                results.olts.errors++;
+                            } else {
+                                results.olts.updated++;
+                            }
+                            processed++;
+                            if (processed === total) resolve();
+                        });
+                    } else {
+                        // Crear nueva OLT
+                        userDb.run(`INSERT INTO olts (nombre, ip, modelo, ubicacion, estado, puerto_ssh, usuario_ssh, notas) 
+                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                            [olt.nombre, olt.ip, olt.modelo, olt.ubicacion, 'activo', olt.puerto_ssh, olt.usuario_ssh, olt.notas], (err) => {
+                            if (err) {
+                                results.olts.errors++;
+                            } else {
+                                results.olts.created++;
+                            }
+                            processed++;
+                            if (processed === total) resolve();
+                        });
+                    }
+                });
+            });
+        });
+    };
+    
+    // Función para importar comandos
+    const importComandos = () => {
+        return new Promise((resolve) => {
+            let processed = 0;
+            const total = data.comandos.length;
+            
+            if (total === 0) {
+                resolve();
+                return;
+            }
+            
+            data.comandos.forEach(comando => {
+                // Buscar OLT por nombre para asociar comando
+                userDb.get(`SELECT id FROM olts WHERE nombre = ?`, [comando.olt_nombre || ''], (err, olt) => {
+                    if (err || !olt) {
+                        // Si no se encuentra la OLT, usar olt_id original o saltar
+                        if (!comando.olt_id) {
+                            results.comandos.errors++;
+                            processed++;
+                            if (processed === total) resolve();
+                            return;
+                        }
+                    }
+                    
+                    const oltId = olt ? olt.id : comando.olt_id;
+                    
+                    // Verificar si existe comando con mismo nombre en la misma OLT
+                    userDb.get(`SELECT id FROM comandos WHERE nombre = ? AND olt_id = ?`, [comando.nombre, oltId], (err, existing) => {
+                        if (err) {
+                            results.comandos.errors++;
+                            processed++;
+                            if (processed === total) resolve();
+                            return;
+                        }
+                        
+                        if (existing && !overwrite) {
+                            processed++;
+                            if (processed === total) resolve();
+                            return;
+                        }
+                        
+                        // Detectar esquema de comandos (comandos_json vs comando)
+                        userDb.all(`PRAGMA table_info(comandos)`, (pragmaErr, cols) => {
+                            if (pragmaErr) {
+                                results.comandos.errors++;
+                                processed++;
+                                if (processed === total) resolve();
+                                return;
+                            }
+                            
+                            const hasComandosJson = cols.some(c => c.name === 'comandos_json');
+                            const hasComando = cols.some(c => c.name === 'comando');
+                            
+                            let sql, params;
+                            
+                            if (existing && overwrite) {
+                                // Actualizar comando existente
+                                if (hasComandosJson) {
+                                    sql = `UPDATE comandos SET descripcion = ?, comandos_json = ?, categoria = ? WHERE id = ?`;
+                                    params = [comando.descripcion, comando.comandos_json || JSON.stringify([comando.comando || '']), comando.categoria, existing.id];
+                                } else if (hasComando) {
+                                    sql = `UPDATE comandos SET descripcion = ?, comando = ?, categoria = ? WHERE id = ?`;
+                                    const cmdStr = comando.comandos_json ? JSON.parse(comando.comandos_json).join('\n') : (comando.comando || '');
+                                    params = [comando.descripcion, cmdStr, comando.categoria, existing.id];
+                                } else {
+                                    sql = `UPDATE comandos SET descripcion = ?, categoria = ? WHERE id = ?`;
+                                    params = [comando.descripcion, comando.categoria, existing.id];
+                                }
+                                
+                                userDb.run(sql, params, (err) => {
+                                    if (err) {
+                                        results.comandos.errors++;
+                                    } else {
+                                        results.comandos.updated++;
+                                    }
+                                    processed++;
+                                    if (processed === total) resolve();
+                                });
+                            } else {
+                                // Crear nuevo comando
+                                if (hasComandosJson) {
+                                    sql = `INSERT INTO comandos (olt_id, nombre, descripcion, comandos_json, categoria, activo) VALUES (?, ?, ?, ?, ?, 1)`;
+                                    params = [oltId, comando.nombre, comando.descripcion, comando.comandos_json || JSON.stringify([comando.comando || '']), comando.categoria];
+                                } else if (hasComando) {
+                                    sql = `INSERT INTO comandos (olt_id, nombre, descripcion, comando, categoria, activo) VALUES (?, ?, ?, ?, ?, 1)`;
+                                    const cmdStr = comando.comandos_json ? JSON.parse(comando.comandos_json).join('\n') : (comando.comando || '');
+                                    params = [oltId, comando.nombre, comando.descripcion, cmdStr, comando.categoria];
+                                } else {
+                                    sql = `INSERT INTO comandos (olt_id, nombre, descripcion, categoria, activo) VALUES (?, ?, ?, ?, 1)`;
+                                    params = [oltId, comando.nombre, comando.descripcion, comando.categoria];
+                                }
+                                
+                                userDb.run(sql, params, (err) => {
+                                    if (err) {
+                                        results.comandos.errors++;
+                                    } else {
+                                        results.comandos.created++;
+                                    }
+                                    processed++;
+                                    if (processed === total) resolve();
+                                });
+                            }
+                        });
+                    });
+                });
+            });
+        });
+    };
+    
+    // Ejecutar importaciones secuencialmente
+    importOLTs().then(() => {
+        return importComandos();
+    }).then(() => {
+        logActivity(usuarioActual.id, 'importar_olts_comandos', 
+                   `OLTs: ${results.olts.created}/${results.olts.updated}/${results.olts.errors}, Comandos: ${results.comandos.created}/${results.comandos.updated}/${results.comandos.errors}`, 
+                   req.ip);
+        
+        res.json({
+            success: true,
+            message: 'Importación completada',
+            stats: {
+                olts_importadas: results.olts.created + results.olts.updated,
+                comandos_importados: results.comandos.created + results.comandos.updated,
+                olts_omitidas: 0, // Calcular si es necesario
+                errores: results.olts.errors + results.comandos.errors
+            }
+        });
+    }).catch(error => {
+        console.error('Error en importación:', error);
+        res.status(500).json({ success: false, message: 'Error en importación', error: error.message });
     });
 });
 

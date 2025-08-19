@@ -1,0 +1,40 @@
+{
+  "timestamp": "2025-08-19T14:50:00.000Z",
+  "version": "3.0.0",
+  "user": "test",
+  "data": {
+    "olts": [
+      {
+        "nombre": "ZTE C600 Test Import",
+        "ip": "192.168.1.200",
+        "puerto": 22,
+        "modelo": "ZTE C600",
+        "ubicacion": "Test Lab",
+        "activo": 1,
+        "configuracion": "{\"shelf\":1,\"slot\":15,\"port\":8,\"onuId\":100}"
+      }
+    ],
+    "comandos": [
+      {
+        "nombre": "Test Command 1",
+        "comando": "echo 'Test 1'",
+        "descripcion": "Comando de prueba para importación",
+        "categoria": "test",
+        "parametros": null,
+        "activo": 1,
+        "orden_display": 1,
+        "tipo_comando": "manual"
+      },
+      {
+        "nombre": "Test Command 2",
+        "comando": "echo 'Test 2'",
+        "descripcion": "Segundo comando de prueba",
+        "categoria": "test",
+        "parametros": null,
+        "activo": 1,
+        "orden_display": 2,
+        "tipo_comando": "manual"
+      }
+    ]
+  }
+}
