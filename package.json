@@ -5,7 +5,8 @@
   "main": "web/server.js",
   "homepage": "./",
   "scripts": {
-    "start": "cd web && npm start",
+  "start": "cd web && npm start",
+  "fix-linux-start": "bash ./fix-linux-start.sh --install-tools --start",
     "dev": "cd web && npm run dev",
     "init-db": "cd web && npm run init-db",
     "web": "cd web && npm start",
