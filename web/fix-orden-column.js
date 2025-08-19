@@ -33,6 +33,7 @@ function fixDatabase(dbPath, dbName) {
             }
 
             const hasOrdenColumn = columns.some(col => col.name === 'orden');
+            const hasOrdenDisplayColumn = columns.some(col => col.name === 'orden_display');
 
             if (hasOrdenColumn) {
                 console.log(`✅ Columna "orden" ya existe en ${dbName}`);
@@ -54,20 +55,37 @@ function fixDatabase(dbPath, dbName) {
 
                 console.log(`✅ Columna "orden" agregada a ${dbName}`);
 
-                // Sincronizar valores con orden_display
-                db.run("UPDATE comandos SET orden = orden_display WHERE orden_display IS NOT NULL", (err) => {
-                    if (err) {
-                        console.error(`❌ Error sincronizando valores en ${dbName}:`, err);
-                        db.close();
-                        reject(err);
-                        return;
-                    }
+                // Solo sincronizar con orden_display si existe esa columna
+                if (hasOrdenDisplayColumn) {
+                    console.log(`🔄 Sincronizando con columna orden_display en ${dbName}...`);
+                    db.run("UPDATE comandos SET orden = orden_display WHERE orden_display IS NOT NULL", (err) => {
+                        if (err) {
+                            console.error(`❌ Error sincronizando valores en ${dbName}:`, err);
+                            db.close();
+                            reject(err);
+                            return;
+                        }
 
-                    console.log(`✅ Valores sincronizados en ${dbName}`);
-                    
-                    db.close();
-                    resolve();
-                });
+                        console.log(`✅ Valores sincronizados con orden_display en ${dbName}`);
+                        db.close();
+                        resolve();
+                    });
+                } else {
+                    console.log(`ℹ️  No hay columna orden_display en ${dbName}, usando valores por defecto`);
+                    // Asignar orden secuencial a los comandos existentes
+                    db.run("UPDATE comandos SET orden = rowid WHERE orden = 0", (err) => {
+                        if (err) {
+                            console.error(`❌ Error asignando orden secuencial en ${dbName}:`, err);
+                            db.close();
+                            reject(err);
+                            return;
+                        }
+
+                        console.log(`✅ Orden secuencial asignado en ${dbName}`);
+                        db.close();
+                        resolve();
+                    });
+                }
             });
         });
     });
