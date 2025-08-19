@@ -8644,7 +8644,7 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                 '¿Deseas exportar todas tus OLTs y comandos? Se generará un archivo JSON con toda la información.',
                 async () => {
                     try {
-                        showInfo('Exportando...', 'Generando archivo de exportación...');
+                        mostrarNotificacion('Generando archivo de exportación...', 'info', 2000);
                         
                         const response = await fetch(`${API_BASE}/export/olts-commands`);
                         const data = await response.json();
@@ -8698,7 +8698,7 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                 `¿Deseas importar las OLTs y comandos desde "${file.name}"?${overwriteCheckbox.checked ? '\n\n⚠️ Se sobrescribirán las OLTs existentes con el mismo nombre.' : ''}`,
                 async () => {
                     try {
-                        showInfo('Importando...', 'Procesando archivo...');
+                        mostrarNotificacion('Procesando archivo...', 'info', 2000);
                         
                         const formData = new FormData();
                         formData.append('file', file);
@@ -11374,18 +11374,12 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                             newWorker.addEventListener('statechange', () => {
                                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                                     // Nueva versión disponible
-                                    if (window.showInfo) {
-                                        window.showInfo(
-                                            'Actualización Disponible',
-                                            'Una nueva versión está disponible. Recargue la página para actualizar.',
-                                            {
-                                                actions: [{
-                                                    label: 'Actualizar',
-                                                    callback: () => window.location.reload()
-                                                }]
-                                            }
-                                        );
-                                    }
+                                    mostrarNotificacion(
+                                        'Una nueva versión está disponible. Recargue la página para actualizar.',
+                                        'info',
+                                        5000,
+                                        'Actualización Disponible'
+                                    );
                                 }
                             });
                         });
@@ -11429,20 +11423,15 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 
-                if (window.showInfo) {
-                    window.showInfo(
-                        'Instalar Aplicación',
-                        '¿Desea instalar la aplicación en su dispositivo para acceso rápido?',
-                        {
-                            actions: [
-                                {
-                                    label: 'Instalar',
-                                    callback: () => {
-                                        e.prompt();
-                                        e.userChoice.then((choiceResult) => {
-                                            if (choiceResult.outcome === 'accepted') {
-                                                console.log('📱 PWA instalada');
-                                            }
+                mostrarConfirmacion(
+                    'Instalar Aplicación',
+                    '¿Desea instalar la aplicación en su dispositivo para acceso rápido?',
+                    () => {
+                        e.prompt();
+                        e.userChoice.then((choiceResult) => {
+                            if (choiceResult.outcome === 'accepted') {
+                                console.log('📱 PWA instalada');
+                            }
                                         });
                                     }
                                 },
@@ -11483,11 +11472,10 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
         
         // Función para mostrar información sobre las nuevas características
         function mostrarCaracteristicasV2() {
-            if (window.showInfo) {
-                window.showInfo(
-                    '🚀 Desarrollo de Servicios Residenciales',
-                    `Nuevas características disponibles:
-                    
+            mostrarModal(
+                '🚀 Desarrollo de Servicios Residenciales',
+                `Nuevas características disponibles:
+                
 • 📊 Dashboard con gráficos en tiempo real
 • 🔔 Notificaciones push y en tiempo real  
 • 📱 Progressive Web App (PWA)
@@ -11498,18 +11486,8 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
 • 📄 Exportación avanzada de reportes
 
 ¡Explore todas las nuevas funcionalidades!`,
-                    {
-                        actions: [{
-                            label: 'Explorar',
-                            callback: () => {
-                                if (window.themeSystem) {
-                                    window.themeSystem.toggleThemeSelector();
-                                }
-                            }
-                        }]
-                    }
-                );
-            }
+                'info'
+            );
         }
         
         // Auto-mostrar características después de la carga inicial
