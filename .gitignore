@@ -56,3 +56,7 @@ portable/package-lock.json
 
 # Archivos de documentación temporal
 IMPORTACION-EXITOSA.md
+
+# Archivos locales no seguidos del usuario
+servidor-actual.tar.gz
+temp-analisis/

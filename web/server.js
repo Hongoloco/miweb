@@ -2778,13 +2778,39 @@ app.use('/api/tareas', (req, res, next) => {
     next();
 });
 
-app.listen(PORT, () => {
-    console.log('🚀 Servidor iniciado en puerto', PORT);
-    console.log('🌐 Acceder a: http://localhost:' + PORT);
-    console.log('📊 Base de datos: ' + dbPath);
-    console.log('📡 SSE habilitado para notificaciones en tiempo real');
-    console.log('📊 Analytics y reportes habilitados');
-});
+// Inicio robusto del servidor con manejo de EADDRINUSE
+function startExpress(port) {
+    const server = app.listen(port, () => {
+        console.log('🚀 Servidor iniciado en puerto', port);
+        console.log('🌐 Acceder a: http://localhost:' + port);
+        console.log('📊 Base de datos: ' + dbPath);
+        console.log('📡 SSE habilitado para notificaciones en tiempo real');
+        console.log('📊 Analytics y reportes habilitados');
+    });
+
+    server.on('error', (err) => {
+        if (err && err.code === 'EADDRINUSE') {
+            console.error(`❌ Puerto ${port} en uso (EADDRINUSE)`);
+            const allowFallback = process.env.ALLOW_PORT_FALLBACK === '1';
+            if (allowFallback) {
+                const next = port + 1;
+                console.log(`↪️  Intentando puerto alternativo ${next} (ALLOW_PORT_FALLBACK=1)`);
+                startExpress(next);
+            } else {
+                console.log('🛠️ Para liberar el puerto puedes ejecutar:');
+                console.log(`   lsof -nP -iTCP:${port} -sTCP:LISTEN`);
+                console.log('   kill -9 <PID>');
+                console.log('💡 O inicia con otro puerto, por ejemplo: PORT=3001 npm start');
+                process.exit(1);
+            }
+        } else {
+            console.error('❌ Error al iniciar servidor:', err);
+            process.exit(1);
+        }
+    });
+}
+
+startExpress(PORT);
 
 // ===== ENDPOINTS ADMINISTRATIVOS PARA GESTIÓN DE BASES DE DATOS =====
 
