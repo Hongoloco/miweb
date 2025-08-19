@@ -1,6 +1,38 @@
 #!/bin/bash
 
-# Script de restauración completa después de git pull
+# Script de restauración completa despu    echo "🔄 Ahora reinicia tu servidor:"
+    echo ""
+    echo "🔍 Detectando gestor de procesos..."
+    
+    # Verificar diferentes opciones de reinicio
+    if command -v pm2 &> /dev/null; then
+        echo "   ✅ PM2 detectado: pm2 restart all"
+        echo "   💡 Ejecuta: pm2 restart all"
+    elif command -v systemctl &> /dev/null; then
+        echo "   ✅ Systemd detectado"
+        echo "   💡 Ejecuta uno de estos:"
+        echo "      sudo systemctl restart miweb"
+        echo "      sudo systemctl restart tu-servicio-web"
+    elif pgrep -f "node server.js" &> /dev/null; then
+        echo "   ✅ Proceso Node.js detectado"
+        echo "   💡 Ejecuta:"
+        echo "      pkill -f 'node server.js'"
+        echo "      cd web && node server.js"
+    else
+        echo "   ⚠️  No se detectó gestor de procesos"
+        echo "   💡 Opciones para reiniciar:"
+        echo "      1. Si usas screen/tmux:"
+        echo "         - Mata la sesión actual"
+        echo "         - cd web && node server.js"
+        echo "      2. Si usas nohup:"
+        echo "         - pkill -f 'node server.js'"
+        echo "         - nohup node server.js > server.log 2>&1 &"
+        echo "      3. Reinicio manual:"
+        echo "         - cd web && node server.js"
+    fi
+    
+    echo ""
+    echo "🚀 Después del reinicio, accede con: alito/vinilo28" git pull
 # Ejecutar este script en tu servidor después de hacer git pull
 
 echo "� Iniciando restauración post git pull..."
