@@ -1,10 +1,11 @@
 # 🔒 PROTECCIÓN DE BASE DE DATOS ZTE C600 - USUARIO ALITO
 
-## 📊 Estado actual (19 Agosto 2025):
+## 📊 Estado actual (19 Agosto 2025 - LIMPIADO):
 - ✅ Base de datos: `/workspaces/miweb/web/databases/alito_olt_system.db`
-- ✅ OLTs ZTE C600: **6 unidades** guardadas permanentemente
+- ✅ OLTs ZTE C600: **1 unidad** (principal - limpiado de pruebas)
 - ✅ Comandos ZTE: **10 comandos** específicos para ZTE C600
 - ✅ Configuración principal: shelf:1, slot:13, port:4, onuId:38
+- ✅ OLT principal: "ZTE C600 - Alito" (ID: 8, IP: 192.168.1.100)
 
 ## 🛡️ Medidas de protección implementadas:
 
@@ -19,6 +20,12 @@
 - Restaura automáticamente si detecta pérdida de datos
 - Crea respaldos automáticos
 
+### 3. **Script de limpieza automática**
+- Archivo: `/workspaces/miweb/scripts/limpiar-olts-prueba.sh`
+- Elimina OLTs de prueba automáticamente
+- Mantiene solo la OLT principal de alito
+- Crea respaldos antes de cualquier limpieza
+
 ### 3. **Respaldo permanente**
 - Ubicación: `/workspaces/miweb/backup/alito-zte-backup.db`
 - Se actualiza automáticamente
@@ -30,11 +37,14 @@
 # Verificar estado de la base de datos
 /workspaces/miweb/scripts/verificar-alito-zte.sh
 
+# Limpiar OLTs de prueba (mantener solo la principal)
+/workspaces/miweb/scripts/limpiar-olts-prueba.sh
+
 # Restaurar manualmente si es necesario
 cd /workspaces/miweb/web && node restaurar-alito-zte.js
 
-# Ver OLTs de alito
-sqlite3 /workspaces/miweb/web/databases/alito_olt_system.db "SELECT * FROM olts;"
+# Ver OLT principal de alito
+sqlite3 /workspaces/miweb/web/databases/alito_olt_system.db "SELECT * FROM olts WHERE id = 8;"
 
 # Ver comandos ZTE
 sqlite3 /workspaces/miweb/web/databases/alito_olt_system.db "SELECT nombre FROM comandos WHERE olt_id = 8;"
