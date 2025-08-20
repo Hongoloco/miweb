@@ -390,6 +390,17 @@ function logActivity(userId, accion, detalles, ip) {
 
 // ===== RUTAS DE SISTEMA Y BASE DE DATOS =====
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        version: '3.0.0',
+        database: 'connected'
+    });
+});
+
 // Estado de la base de datos
 app.get('/api/database/status', (req, res) => {
     const status = {
