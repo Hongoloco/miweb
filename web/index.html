@@ -5138,6 +5138,36 @@
                         <h4 style="margin-top: 0;">📊 Resultados</h4>
                         <div id="import-export-content"></div>
                     </div>
+                    
+                    <!-- Sección de ayuda para Import/Export -->
+                    <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #1976d2; margin-top: 20px;">
+                        <h4 style="color: #1565c0; margin-top: 0;">💡 Ayuda para Import/Export</h4>
+                        <div style="color: #1565c0; font-size: 14px; line-height: 1.6;">
+                            <p><strong>📤 Para Exportar:</strong></p>
+                            <ul style="margin-left: 20px;">
+                                <li>Haz clic en "📤 Exportar OLTs y Comandos"</li>
+                                <li>Se descargará un archivo JSON con todas tus configuraciones</li>
+                                <li>Este archivo se puede usar para hacer respaldos o migrar datos</li>
+                            </ul>
+                            
+                            <p><strong>📥 Para Importar:</strong></p>
+                            <ul style="margin-left: 20px;">
+                                <li>El archivo debe tener formato JSON válido</li>
+                                <li>Debe contener la estructura: <code>{"data": {"olts": [...], "comandos": [...]}}</code></li>
+                                <li>Usa el checkbox "🔄 Sobrescribir" para reemplazar datos existentes</li>
+                                <li>Se pueden importar archivos exportados desde este mismo sistema</li>
+                            </ul>
+                            
+                            <div style="margin-top: 10px;">
+                                <button class="btn btn-info btn-sm" onclick="mostrarEjemploImport()" style="font-size: 12px;">
+                                    📋 Ver Ejemplo de Estructura
+                                </button>
+                                <button class="btn btn-success btn-sm" onclick="descargarEjemploImport()" style="font-size: 12px; margin-left: 8px;">
+                                    💾 Descargar Archivo de Ejemplo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -8803,6 +8833,121 @@ InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.`
                     container.style.display = 'none';
                 }, 10000);
             }
+        }
+
+        // ===== FUNCIONES DE AYUDA PARA IMPORT/EXPORT =====
+        function mostrarEjemploImport() {
+            const ejemplo = {
+                "timestamp": "2025-08-26T18:30:00.000Z",
+                "version": "3.0.0",
+                "user": "usuario-ejemplo",
+                "data": {
+                    "olts": [
+                        {
+                            "id": 1,
+                            "nombre": "OLT Ejemplo",
+                            "ip": "192.168.1.1",
+                            "modelo": "ZTE C600",
+                            "ubicacion": "Central Principal",
+                            "estado": "activo",
+                            "puerto_ssh": 22,
+                            "usuario_ssh": "admin",
+                            "notas": "OLT de ejemplo para importación",
+                            "activo": 1
+                        }
+                    ],
+                    "comandos": [
+                        {
+                            "id": 1,
+                            "nombre": "Mostrar Información",
+                            "descripcion": "Comando para mostrar información del sistema",
+                            "comandos_json": "[\"show version\", \"show system\"]",
+                            "categoria": "informacion",
+                            "olt_id": 1,
+                            "activo": 1,
+                            "orden": 1
+                        }
+                    ]
+                }
+            };
+
+            mostrarConfirmacion(
+                'Ejemplo de Estructura de Archivo',
+                `La estructura correcta de un archivo de importación es:\n\n${JSON.stringify(ejemplo, null, 2)}`,
+                null,
+                null,
+                'info'
+            );
+        }
+
+        function descargarEjemploImport() {
+            const ejemplo = {
+                "timestamp": new Date().toISOString(),
+                "version": "3.0.0",
+                "user": "usuario-ejemplo",
+                "data": {
+                    "olts": [
+                        {
+                            "id": 999,
+                            "nombre": "OLT Ejemplo",
+                            "ip": "192.168.1.100",
+                            "modelo": "ZTE C600 Ejemplo",
+                            "ubicacion": "Centro de Pruebas",
+                            "estado": "activo",
+                            "puerto_ssh": 22,
+                            "usuario_ssh": "admin",
+                            "notas": "OLT de ejemplo para importación",
+                            "activo": 1,
+                            "fecha_creacion": new Date().toISOString().split('T')[0] + ' ' + new Date().toTimeString().split(' ')[0]
+                        }
+                    ],
+                    "comandos": [
+                        {
+                            "id": 999,
+                            "nombre": "Información del Sistema",
+                            "descripcion": "Comando de ejemplo para mostrar información",
+                            "comandos_json": "[\"show version\", \"show system info\", \"show uptime\"]",
+                            "categoria": "informacion",
+                            "olt_id": 999,
+                            "olt_nombre": "OLT Ejemplo",
+                            "activo": 1,
+                            "fecha_creacion": new Date().toISOString().split('T')[0] + ' ' + new Date().toTimeString().split(' ')[0],
+                            "orden": 1,
+                            "tipo": "informativo"
+                        },
+                        {
+                            "id": 998,
+                            "nombre": "Configurar Puerto GPON",
+                            "descripcion": "Ejemplo de configuración de puerto",
+                            "comandos_json": "[\"configure terminal\", \"interface gpon 0/1\", \"onu whitelist add {onuId}\", \"exit\"]",
+                            "categoria": "configuracion",
+                            "olt_id": 999,
+                            "olt_nombre": "OLT Ejemplo",
+                            "activo": 1,
+                            "fecha_creacion": new Date().toISOString().split('T')[0] + ' ' + new Date().toTimeString().split(' ')[0],
+                            "orden": 2,
+                            "tipo": "configuracion"
+                        }
+                    ]
+                },
+                "stats": {
+                    "total_olts": 1,
+                    "total_comandos": 2,
+                    "fecha_exportacion": new Date().toISOString()
+                }
+            };
+
+            const blob = new Blob([JSON.stringify(ejemplo, null, 2)], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ejemplo_importacion_olts_comandos.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            mostrarNotificacion('Archivo de ejemplo descargado correctamente', 'success', 3000, 'Descarga Completa');
         }
 
         // ===== INICIALIZACIÓN DEL SISTEMA =====

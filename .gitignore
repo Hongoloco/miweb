@@ -6,12 +6,23 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Base de datos local SQLite
+# Base de datos local SQLite - PROTECCIÓN TOTAL DE DATOS
 *.db
 *.sqlite
 *.sqlite3
 web/*.db
 portable/*.db
+web/databases/
+web/backups/
+
+# Archivos de sesión y cookies - DATOS DE USUARIO
+web/cookies.txt
+web/session-*
+web/.sessions/
+
+# Configuración personalizada de producción
+web/.env.production
+web/.env.local
 
 # Archivos de entorno
 .env

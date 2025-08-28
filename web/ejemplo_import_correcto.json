@@ -1,0 +1,81 @@
+{
+  "timestamp": "2025-08-26T18:30:00.000Z",
+  "version": "3.0.0",
+  "user": "test-user",
+  "data": {
+    "olts": [
+      {
+        "id": 999,
+        "nombre": "OLT Test Importación",
+        "ip": "192.168.100.1",
+        "modelo": "ZTE C600 Test",
+        "ubicacion": "Centro de Pruebas",
+        "estado": "activo",
+        "puerto_ssh": 22,
+        "usuario_ssh": "admin",
+        "notas": "OLT importada para pruebas",
+        "activo": 1,
+        "fecha_creacion": "2025-08-26 18:30:00"
+      },
+      {
+        "id": 998,
+        "nombre": "OLT Test 2",
+        "ip": "192.168.100.2",
+        "modelo": "Huawei MA5608T",
+        "ubicacion": "Laboratorio",
+        "estado": "activo",
+        "puerto_ssh": 23,
+        "usuario_ssh": "root",
+        "notas": "Segunda OLT de prueba",
+        "activo": 1,
+        "fecha_creacion": "2025-08-26 18:30:00"
+      }
+    ],
+    "comandos": [
+      {
+        "id": 999,
+        "nombre": "Mostrar Información General",
+        "descripcion": "Comando para mostrar información del sistema",
+        "comandos_json": "[\"show system info\", \"show version\", \"show uptime\"]",
+        "categoria": "informacion",
+        "olt_id": 999,
+        "olt_nombre": "OLT Test Importación",
+        "activo": 1,
+        "fecha_creacion": "2025-08-26 18:30:00",
+        "orden": 1,
+        "tipo": "informativo"
+      },
+      {
+        "id": 998,
+        "nombre": "Configurar Puerto",
+        "descripcion": "Configuración básica de puerto",
+        "comandos_json": "[\"configure terminal\", \"interface gpon 0/1\", \"onu whitelist add {onuId}\", \"exit\"]",
+        "categoria": "configuracion",
+        "olt_id": 999,
+        "olt_nombre": "OLT Test Importación",
+        "activo": 1,
+        "fecha_creacion": "2025-08-26 18:30:00",
+        "orden": 2,
+        "tipo": "configuracion"
+      },
+      {
+        "id": 997,
+        "nombre": "Reset ONU",
+        "descripcion": "Reiniciar ONU específica",
+        "comandos_json": "[\"pon-onu-mng gpon_onu-0/1/1:{onuId}\", \"reset\", \"exit\"]",
+        "categoria": "mantenimiento",
+        "olt_id": 998,
+        "olt_nombre": "OLT Test 2",
+        "activo": 1,
+        "fecha_creacion": "2025-08-26 18:30:00",
+        "orden": 1,
+        "tipo": "mantenimiento"
+      }
+    ]
+  },
+  "stats": {
+    "total_olts": 2,
+    "total_comandos": 3,
+    "fecha_exportacion": "2025-08-26T18:30:00.000Z"
+  }
+}

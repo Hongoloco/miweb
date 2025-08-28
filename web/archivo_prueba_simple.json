@@ -1,0 +1,25 @@
+{
+  "data": {
+    "olts": [
+      {
+        "nombre": "OLT Prueba Simple",
+        "ip": "192.168.1.50",
+        "modelo": "ZTE C600",
+        "ubicacion": "Prueba",
+        "estado": "activo",
+        "activo": 1
+      }
+    ],
+    "comandos": [
+      {
+        "nombre": "Comando Simple",
+        "descripcion": "Comando de prueba",
+        "comandos_json": "[\"show version\"]",
+        "categoria": "test",
+        "olt_id": 1,
+        "activo": 1,
+        "orden": 1
+      }
+    ]
+  }
+}

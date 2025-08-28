@@ -5,7 +5,6 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
 const path = require('path');
-const multer = require('multer');
 const { runDatabaseMigrations } = require('./database-migrations');
 const UserDatabaseManager = require('./user-database-manager');
 
@@ -28,12 +27,6 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Configurar multer para manejo de archivos
-const upload = multer({ 
-    storage: multer.memoryStorage(),
-    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
-});
-
 // Configuración de sesiones
 app.use(session({
     secret: 'desarrollo-residenciales-secret-key-2025',
@@ -46,19 +39,19 @@ app.use(session({
     }
 }));
 
-// app.use(express.static('public')); // Deshabilitado: carpeta no existe
+app.use(express.static('public'));
 
 // Servir archivos estáticos adicionales
 app.use('/dashboard-charts.js', express.static(path.join(__dirname, 'dashboard-charts.js')));
 app.use('/notification-system.js', express.static(path.join(__dirname, 'notification-system.js')));
 app.use('/reports-analytics.js', express.static(path.join(__dirname, 'reports-analytics.js')));
 app.use('/sw-notifications.js', express.static(path.join(__dirname, 'sw-notifications.js')));
-// app.use('/theme-system.js', express.static(path.join(__dirname, 'theme-system.js'))); // Archivo no presente
+app.use('/theme-system.js', express.static(path.join(__dirname, 'theme-system.js')));
 app.use('/automation-system.js', express.static(path.join(__dirname, 'automation-system.js')));
 app.use('/elegant-dark-mode.js', express.static(path.join(__dirname, 'elegant-dark-mode.js')));
-// app.use('/test-dark-mode.js', express.static(path.join(__dirname, 'test-dark-mode.js'))); // Archivo no presente
+app.use('/test-dark-mode.js', express.static(path.join(__dirname, 'test-dark-mode.js')));
 app.use('/force-commands-dark.js', express.static(path.join(__dirname, 'force-commands-dark.js')));
-// app.use('/diagnostico-tareas.js', express.static(path.join(__dirname, 'diagnostico-tareas.js'))); // Archivo no presente
+app.use('/diagnostico-tareas.js', express.static(path.join(__dirname, 'diagnostico-tareas.js')));
 app.use('/fix-tareas-login.js', express.static(path.join(__dirname, 'fix-tareas-login.js')));
 app.use('/adaptive-colors.js', express.static(path.join(__dirname, 'adaptive-colors.js')));
 app.use('/sw.js', express.static(path.join(__dirname, 'sw.js')));
@@ -390,17 +383,6 @@ function logActivity(userId, accion, detalles, ip) {
 
 // ===== RUTAS DE SISTEMA Y BASE DE DATOS =====
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-    res.json({
-        status: 'ok',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        version: '3.0.0',
-        database: 'connected'
-    });
-});
-
 // Estado de la base de datos
 app.get('/api/database/status', (req, res) => {
     const status = {
@@ -534,316 +516,6 @@ app.get('/api/database/backup', (req, res) => {
     });
 });
 
-// ===== RUTAS DE EXPORTAR/IMPORTAR COMANDOS Y OLTs =====
-
-// Exportar OLTs y comandos del usuario actual
-app.get('/api/export/olts-commands', (req, res) => {
-    const usuarioActual = req.session && req.session.user;
-    
-    if (!usuarioActual) {
-        return res.status(401).json({ success: false, message: 'No autorizado' });
-    }
-    
-    const userDb = getUserDatabase(req);
-    const exportData = {
-        timestamp: new Date().toISOString(),
-        version: '3.0.0',
-        user: usuarioActual.username,
-        data: {}
-    };
-    
-    // Exportar OLTs
-    userDb.all(`SELECT * FROM olts WHERE activo = 1`, (err, olts) => {
-        if (err) {
-            console.error('Error exportando OLTs:', err);
-            return res.status(500).json({ success: false, message: 'Error exportando OLTs' });
-        }
-        
-        exportData.data.olts = olts;
-        
-        // Exportar comandos
-        userDb.all(`SELECT * FROM comandos WHERE activo = 1`, (err, comandos) => {
-            if (err) {
-                console.error('Error exportando comandos:', err);
-                return res.status(500).json({ success: false, message: 'Error exportando comandos' });
-            }
-            
-            exportData.data.comandos = comandos;
-            
-            const filename = `olts-commands-${usuarioActual.username}-${Date.now()}.json`;
-            res.setHeader('Content-Type', 'application/json');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.json(exportData);
-            
-            logActivity(usuarioActual.id, 'exportar_olts_comandos', `Archivo: ${filename}`, req.ip);
-        });
-    });
-});
-
-// Importar OLTs y comandos
-app.post('/api/import/olts-commands', upload.single('file'), (req, res) => {
-    const usuarioActual = req.session && req.session.user;
-    
-    if (!usuarioActual) {
-        return res.status(401).json({ success: false, message: 'No autorizado' });
-    }
-    
-    if (!req.file) {
-        return res.status(400).json({ success: false, message: 'Archivo no proporcionado' });
-    }
-    
-    let importData;
-    try {
-        // Parsear el archivo JSON
-        const fileContent = req.file.buffer.toString('utf8');
-        importData = JSON.parse(fileContent);
-        
-        // Validar estructura del archivo con mensajes detallados
-        if (!importData.data) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Estructura de archivo inválida: falta el objeto "data".\n\nEstructura esperada:\n{\n  "data": {\n    "olts": [...],\n    "comandos": [...]\n  }\n}' 
-            });
-        }
-        
-        if (!importData.data.olts) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Estructura de archivo inválida: falta el array "olts" dentro de "data"' 
-            });
-        }
-        
-        if (!importData.data.comandos) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Estructura de archivo inválida: falta el array "comandos" dentro de "data"' 
-            });
-        }
-        
-        // Validar que sean arrays
-        if (!Array.isArray(importData.data.olts)) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Error: "olts" debe ser un array' 
-            });
-        }
-        
-        if (!Array.isArray(importData.data.comandos)) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Error: "comandos" debe ser un array' 
-            });
-        }
-        
-    } catch (error) {
-        console.error('Error parseando archivo JSON:', error);
-        return res.status(400).json({ 
-            success: false, 
-            message: `Archivo JSON inválido: ${error.message}\n\nAsegúrate de que el archivo tenga formato JSON válido.` 
-        });
-    }
-    
-    const data = importData.data;
-    const overwrite = req.body.overwrite === 'true';
-    
-    const userDb = getUserDatabase(req);
-    const results = {
-        olts: { created: 0, updated: 0, errors: 0 },
-        comandos: { created: 0, updated: 0, errors: 0 }
-    };
-    
-    // Función para importar OLTs
-    const importOLTs = () => {
-        return new Promise((resolve) => {
-            let processed = 0;
-            const total = data.olts.length;
-            
-            if (total === 0) {
-                resolve();
-                return;
-            }
-            
-            data.olts.forEach(olt => {
-                // Verificar si existe OLT con mismo nombre o IP
-                userDb.get(`SELECT id FROM olts WHERE nombre = ? OR ip = ?`, [olt.nombre, olt.ip], (err, existing) => {
-                    if (err) {
-                        results.olts.errors++;
-                        processed++;
-                        if (processed === total) resolve();
-                        return;
-                    }
-                    
-                    if (existing && !overwrite) {
-                        // Saltar si existe y no se permite sobrescribir
-                        processed++;
-                        if (processed === total) resolve();
-                        return;
-                    }
-                    
-                    if (existing && overwrite) {
-                        // Actualizar OLT existente
-                        userDb.run(`UPDATE olts SET modelo = ?, ubicacion = ?, puerto_ssh = ?, usuario_ssh = ?, notas = ? WHERE id = ?`,
-                            [olt.modelo, olt.ubicacion, olt.puerto_ssh, olt.usuario_ssh, olt.notas, existing.id], (err) => {
-                            if (err) {
-                                results.olts.errors++;
-                            } else {
-                                results.olts.updated++;
-                            }
-                            processed++;
-                            if (processed === total) resolve();
-                        });
-                    } else {
-                        // Crear nueva OLT
-                        userDb.run(`INSERT INTO olts (nombre, ip, modelo, ubicacion, estado, puerto_ssh, usuario_ssh, notas) 
-                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-                            [olt.nombre, olt.ip, olt.modelo, olt.ubicacion, 'activo', olt.puerto_ssh, olt.usuario_ssh, olt.notas], (err) => {
-                            if (err) {
-                                results.olts.errors++;
-                            } else {
-                                results.olts.created++;
-                            }
-                            processed++;
-                            if (processed === total) resolve();
-                        });
-                    }
-                });
-            });
-        });
-    };
-    
-    // Función para importar comandos
-    const importComandos = () => {
-        return new Promise((resolve) => {
-            let processed = 0;
-            const total = data.comandos.length;
-            
-            if (total === 0) {
-                resolve();
-                return;
-            }
-            
-            data.comandos.forEach(comando => {
-                // Buscar OLT por nombre para asociar comando
-                userDb.get(`SELECT id FROM olts WHERE nombre = ?`, [comando.olt_nombre || ''], (err, olt) => {
-                    if (err || !olt) {
-                        // Si no se encuentra la OLT, usar olt_id original o saltar
-                        if (!comando.olt_id) {
-                            results.comandos.errors++;
-                            processed++;
-                            if (processed === total) resolve();
-                            return;
-                        }
-                    }
-                    
-                    const oltId = olt ? olt.id : comando.olt_id;
-                    
-                    // Verificar si existe comando con mismo nombre en la misma OLT
-                    userDb.get(`SELECT id FROM comandos WHERE nombre = ? AND olt_id = ?`, [comando.nombre, oltId], (err, existing) => {
-                        if (err) {
-                            results.comandos.errors++;
-                            processed++;
-                            if (processed === total) resolve();
-                            return;
-                        }
-                        
-                        if (existing && !overwrite) {
-                            processed++;
-                            if (processed === total) resolve();
-                            return;
-                        }
-                        
-                        // Detectar esquema de comandos (comandos_json vs comando)
-                        userDb.all(`PRAGMA table_info(comandos)`, (pragmaErr, cols) => {
-                            if (pragmaErr) {
-                                results.comandos.errors++;
-                                processed++;
-                                if (processed === total) resolve();
-                                return;
-                            }
-                            
-                            const hasComandosJson = cols.some(c => c.name === 'comandos_json');
-                            const hasComando = cols.some(c => c.name === 'comando');
-                            
-                            let sql, params;
-                            
-                            if (existing && overwrite) {
-                                // Actualizar comando existente
-                                if (hasComandosJson) {
-                                    sql = `UPDATE comandos SET descripcion = ?, comandos_json = ?, categoria = ? WHERE id = ?`;
-                                    params = [comando.descripcion, comando.comandos_json || JSON.stringify([comando.comando || '']), comando.categoria, existing.id];
-                                } else if (hasComando) {
-                                    sql = `UPDATE comandos SET descripcion = ?, comando = ?, categoria = ? WHERE id = ?`;
-                                    const cmdStr = comando.comandos_json ? JSON.parse(comando.comandos_json).join('\n') : (comando.comando || '');
-                                    params = [comando.descripcion, cmdStr, comando.categoria, existing.id];
-                                } else {
-                                    sql = `UPDATE comandos SET descripcion = ?, categoria = ? WHERE id = ?`;
-                                    params = [comando.descripcion, comando.categoria, existing.id];
-                                }
-                                
-                                userDb.run(sql, params, (err) => {
-                                    if (err) {
-                                        results.comandos.errors++;
-                                    } else {
-                                        results.comandos.updated++;
-                                    }
-                                    processed++;
-                                    if (processed === total) resolve();
-                                });
-                            } else {
-                                // Crear nuevo comando
-                                if (hasComandosJson) {
-                                    sql = `INSERT INTO comandos (olt_id, nombre, descripcion, comandos_json, categoria, activo) VALUES (?, ?, ?, ?, ?, 1)`;
-                                    params = [oltId, comando.nombre, comando.descripcion, comando.comandos_json || JSON.stringify([comando.comando || '']), comando.categoria];
-                                } else if (hasComando) {
-                                    sql = `INSERT INTO comandos (olt_id, nombre, descripcion, comando, categoria, activo) VALUES (?, ?, ?, ?, ?, 1)`;
-                                    const cmdStr = comando.comandos_json ? JSON.parse(comando.comandos_json).join('\n') : (comando.comando || '');
-                                    params = [oltId, comando.nombre, comando.descripcion, cmdStr, comando.categoria];
-                                } else {
-                                    sql = `INSERT INTO comandos (olt_id, nombre, descripcion, categoria, activo) VALUES (?, ?, ?, ?, 1)`;
-                                    params = [oltId, comando.nombre, comando.descripcion, comando.categoria];
-                                }
-                                
-                                userDb.run(sql, params, (err) => {
-                                    if (err) {
-                                        results.comandos.errors++;
-                                    } else {
-                                        results.comandos.created++;
-                                    }
-                                    processed++;
-                                    if (processed === total) resolve();
-                                });
-                            }
-                        });
-                    });
-                });
-            });
-        });
-    };
-    
-    // Ejecutar importaciones secuencialmente
-    importOLTs().then(() => {
-        return importComandos();
-    }).then(() => {
-        logActivity(usuarioActual.id, 'importar_olts_comandos', 
-                   `OLTs: ${results.olts.created}/${results.olts.updated}/${results.olts.errors}, Comandos: ${results.comandos.created}/${results.comandos.updated}/${results.comandos.errors}`, 
-                   req.ip);
-        
-        res.json({
-            success: true,
-            message: 'Importación completada',
-            stats: {
-                olts_importadas: results.olts.created + results.olts.updated,
-                comandos_importados: results.comandos.created + results.comandos.updated,
-                olts_omitidas: 0, // Calcular si es necesario
-                errores: results.olts.errors + results.comandos.errors
-            }
-        });
-    }).catch(error => {
-        console.error('Error en importación:', error);
-        res.status(500).json({ success: false, message: 'Error en importación', error: error.message });
-    });
-});
-
 // ===== RUTAS DE AUTENTICACIÓN =====
 
 // Login
@@ -895,7 +567,7 @@ app.post('/api/login', (req, res) => {
                 email: user.email,
                 rol: user.rol
             },
-            databaseType: (isAdmin({ rol: user.rol }) ? 'principal' : 'privada')
+            databaseType: user.rol === 'admin' ? 'principal' : 'privada'
         });
     });
 });
@@ -1361,7 +1033,7 @@ app.get('/api/tareas', (req, res) => {
                         COALESCE(c.nombre, 'Sin categoría') as categoria_nombre
                  FROM tareas t 
                  LEFT JOIN categorias_tareas c ON t.categoria = c.nombre
-                 WHERE t.estado != 'eliminada' AND t.activa = 1`;
+                 WHERE t.estado != 'eliminada'`;
     let params = [];
     
     // Los usuarios técnicos solo ven sus propias tareas en su BD privada
@@ -1415,13 +1087,16 @@ app.get('/api/tareas/estadisticas', (req, res) => {
     // Usar la base de datos específica del usuario
     const userDb = getUserDatabase(req);
     
-    let whereClause = 'WHERE t.estado != "eliminada" AND t.activa = 1';
+    let whereClause = 'WHERE t.estado != "eliminada"';
     let params = [];
     
-    // En BDs privadas (usuarios no admin) no filtramos por usuario: toda la BD ya es del usuario
-    // Si es admin y especifica un usuario, filtramos por usuario_id en la BD principal
-    if (isAdmin(usuarioActual) && usuario_id) {
-        whereClause += ' AND t.usuario_id = ?';
+    // Si no es admin, solo puede ver estadísticas de sus propias tareas
+    if (usuarioActual.rol !== 'admin' && usuarioActual.rol !== 'administrador') {
+        whereClause += ' AND t.asignado_a = ?';
+        params.push(usuarioActual.id);
+    } else if (usuario_id) {
+        // Si es admin y especifica un usuario, filtrar por ese usuario
+        whereClause += ' AND t.asignado_a = ?';
         params.push(usuario_id);
     }
     
@@ -1445,14 +1120,14 @@ app.get('/api/tareas/estadisticas', (req, res) => {
 // Obtener una tarea específica con sus notas
 app.get('/api/tareas/:id', (req, res) => {
     const tareaId = req.params.id;
-    const usuarioActual = req.session && req.session.user;
-    const userDb = getUserDatabase(req);
-
-    // Obtener tarea (join sólo con categorias para compatibilidad con BDs privadas)
-    userDb.get(`SELECT t.*, c.color as categoria_color, c.nombre as categoria_nombre
+    
+    // Obtener tarea
+    db.get(`SELECT t.*, c.color as categoria_color, c.nombre as categoria_nombre,
+            u.username as usuario_asignado_username, u.nombre_completo as usuario_asignado_nombre
             FROM tareas t 
             LEFT JOIN categorias_tareas c ON t.categoria = c.nombre
-            WHERE t.id = ? AND t.estado != 'eliminada' AND t.activa = 1`, [tareaId], (err, tarea) => {
+            LEFT JOIN usuarios u ON t.asignado_a = u.id
+            WHERE t.id = ? AND t.estado != 'eliminada'`, [tareaId], (err, tarea) => {
         if (err) {
             console.error('Error al obtener tarea:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
@@ -1462,9 +1137,10 @@ app.get('/api/tareas/:id', (req, res) => {
             return res.status(404).json({ success: false, message: 'Tarea no encontrada' });
         }
         
-        // Obtener notas de la tarea (sin join a usuarios para compatibilidad con BDs privadas)
-        userDb.all(`SELECT n.*
+        // Obtener notas de la tarea
+        db.all(`SELECT n.*, u.username 
                 FROM tareas_notas n 
+                LEFT JOIN usuarios u ON n.usuario_id = u.id
                 WHERE n.tarea_id = ? 
                 ORDER BY n.fecha_creacion DESC`, [tareaId], (err, notas) => {
             if (err) {
@@ -1522,7 +1198,6 @@ app.put('/api/tareas/:id', (req, res) => {
     const tareaId = req.params.id;
     const { titulo, descripcion, estado, prioridad, categoria, usuario_id, editor_id } = req.body;
     const usuarioActual = req.session && req.session.user;
-    const userDb = getUserDatabase(req);
     
     if (!usuarioActual) {
         return res.status(401).json({ success: false, message: 'No autorizado' });
@@ -1545,12 +1220,16 @@ app.put('/api/tareas/:id', (req, res) => {
         params.push(usuario_id);
     }
     
-    // En BDs privadas no es necesario forzar filtro por usuario_id; en admin (BD principal) se mantiene por id de tarea
-    params.push(tareaId);
+    // Si no es admin, solo puede editar sus propias tareas
+    if (usuarioActual.rol !== 'admin') {
+        whereClause += ` AND usuario_id = ?`;
+        params.push(tareaId);
+        params.push(usuarioActual.id);
+    } else {
+        params.push(tareaId);
+    }
     
-    // En BDs privadas no forzamos filtro por usuario_id; en admin (BD principal) se mantiene
-    const finalQuery = updateQuery + whereClause;
-    userDb.run(finalQuery, params, function(err) {
+    db.run(updateQuery + whereClause, params, function(err) {
         if (err) {
             console.error('Error al actualizar tarea:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
@@ -1574,9 +1253,8 @@ app.put('/api/tareas/:id', (req, res) => {
 app.delete('/api/tareas/:id', (req, res) => {
     const tareaId = req.params.id;
     const { eliminador_id } = req.body;
-    const userDb = getUserDatabase(req);
     
-    userDb.run(`UPDATE tareas SET activa = 0 WHERE id = ?`, [tareaId], function(err) {
+    db.run(`UPDATE tareas SET activa = 0 WHERE id = ?`, [tareaId], function(err) {
         if (err) {
             console.error('Error al eliminar tarea:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
@@ -1592,19 +1270,34 @@ app.delete('/api/tareas/:id', (req, res) => {
     });
 });
 
-// (Eliminada ruta duplicada de /api/usuarios con validación distinta)
+// Obtener todos los usuarios (solo para admin)
+app.get('/api/usuarios', (req, res) => {
+    const usuarioActual = req.session && req.session.user;
+    
+    if (!usuarioActual || usuarioActual.rol !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Acceso denegado. Solo administradores.' });
+    }
+    
+    db.all(`SELECT id, username, nombre_completo, rol, activo, fecha_creacion 
+            FROM usuarios WHERE activo = 1 ORDER BY username`, [], (err, usuarios) => {
+        if (err) {
+            console.error('Error al obtener usuarios:', err);
+            return res.status(500).json({ success: false, message: 'Error del servidor' });
+        }
+        res.json({ success: true, usuarios });
+    });
+});
 
 // Agregar nota a tarea
 app.post('/api/tareas/:id/notas', (req, res) => {
     const tareaId = req.params.id;
     const { nota, tipo, usuario_id } = req.body;
-    const userDb = getUserDatabase(req);
     
     if (!nota) {
         return res.status(400).json({ success: false, message: 'La nota es obligatoria' });
     }
     
-    userDb.run(`INSERT INTO tareas_notas (tarea_id, nota, tipo, usuario_id) VALUES (?, ?, ?, ?)`,
+    db.run(`INSERT INTO tareas_notas (tarea_id, nota, tipo, usuario_id) VALUES (?, ?, ?, ?)`,
         [tareaId, nota, tipo || 'comentario', usuario_id],
         function(err) {
             if (err) {
@@ -1633,7 +1326,7 @@ app.get('/api/categorias-tareas', (req, res) => {
         }
         
         console.log(`📂 Usuario ${usuarioActual?.username} cargó ${categorias.length} categorías`);
-        res.json({ success: true, categorias });
+        res.json(categorias);
     });
 });
 
@@ -1783,9 +1476,8 @@ app.get('/api/olts', (req, res) => {
 // Obtener una OLT específica con sus comandos
 app.get('/api/olts/:id', (req, res) => {
     const oltId = req.params.id;
-    const userDb = getUserDatabase(req);
     
-    userDb.get(`SELECT * FROM olts WHERE id = ?`, [oltId], (err, olt) => {
+    db.get(`SELECT * FROM olts WHERE id = ?`, [oltId], (err, olt) => {
         if (err) {
             console.error('Error al obtener OLT:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
@@ -1795,43 +1487,26 @@ app.get('/api/olts/:id', (req, res) => {
             return res.status(404).json({ success: false, message: 'OLT no encontrada' });
         }
 
-        // Obtener comandos de la OLT (compatible con ambos esquemas)
-        userDb.all(`PRAGMA table_info(comandos)`, (pragmaErr, cols) => {
-            if (pragmaErr) {
-                console.error('Error detectando esquema de comandos:', pragmaErr);
+        // Obtener comandos de la OLT
+        db.all(`SELECT * FROM comandos WHERE olt_id = ? AND activo = 1 ORDER BY orden, id`, 
+               [oltId], (err, comandos) => {
+            if (err) {
+                console.error('Error al obtener comandos:', err);
                 return res.status(500).json({ success: false, message: 'Error del servidor' });
             }
 
-            const hasOrdenDisplay = cols.some(c => c.name === 'orden_display');
-            const hasOrden = cols.some(c => c.name === 'orden');
-            let orderClause = 'nombre';
-            if (hasOrdenDisplay) orderClause = 'orden_display, nombre';
-            else if (hasOrden) orderClause = 'orden, nombre';
+            // Convertir comandos_json de string a array
+            const comandosFormateados = comandos.map(cmd => ({
+                ...cmd,
+                comandos: JSON.parse(cmd.comandos_json)
+            }));
 
-            const query = `SELECT * FROM comandos WHERE olt_id = ? AND activo = 1 ORDER BY ${orderClause}`;
-            userDb.all(query, [oltId], (err, comandos) => {
-                if (err) {
-                    console.error('Error al obtener comandos:', err);
-                    return res.status(500).json({ success: false, message: 'Error del servidor' });
+            res.json({
+                success: true,
+                olt: {
+                    ...olt,
+                    comandos: comandosFormateados
                 }
-
-                const comandosFormateados = comandos.map(cmd => {
-                    let parsed = [];
-                    if (cmd.comandos_json) {
-                        try { parsed = JSON.parse(cmd.comandos_json || '[]'); } catch (e) { parsed = []; }
-                    } else if (cmd.comando) {
-                        parsed = [cmd.comando];
-                    }
-                    return { ...cmd, comandos: parsed };
-                });
-
-                res.json({
-                    success: true,
-                    olt: {
-                        ...olt,
-                        comandos: comandosFormateados
-                    }
-                });
             });
         });
     });
@@ -1839,87 +1514,40 @@ app.get('/api/olts/:id', (req, res) => {
 
 // Crear nueva OLT
 app.post('/api/olts', (req, res) => {
-    const { nombre } = req.body;
+    const { nombre, shelf, slot, port, onu_id, ip_address, ubicacion } = req.body;
     const oltId = 'olt-' + Date.now();
-    const userDb = getUserDatabase(req);
 
-    userDb.all(`PRAGMA table_info(olts)`, (pragmaErr, cols) => {
-        if (pragmaErr) {
-            console.error('Error detectando esquema de OLTs:', pragmaErr);
-            return res.status(500).json({ success: false, message: 'Error del servidor' });
-        }
-
-        const colNames = cols.map(c => c.name);
-        const hasCol = (c) => colNames.includes(c);
-
-        const payload = req.body;
-        const fields = ['id', 'nombre'];
-        const values = [oltId, nombre];
-
-        if (hasCol('shelf')) { fields.push('shelf'); values.push(payload.shelf || 1); }
-        if (hasCol('slot')) { fields.push('slot'); values.push(payload.slot || 1); }
-        if (hasCol('port')) { fields.push('port'); values.push(payload.port || 1); }
-        if (hasCol('onu_id')) { fields.push('onu_id'); values.push(payload.onu_id ?? payload.onuId ?? 1); }
-        if (hasCol('ip_address')) { fields.push('ip_address'); values.push(payload.ip_address ?? payload.ip ?? null); }
-        if (hasCol('ip')) { fields.push('ip'); values.push(payload.ip ?? payload.ip_address ?? null); }
-        if (hasCol('puerto')) { fields.push('puerto'); values.push(payload.port ?? payload.puerto ?? 23); }
-        if (hasCol('modelo')) { fields.push('modelo'); values.push(payload.modelo ?? 'ZTE C600'); }
-        if (hasCol('ubicacion')) { fields.push('ubicacion'); values.push(payload.ubicacion ?? null); }
-        if (hasCol('estado')) { fields.push('estado'); values.push('activo'); }
-        if (hasCol('activo')) { fields.push('activo'); values.push(1); }
-
-        const placeholders = fields.map(() => '?').join(', ');
-        const query = `INSERT INTO olts (${fields.join(', ')}) VALUES (${placeholders})`;
-
-        userDb.run(query, values, function(err) {
+    db.run(`INSERT INTO olts (id, nombre, shelf, slot, port, onu_id, ip_address, ubicacion) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [oltId, nombre, shelf || 1, slot || 1, port || 1, onu_id || 1, ip_address, ubicacion],
+        function(err) {
             if (err) {
                 console.error('Error al crear OLT:', err);
                 return res.status(500).json({ success: false, message: 'Error del servidor' });
             }
 
             logActivity(req.body.userId, 'crear_olt', `OLT: ${nombre}`, req.ip);
-            res.json({ success: true, message: 'OLT creada correctamente', olt: { id: oltId, nombre } });
-        });
-    });
+            
+            res.json({
+                success: true,
+                message: 'OLT creada correctamente',
+                olt: { id: oltId, nombre, shelf, slot, port, onu_id }
+            });
+        }
+    );
 });
 
 // Actualizar OLT
 app.put('/api/olts/:id', (req, res) => {
     const oltId = req.params.id;
-    const payload = req.body;
-    const userDb = getUserDatabase(req);
+    const { nombre, shelf, slot, port, onu_id, ip_address, ubicacion } = req.body;
 
-    userDb.all(`PRAGMA table_info(olts)`, (pragmaErr, cols) => {
-        if (pragmaErr) {
-            console.error('Error detectando esquema de OLTs:', pragmaErr);
-            return res.status(500).json({ success: false, message: 'Error del servidor' });
-        }
-
-        const colNames = cols.map(c => c.name);
-        const hasCol = (c) => colNames.includes(c);
-
-        const fields = [];
-        const values = [];
-
-        if (hasCol('nombre') && payload.nombre !== undefined) { fields.push('nombre = ?'); values.push(payload.nombre); }
-        if (hasCol('shelf') && payload.shelf !== undefined) { fields.push('shelf = ?'); values.push(payload.shelf); }
-        if (hasCol('slot') && payload.slot !== undefined) { fields.push('slot = ?'); values.push(payload.slot); }
-        if (hasCol('port') && payload.port !== undefined) { fields.push('port = ?'); values.push(payload.port); }
-        if (hasCol('puerto') && payload.port !== undefined) { fields.push('puerto = ?'); values.push(payload.port); }
-        if (hasCol('onu_id') && (payload.onu_id !== undefined || payload.onuId !== undefined)) { fields.push('onu_id = ?'); values.push(payload.onu_id ?? payload.onuId); }
-        if (hasCol('ip_address') && (payload.ip_address !== undefined || payload.ip !== undefined)) { fields.push('ip_address = ?'); values.push(payload.ip_address ?? payload.ip); }
-        if (hasCol('ip') && (payload.ip !== undefined || payload.ip_address !== undefined)) { fields.push('ip = ?'); values.push(payload.ip ?? payload.ip_address); }
-        if (hasCol('ubicacion') && payload.ubicacion !== undefined) { fields.push('ubicacion = ?'); values.push(payload.ubicacion); }
-        if (hasCol('fecha_modificacion')) { fields.push('fecha_modificacion = CURRENT_TIMESTAMP'); }
-
-        if (fields.length === 0) {
-            return res.status(400).json({ success: false, message: 'No hay campos válidos para actualizar' });
-        }
-
-        const query = `UPDATE olts SET ${fields.join(', ')} WHERE id = ?`;
-        values.push(oltId);
-
-        userDb.run(query, values, function(err) {
+    db.run(`UPDATE olts SET 
+                nombre = ?, shelf = ?, slot = ?, port = ?, onu_id = ?, 
+                ip_address = ?, ubicacion = ?, fecha_modificacion = CURRENT_TIMESTAMP 
+            WHERE id = ?`,
+        [nombre, shelf, slot, port, onu_id, ip_address, ubicacion, oltId],
+        function(err) {
             if (err) {
                 console.error('Error al actualizar OLT:', err);
                 return res.status(500).json({ success: false, message: 'Error del servidor' });
@@ -1929,97 +1557,81 @@ app.put('/api/olts/:id', (req, res) => {
                 return res.status(404).json({ success: false, message: 'OLT no encontrada' });
             }
 
-            logActivity(req.body.userId, 'actualizar_olt', `OLT: ${payload.nombre || oltId}`, req.ip);
+            logActivity(req.body.userId, 'actualizar_olt', `OLT: ${nombre}`, req.ip);
+            
             res.json({ success: true, message: 'OLT actualizada correctamente' });
-        });
-    });
+        }
+    );
 });
 
 // Endpoint específico para actualizar solo parámetros de conexión
 app.patch('/api/olts/:id/parametros', (req, res) => {
     const oltId = req.params.id;
     const { shelf, slot, port, onu_id } = req.body;
-    const userDb = getUserDatabase(req);
 
-    userDb.all(`PRAGMA table_info(olts)`, (pragmaErr, cols) => {
-        if (pragmaErr) {
-            console.error('Error detectando esquema de OLTs:', pragmaErr);
+    // Construir query dinámicamente solo con los campos proporcionados
+    const fieldsToUpdate = [];
+    const values = [];
+    
+    if (shelf !== undefined) {
+        fieldsToUpdate.push('shelf = ?');
+        values.push(shelf);
+    }
+    if (slot !== undefined) {
+        fieldsToUpdate.push('slot = ?');
+        values.push(slot);
+    }
+    if (port !== undefined) {
+        fieldsToUpdate.push('port = ?');
+        values.push(port);
+    }
+    if (onu_id !== undefined) {
+        fieldsToUpdate.push('onu_id = ?');
+        values.push(onu_id);
+    }
+
+    if (fieldsToUpdate.length === 0) {
+        return res.status(400).json({ success: false, message: 'No hay parámetros para actualizar' });
+    }
+
+    fieldsToUpdate.push('fecha_modificacion = CURRENT_TIMESTAMP');
+    values.push(oltId);
+
+    const query = `UPDATE olts SET ${fieldsToUpdate.join(', ')} WHERE id = ?`;
+
+    db.run(query, values, function(err) {
+        if (err) {
+            console.error('Error al actualizar parámetros de OLT:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
         }
 
-        const colNames = cols.map(c => c.name);
-        const hasCol = (c) => colNames.includes(c);
-
-        const fieldsToUpdate = [];
-        const values = [];
-
-        if (shelf !== undefined && hasCol('shelf')) { fieldsToUpdate.push('shelf = ?'); values.push(shelf); }
-        if (slot !== undefined && hasCol('slot')) { fieldsToUpdate.push('slot = ?'); values.push(slot); }
-        if (port !== undefined) {
-            if (hasCol('port')) { fieldsToUpdate.push('port = ?'); values.push(port); }
-            else if (hasCol('puerto')) { fieldsToUpdate.push('puerto = ?'); values.push(port); }
-        }
-        if (onu_id !== undefined && hasCol('onu_id')) { fieldsToUpdate.push('onu_id = ?'); values.push(onu_id); }
-
-        if (fieldsToUpdate.length === 0) {
-            return res.status(400).json({ success: false, message: 'No hay parámetros válidos para actualizar' });
+        if (this.changes === 0) {
+            return res.status(404).json({ success: false, message: 'OLT no encontrada' });
         }
 
-        if (hasCol('fecha_modificacion')) fieldsToUpdate.push('fecha_modificacion = CURRENT_TIMESTAMP');
-        values.push(oltId);
-
-        const query = `UPDATE olts SET ${fieldsToUpdate.join(', ')} WHERE id = ?`;
-
-        userDb.run(query, values, function(err) {
-            if (err) {
-                console.error('Error al actualizar parámetros de OLT:', err);
-                return res.status(500).json({ success: false, message: 'Error del servidor' });
-            }
-
-            if (this.changes === 0) {
-                return res.status(404).json({ success: false, message: 'OLT no encontrada' });
-            }
-
-            logActivity(req.body.userId, 'actualizar_parametros_olt', `Parámetros OLT ID: ${oltId}`, req.ip);
-            
-            res.json({ success: true, message: 'Parámetros de conexión actualizados automáticamente' });
-        });
+        logActivity(req.body.userId, 'actualizar_parametros_olt', `Parámetros OLT ID: ${oltId}`, req.ip);
+        
+        res.json({ success: true, message: 'Parámetros de conexión actualizados automáticamente' });
     });
 });
 
 // Eliminar OLT
 app.delete('/api/olts/:id', (req, res) => {
     const oltId = req.params.id;
-    const userDb = getUserDatabase(req);
 
-    userDb.all(`PRAGMA table_info(olts)`, (pragmaErr, cols) => {
-        if (pragmaErr) {
-            console.error('Error detectando esquema de OLTs:', pragmaErr);
+    db.run(`UPDATE olts SET estado = 'inactiva' WHERE id = ?`, [oltId], function(err) {
+        if (err) {
+            console.error('Error al eliminar OLT:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
         }
 
-        const hasEstado = cols.some(c => c.name === 'estado');
-        const hasActivo = cols.some(c => c.name === 'activo');
+        if (this.changes === 0) {
+            return res.status(404).json({ success: false, message: 'OLT no encontrada' });
+        }
 
-        let query, params;
-        if (hasEstado) { query = `UPDATE olts SET estado = 'inactiva' WHERE id = ?`; params = [oltId]; }
-        else if (hasActivo) { query = `UPDATE olts SET activo = 0 WHERE id = ?`; params = [oltId]; }
-        else { query = `DELETE FROM olts WHERE id = ?`; params = [oltId]; }
-
-        userDb.run(query, params, function(err) {
-            if (err) {
-                console.error('Error al eliminar OLT:', err);
-                return res.status(500).json({ success: false, message: 'Error del servidor' });
-            }
-
-            if (this.changes === 0) {
-                return res.status(404).json({ success: false, message: 'OLT no encontrada' });
-            }
-
-            logActivity(req.body.userId, 'eliminar_olt', `OLT ID: ${oltId}`, req.ip);
-            
-            res.json({ success: true, message: 'OLT eliminada correctamente' });
-        });
+        logActivity(req.body.userId, 'eliminar_olt', `OLT ID: ${oltId}`, req.ip);
+        
+        res.json({ success: true, message: 'OLT eliminada correctamente' });
     });
 });
 
@@ -2029,136 +1641,70 @@ app.delete('/api/olts/:id', (req, res) => {
 app.get('/api/comandos', (req, res) => {
     const usuarioActual = req.session && req.session.user;
     const userDb = getUserDatabase(req);
-
-    userDb.all(`PRAGMA table_info(comandos)`, (pragmaErr, cols) => {
-        if (pragmaErr) {
-            console.error('Error detectando esquema de comandos:', pragmaErr);
+    
+    userDb.all(`SELECT * FROM comandos WHERE activo = 1 ORDER BY orden_display, nombre`, (err, comandos) => {
+        if (err) {
+            console.error('Error al obtener comandos:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
         }
-
-        const hasOrdenDisplay = cols.some(c => c.name === 'orden_display');
-        const hasOrden = cols.some(c => c.name === 'orden');
-        let orderClause = 'nombre';
-        if (hasOrdenDisplay) orderClause = 'orden_display, nombre';
-        else if (hasOrden) orderClause = 'orden, nombre';
-
-        const query = `SELECT * FROM comandos WHERE activo = 1 ORDER BY ${orderClause}`;
-        userDb.all(query, (err, comandos) => {
-            if (err) {
-                console.error('Error al obtener comandos:', err);
-                return res.status(500).json({ success: false, message: 'Error del servidor' });
-            }
-
-            console.log(`📋 Usuario ${usuarioActual?.username} cargó ${comandos.length} comandos`);
-            res.json(comandos);
-        });
+        
+        console.log(`📋 Usuario ${usuarioActual?.username} cargó ${comandos.length} comandos`);
+        res.json(comandos);
     });
 });
 
 // Obtener comandos por OLT ID
 app.get('/api/comandos/:olt_id', (req, res) => {
     const oltId = req.params.olt_id;
-
+    
     // Usar la base de datos específica del usuario
     const userDb = getUserDatabase(req);
-
-    userDb.all(`PRAGMA table_info(comandos)`, (pragmaErr, cols) => {
-        if (pragmaErr) {
-            console.error('Error detectando esquema de comandos:', pragmaErr);
+    
+    userDb.all(`SELECT * FROM comandos WHERE olt_id = ? AND activo = 1 ORDER BY orden_display, nombre`, [oltId], (err, comandos) => {
+        if (err) {
+            console.error('Error al obtener comandos:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
         }
-
-        const hasOrdenDisplay = cols.some(c => c.name === 'orden_display');
-        const hasOrden = cols.some(c => c.name === 'orden');
-        let orderClause = 'nombre';
-        if (hasOrdenDisplay) orderClause = 'orden_display, nombre';
-        else if (hasOrden) orderClause = 'orden, nombre';
-
-        const query = `SELECT * FROM comandos WHERE olt_id = ? AND activo = 1 ORDER BY ${orderClause}`;
-        userDb.all(query, [oltId], (err, comandos) => {
-            if (err) {
-                console.error('Error al obtener comandos:', err);
-                return res.status(500).json({ success: false, message: 'Error del servidor' });
-            }
-
-            res.json({ success: true, comandos });
-        });
+        
+        res.json({ success: true, comandos: comandos });
     });
 });
 
 // Crear nuevo comando
 app.post('/api/comandos', (req, res) => {
-    const { olt_id, nombre, descripcion, comandos, comando, categoria } = req.body;
-    const userDb = getUserDatabase(req);
+    const { olt_id, nombre, descripcion, comandos, categoria } = req.body;
 
-    // Detectar columnas disponibles
-    userDb.all(`PRAGMA table_info(comandos)`, (pragmaErr, cols) => {
-        if (pragmaErr) {
-            console.error('Error detectando esquema comandos:', pragmaErr);
-            return res.status(500).json({ success: false, message: 'Error del servidor' });
-        }
-
-        const hasComandosJson = cols.some(c => c.name === 'comandos_json');
-        const hasComando = cols.some(c => c.name === 'comando');
-
-        let sql;
-        let params;
-
-        if (hasComandosJson) {
-            sql = `INSERT INTO comandos (olt_id, nombre, descripcion, comandos_json, categoria) VALUES (?, ?, ?, ?, ?)`;
-            params = [olt_id, nombre, descripcion || '', JSON.stringify(comandos || []), categoria || 'general'];
-        } else if (hasComando) {
-            const cmdStr = Array.isArray(comandos) ? comandos.join('\n') : (comando || '');
-            sql = `INSERT INTO comandos (olt_id, nombre, descripcion, comando, categoria) VALUES (?, ?, ?, ?, ?)`;
-            params = [olt_id, nombre, descripcion || '', cmdStr, categoria || 'general'];
-        } else {
-            sql = `INSERT INTO comandos (olt_id, nombre, descripcion, categoria) VALUES (?, ?, ?, ?)`;
-            params = [olt_id, nombre, descripcion || '', categoria || 'general'];
-        }
-
-        userDb.run(sql, params, function(err) {
+    db.run(`INSERT INTO comandos (olt_id, nombre, descripcion, comandos_json, categoria) 
+            VALUES (?, ?, ?, ?, ?)`,
+        [olt_id, nombre, descripcion, JSON.stringify(comandos), categoria || 'general'],
+        function(err) {
             if (err) {
                 console.error('Error al crear comando:', err);
                 return res.status(500).json({ success: false, message: 'Error del servidor' });
             }
 
             logActivity(req.body.userId, 'crear_comando', `Comando: ${nombre} en OLT: ${olt_id}`, req.ip);
-            res.json({ success: true, message: 'Comando creado correctamente', comando_id: this.lastID });
-        });
-    });
+            
+            res.json({
+                success: true,
+                message: 'Comando creado correctamente',
+                comando_id: this.lastID
+            });
+        }
+    );
 });
 
 // Actualizar comando
 app.put('/api/comandos/:id', (req, res) => {
     const comandoId = req.params.id;
-    const { nombre, descripcion, comandos, comando, categoria } = req.body;
-    const userDb = getUserDatabase(req);
+    const { nombre, descripcion, comandos, categoria } = req.body;
 
-    userDb.all(`PRAGMA table_info(comandos)`, (pragmaErr, cols) => {
-        if (pragmaErr) {
-            console.error('Error detectando esquema comandos:', pragmaErr);
-            return res.status(500).json({ success: false, message: 'Error del servidor' });
-        }
-
-        const hasComandosJson = cols.some(c => c.name === 'comandos_json');
-        const hasComando = cols.some(c => c.name === 'comando');
-
-        let sql;
-        let params;
-
-        if (hasComandosJson) {
-            sql = `UPDATE comandos SET nombre = ?, descripcion = ?, comandos_json = ?, categoria = ?, fecha_modificacion = CURRENT_TIMESTAMP WHERE id = ?`;
-            params = [nombre, descripcion || '', JSON.stringify(comandos || []), categoria || 'general', comandoId];
-        } else if (hasComando) {
-            const cmdStr = Array.isArray(comandos) ? comandos.join('\n') : (comando || '');
-            sql = `UPDATE comandos SET nombre = ?, descripcion = ?, comando = ?, categoria = ?, fecha_modificacion = CURRENT_TIMESTAMP WHERE id = ?`;
-            params = [nombre, descripcion || '', cmdStr, categoria || 'general', comandoId];
-        } else {
-            sql = `UPDATE comandos SET nombre = ?, descripcion = ?, categoria = ?, fecha_modificacion = CURRENT_TIMESTAMP WHERE id = ?`;
-            params = [nombre, descripcion || '', categoria || 'general', comandoId];
-        }
-
-        userDb.run(sql, params, function(err) {
+    db.run(`UPDATE comandos SET 
+                nombre = ?, descripcion = ?, comandos_json = ?, categoria = ?,
+                fecha_modificacion = CURRENT_TIMESTAMP 
+            WHERE id = ?`,
+        [nombre, descripcion, JSON.stringify(comandos), categoria, comandoId],
+        function(err) {
             if (err) {
                 console.error('Error al actualizar comando:', err);
                 return res.status(500).json({ success: false, message: 'Error del servidor' });
@@ -2169,43 +1715,49 @@ app.put('/api/comandos/:id', (req, res) => {
             }
 
             logActivity(req.body.userId, 'actualizar_comando', `Comando ID: ${comandoId}`, req.ip);
+            
             res.json({ success: true, message: 'Comando actualizado correctamente' });
-        });
-    });
+        }
+    );
 });
 
 // Eliminar comando
 app.delete('/api/comandos/:id', (req, res) => {
     const comandoId = req.params.id;
     const { userId } = req.body;
-    const userDb = getUserDatabase(req);
 
-    // Obtener info básica del comando
-    userDb.get(`SELECT id, nombre, olt_id FROM comandos WHERE id = ?`, [comandoId], (err, cmd) => {
+    // Primero obtener información del comando para el log
+    db.get(`SELECT c.nombre, o.nombre as olt_nombre 
+            FROM comandos c 
+            JOIN olts o ON c.olt_id = o.id 
+            WHERE c.id = ?`, [comandoId], (err, comando) => {
+        
         if (err) {
             console.error('Error al obtener comando:', err);
             return res.status(500).json({ success: false, message: 'Error del servidor' });
         }
-        if (!cmd) {
+
+        if (!comando) {
             return res.status(404).json({ success: false, message: 'Comando no encontrado' });
         }
 
-        // Intentar obtener nombre de la OLT (si existe la tabla/relación)
-        userDb.get(`SELECT nombre FROM olts WHERE id = ?`, [cmd.olt_id], (oltErr, olt) => {
-            const oltNombre = (!oltErr && olt) ? olt.nombre : 'N/D';
+        // Eliminar el comando completamente de la base de datos
+        db.run(`DELETE FROM comandos WHERE id = ?`, [comandoId], function(err) {
+            if (err) {
+                console.error('Error al eliminar comando:', err);
+                return res.status(500).json({ success: false, message: 'Error del servidor' });
+            }
 
-            userDb.run(`DELETE FROM comandos WHERE id = ?`, [comandoId], function(err) {
-                if (err) {
-                    console.error('Error al eliminar comando:', err);
-                    return res.status(500).json({ success: false, message: 'Error del servidor' });
-                }
+            if (this.changes === 0) {
+                return res.status(404).json({ success: false, message: 'Comando no encontrado' });
+            }
 
-                if (this.changes === 0) {
-                    return res.status(404).json({ success: false, message: 'Comando no encontrado' });
-                }
-
-                logActivity(userId, 'eliminar_comando', `Comando: ${cmd.nombre} de OLT: ${oltNombre}`, req.ip);
-                res.json({ success: true, message: 'Comando eliminado correctamente', comando_eliminado: cmd.nombre });
+            logActivity(userId, 'eliminar_comando', `Comando: ${comando.nombre} de OLT: ${comando.olt_nombre}`, req.ip);
+            
+            res.json({ 
+                success: true, 
+                message: 'Comando eliminado correctamente',
+                comando_eliminado: comando.nombre
             });
         });
     });
@@ -2396,7 +1948,7 @@ app.get('/api/comandos/buscar', (req, res) => {
         SELECT c.*, o.nombre as olt_nombre 
         FROM comandos c 
         JOIN olts o ON c.olt_id = o.id 
-    WHERE c.activo = 1 AND o.estado = 'activo' AND 
+        WHERE c.activo = 1 AND o.estado = 'activa' AND 
               (c.nombre LIKE ? OR c.descripcion LIKE ? OR c.comandos_json LIKE ?)
         ORDER BY c.nombre
     `;
@@ -3111,7 +2663,7 @@ async function generateTaskReport(filters = {}) {
 
 async function generateUserReport(filters = {}) {
     return new Promise((resolve, reject) => {
-    let query = 'SELECT id, username, rol, email, activo, fecha_creacion FROM usuarios WHERE 1=1';
+        let query = 'SELECT id, username, rol, email, activo, created_at FROM usuarios WHERE 1=1';
         const params = [];
         
         if (filters.rol) {
@@ -3173,7 +2725,19 @@ function groupBy(array, key) {
     }, {});
 }
 
-// (Eliminada duplicación de /api/categorias-tareas con tabla task_categories inexistente)
+// ===== RUTAS PARA CATEGORÍAS DE TAREAS =====
+
+// Obtener categorías de tareas disponibles
+app.get('/api/categorias-tareas', (req, res) => {
+    db.all('SELECT * FROM task_categories ORDER BY nombre', (err, rows) => {
+        if (err) {
+            console.error('Error obteniendo categorías:', err);
+            res.status(500).json({ success: false, message: 'Error obteniendo categorías' });
+        } else {
+            res.json({ success: true, categorias: rows });
+        }
+    });
+});
 
 // ===== INTERCEPTORES PARA NOTIFICACIONES AUTOMÁTICAS =====
 
@@ -3208,47 +2772,23 @@ app.use('/api/tareas', (req, res, next) => {
     next();
 });
 
-// Inicio robusto del servidor con manejo de EADDRINUSE
-function startExpress(port) {
-    const server = app.listen(port, () => {
-        console.log('🚀 Servidor iniciado en puerto', port);
-        console.log('🌐 Acceder a: http://localhost:' + port);
-        console.log('📊 Base de datos: ' + dbPath);
-        console.log('📡 SSE habilitado para notificaciones en tiempo real');
-        console.log('📊 Analytics y reportes habilitados');
-    });
+app.listen(PORT, () => {
+    console.log('�🚀 Servidor iniciado en puerto', PORT);
+    console.log('🌐 Acceder a: http://localhost:' + PORT);
+    console.log('📊 Base de datos: ' + dbPath);
+    console.log('📡 SSE habilitado para notificaciones en tiempo real');
+    console.log('📊 Analytics y reportes habilitados');
+});
 
-    server.on('error', (err) => {
-        if (err && err.code === 'EADDRINUSE') {
-            console.error(`❌ Puerto ${port} en uso (EADDRINUSE)`);
-            const allowFallback = process.env.ALLOW_PORT_FALLBACK === '1';
-            if (allowFallback) {
-                const next = port + 1;
-                console.log(`↪️  Intentando puerto alternativo ${next} (ALLOW_PORT_FALLBACK=1)`);
-                startExpress(next);
-            } else {
-                console.log('🛠️ Para liberar el puerto puedes ejecutar:');
-                console.log(`   lsof -nP -iTCP:${port} -sTCP:LISTEN`);
-                console.log('   kill -9 <PID>');
-                console.log('💡 O inicia con otro puerto, por ejemplo: PORT=3001 npm start');
-                process.exit(1);
-            }
-        } else {
-            console.error('❌ Error al iniciar servidor:', err);
-            process.exit(1);
-        }
-    });
-}
-
-startExpress(PORT);
-
+// Manejo de cierre del servidor
+process.on('SIGINT', () => {
 // ===== ENDPOINTS ADMINISTRATIVOS PARA GESTIÓN DE BASES DE DATOS =====
 
 // Estadísticas de bases de datos (solo admin)
 app.get('/api/admin/database-stats', (req, res) => {
     const usuarioActual = req.session && req.session.user;
     
-    if (!usuarioActual || !isAdmin(usuarioActual)) {
+    if (!usuarioActual || usuarioActual.rol !== 'admin') {
         return res.status(403).json({ success: false, message: 'Acceso denegado - Solo admin' });
     }
     
@@ -3266,7 +2806,7 @@ app.get('/api/admin/database-stats', (req, res) => {
 app.get('/api/admin/users-databases', (req, res) => {
     const usuarioActual = req.session && req.session.user;
     
-    if (!usuarioActual || !isAdmin(usuarioActual)) {
+    if (!usuarioActual || usuarioActual.rol !== 'admin') {
         return res.status(403).json({ success: false, message: 'Acceso denegado - Solo admin' });
     }
     
@@ -3310,7 +2850,7 @@ app.post('/api/admin/reset-user-database', (req, res) => {
     const usuarioActual = req.session && req.session.user;
     const { username } = req.body;
     
-    if (!usuarioActual || !isAdmin(usuarioActual)) {
+    if (!usuarioActual || usuarioActual.rol !== 'admin') {
         return res.status(403).json({ success: false, message: 'Acceso denegado - Solo admin' });
     }
     
@@ -3338,8 +2878,6 @@ app.post('/api/admin/reset-user-database', (req, res) => {
 
 // ===== CIERRE DEL SERVIDOR =====
 
-// Manejo de cierre del servidor
-process.on('SIGINT', () => {
     console.log('\n🔒 Cerrando servidor...');
     
     // Cerrar todas las conexiones de bases de datos

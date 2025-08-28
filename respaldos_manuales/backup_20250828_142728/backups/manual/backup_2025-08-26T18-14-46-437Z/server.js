@@ -598,49 +598,13 @@ app.post('/api/import/olts-commands', upload.single('file'), (req, res) => {
         const fileContent = req.file.buffer.toString('utf8');
         importData = JSON.parse(fileContent);
         
-        // Validar estructura del archivo con mensajes detallados
-        if (!importData.data) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Estructura de archivo inválida: falta el objeto "data".\n\nEstructura esperada:\n{\n  "data": {\n    "olts": [...],\n    "comandos": [...]\n  }\n}' 
-            });
+        // Validar estructura del archivo
+        if (!importData.data || !importData.data.olts || !importData.data.comandos) {
+            return res.status(400).json({ success: false, message: 'Estructura de archivo inválida' });
         }
-        
-        if (!importData.data.olts) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Estructura de archivo inválida: falta el array "olts" dentro de "data"' 
-            });
-        }
-        
-        if (!importData.data.comandos) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Estructura de archivo inválida: falta el array "comandos" dentro de "data"' 
-            });
-        }
-        
-        // Validar que sean arrays
-        if (!Array.isArray(importData.data.olts)) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Error: "olts" debe ser un array' 
-            });
-        }
-        
-        if (!Array.isArray(importData.data.comandos)) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Error: "comandos" debe ser un array' 
-            });
-        }
-        
     } catch (error) {
         console.error('Error parseando archivo JSON:', error);
-        return res.status(400).json({ 
-            success: false, 
-            message: `Archivo JSON inválido: ${error.message}\n\nAsegúrate de que el archivo tenga formato JSON válido.` 
-        });
+        return res.status(400).json({ success: false, message: 'Archivo JSON inválido' });
     }
     
     const data = importData.data;

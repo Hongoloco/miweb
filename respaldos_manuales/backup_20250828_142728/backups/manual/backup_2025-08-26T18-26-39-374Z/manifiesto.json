@@ -1,0 +1,19 @@
+{
+  "timestamp": "2025-08-26T18-26-39-374Z",
+  "tipo": "manual",
+  "descripcion": "Prueba de funcionamiento del sistema",
+  "archivos": [
+    "olt_system.db",
+    "server.js",
+    "user-database-manager.js",
+    "package.json"
+  ],
+  "usuarios": [],
+  "exito": true,
+  "errores": [],
+  "fecha_creacion": "2025-08-26T18:26:39.389Z",
+  "ruta_backup": "/workspaces/miweb/web/backups/manual/backup_2025-08-26T18-26-39-374Z",
+  "version": "3.1.0",
+  "total_usuarios": 0,
+  "total_archivos": 4
+}
