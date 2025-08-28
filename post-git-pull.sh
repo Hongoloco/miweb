@@ -47,7 +47,23 @@ if [ -f "web/cookies.txt" ]; then
 fi
 
 echo ""
-echo "📦 Instalando dependencias (root)..."
+echo "📦 PASO 2: Validando protección de datos..."
+
+# Verificar que el backup se creó correctamente
+if [ ! -f "$BACKUP_DIR/olt_system.db" ]; then
+    echo "⚠️  ADVERTENCIA: No se pudo respaldar olt_system.db"
+    echo "   Puede que la base de datos no exista o esté vacía"
+else
+    BACKUP_SIZE=$(stat -c%s "$BACKUP_DIR/olt_system.db" 2>/dev/null || stat -f%z "$BACKUP_DIR/olt_system.db" 2>/dev/null || echo "0")
+    echo "✅ Backup de olt_system.db: ${BACKUP_SIZE} bytes"
+    
+    if [ "$BACKUP_SIZE" = "0" ]; then
+        echo "⚠️  ADVERTENCIA: La base de datos respaldada está vacía"
+    fi
+fi
+
+echo ""
+echo "📦 PASO 3: Instalando dependencias..."
 if [ -f package-lock.json ]; then
   npm ci || npm install
 else
@@ -93,12 +109,21 @@ fi
 
 # 5) RESTAURAR DATOS PROTEGIDOS
 echo ""
-echo "📥 PASO 3: Restaurando datos protegidos..."
+echo "📥 PASO 4: Restaurando datos protegidos..."
 
-# Restaurar base de datos principal si existe respaldo
+# Restaurar base de datos principal si existe respaldo válido
 if [ -f "$BACKUP_DIR/olt_system.db" ]; then
-    cp "$BACKUP_DIR/olt_system.db" "web/"
-    echo "✅ Base de datos principal restaurada"
+    BACKUP_SIZE=$(stat -c%s "$BACKUP_DIR/olt_system.db" 2>/dev/null || stat -f%z "$BACKUP_DIR/olt_system.db" 2>/dev/null || echo "0")
+    
+    if [ "$BACKUP_SIZE" != "0" ]; then
+        cp "$BACKUP_DIR/olt_system.db" "web/"
+        echo "✅ Base de datos principal restaurada (${BACKUP_SIZE} bytes)"
+    else
+        echo "⚠️  Base de datos respaldada está vacía, no se restaura"
+        echo "   Será necesario ejecutar el script de recuperación"
+    fi
+else
+    echo "⚠️  No se encontró backup de base de datos principal"
 fi
 
 # Restaurar bases de datos de usuarios
@@ -125,8 +150,31 @@ if [ -f "$BACKUP_DIR/cookies.txt" ]; then
     echo "✅ Cookies restauradas"
 fi
 
-# 6) Diagnóstico (no bloqueante)
-if [ -f "web/diagnosticar-alito.js" ]; then
+# 6) Diagnóstico y verificación final
+echo ""
+echo "🔍 PASO 5: Verificación final..."
+
+# Verificar que la base de datos está en buen estado
+if [ -f "web/olt_system.db" ]; then
+    DB_SIZE=$(stat -c%s "web/olt_system.db" 2>/dev/null || stat -f%z "web/olt_system.db" 2>/dev/null || echo "0")
+    echo "📄 Base de datos principal: ${DB_SIZE} bytes"
+    
+    if [ "$DB_SIZE" = "0" ]; then
+        echo "❌ PROBLEMA: Base de datos está vacía"
+        echo "🔧 SOLUCIÓN: Ejecutar ./recuperar-base-datos.sh"
+        RECOVERY_NEEDED=true
+    else
+        echo "✅ Base de datos parece estar bien"
+        RECOVERY_NEEDED=false
+    fi
+else
+    echo "❌ PROBLEMA: Base de datos no existe"
+    echo "🔧 SOLUCIÓN: Ejecutar ./recuperar-base-datos.sh"
+    RECOVERY_NEEDED=true
+fi
+
+# Diagnóstico opcional
+if [ -f "web/diagnosticar-alito.js" ] && [ "$RECOVERY_NEEDED" = false ]; then
   echo "🩺 Ejecutando diagnóstico rápido..."
   node web/diagnosticar-alito.js || true
 fi
@@ -135,16 +183,37 @@ echo ""
 echo "🧹 LIMPIEZA Y FINALIZACIÓN"
 echo "========================="
 echo "📂 Respaldo temporal: $BACKUP_DIR"
-echo "💡 Si todo funciona bien, puedes eliminar el respaldo:"
-echo "   rm -rf '$BACKUP_DIR'"
+
+if [ "$RECOVERY_NEEDED" = true ]; then
+    echo ""
+    echo "⚠️  SE DETECTARON PROBLEMAS CON LA BASE DE DATOS"
+    echo "🔧 EJECUTA ESTE COMANDO PARA SOLUCIONARLO:"
+    echo "   ./recuperar-base-datos.sh"
+    echo ""
+    echo "💡 O alternativamente:"
+    echo "   cd web && node server.js"
+    echo "   (el servidor puede auto-inicializar la base de datos)"
+else
+    echo "💡 Si todo funciona bien, puedes eliminar el respaldo:"
+    echo "   rm -rf '$BACKUP_DIR'"
+fi
 
 echo ""
-echo "✅ ACTUALIZACIÓN COMPLETADA CON DATOS PROTEGIDOS"
-echo "=============================================="
-echo "🔹 Código actualizado desde Git ✓"
-echo "🔹 Dependencias instaladas ✓" 
-echo "🔹 Base de datos verificada ✓"
-echo "🔹 Datos personales restaurados ✓"
+if [ "$RECOVERY_NEEDED" = true ]; then
+    echo "⚠️  ACTUALIZACIÓN COMPLETADA - REQUIERE RECUPERACIÓN"
+    echo "================================================"
+    echo "🔹 Código actualizado desde Git ✓"
+    echo "🔹 Dependencias instaladas ✓" 
+    echo "🔹 Base de datos REQUIERE RECUPERACIÓN ⚠️"
+    echo "🔹 Script de recuperación disponible ✓"
+else
+    echo "✅ ACTUALIZACIÓN COMPLETADA CON DATOS PROTEGIDOS"
+    echo "=============================================="
+    echo "🔹 Código actualizado desde Git ✓"
+    echo "🔹 Dependencias instaladas ✓" 
+    echo "🔹 Base de datos verificada ✓"
+    echo "🔹 Datos personales restaurados ✓"
+fi
 echo ""
 echo "🚀 Tu aplicación está lista para usar con todos tus datos intactos"
 
