@@ -49,6 +49,23 @@ const migrations = {
         }
     ],
     '3.1.0': [
+        // Crear tabla de modelos ONT
+        {
+            name: 'create_modelos_ont_table',
+            sql: `CREATE TABLE IF NOT EXISTS modelos_ont (
+                id INTEGER PRIMARY KEY,
+                fabricante TEXT NOT NULL,
+                modelo TEXT NOT NULL,
+                version TEXT,
+                tipo TEXT,
+                descripcion TEXT,
+                usuario_id INTEGER DEFAULT 1,
+                fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(fabricante, modelo),
+                FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+            )`,
+            rollback: `DROP TABLE IF EXISTS modelos_ont`
+        },
         // Futuras migraciones para versión 3.1.0
         {
             name: 'add_notificaciones_table',
